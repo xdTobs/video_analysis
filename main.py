@@ -20,7 +20,7 @@ import analyse
 
 
 
-HOST = "192.168.226.124"  # The server's hostname or IP address
+HOST = "172.20.10.3"  # Robot IP
 PORT = 65438  # The port used by the server
 
 def run_video(robotInterface : RobotInterface.RobotInterface):
@@ -46,12 +46,12 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
 
     while True:
         
-        try:
-            recieved_data = robotInterface.receive_command()
-        except ConnectionError as e:
-            print("Robot not connected",e)
-        except Exception as e:
-            print("Error receiving: ",e)
+        #try:
+        #    recieved_data = robotInterface.receive_command()
+        #except ConnectionError as e:
+        #    print("Robot not connected",e)
+        #except Exception as e:
+        #    print("Error receiving: ",e)
 
         ret, frame = video.read()
         if not ret:
@@ -195,9 +195,6 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             video.release()
             cv2.destroyAllWindows()
             break
-        end_time = time.time()
-        iteration_time = end_time - start_time
-        print(f"Iteration time: {iteration_time} seconds")
     
 
     video.release()
