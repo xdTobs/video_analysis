@@ -12,7 +12,7 @@ class Analyse:
         self.robot_vector = None
         self.corners = None
         self.ball_vector = None
-        
+        self.bounds_dict = read_bounds()
         pass
     
     def analysis_pipeline(self, image: np.ndarray, bounds_dict : Dict[str,np.ndarray] ):
@@ -222,6 +222,15 @@ class Analyse:
         
         return keypoints
         pass
+    
+    def read_bounds():
+        bounds_dict = {}
+        with open("bounds.txt") as f:
+            for line in f:
+                key, value = line.split(";")
+                bounds = value.split(",")
+                bounds_dict[key] = np.array([float(x) for x in bounds])
+        return bounds_dict
 
 class RobotNotFoundError(Exception):
     def __init__(self, message="Robot not found", *args):
