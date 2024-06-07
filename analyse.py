@@ -1,5 +1,4 @@
 from typing import Tuple, List, Dict
-from charset_normalizer import detect
 import cv2
 import numpy as np
 import VideoDebugger
@@ -8,7 +7,6 @@ import BlobDetector
 class Analyse:
     def __init__(self):
         self.videoDebugger = VideoDebugger.VideoDebugger()
-        
         self.red_pos = None
         self.robot_pos = None
         self.robot_vector = None

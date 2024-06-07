@@ -9,14 +9,10 @@ import os
 import numpy as np
 import datetime
 import socket
-from pynput.keyboard import Key, Listener
 import json
 import math
 from typing import List,Dict
-import color_picker.colorpicker as colorpicker
 import time
-
-
 import RobotInterface
 
 import VideoDebugger
@@ -210,20 +206,16 @@ def run_video(robotInterface : RobotInterface.RobotInterface, bounds_dict: Dict[
     
         
 # Run video analysis
-color_picker = colorpicker.ColorPicker()
-bounds_dict = color_picker.bounds_dict()
-print(bounds_dict)
-
 if "offline" in sys.argv:
     robotInterface = RobotInterface.RobotInterface(HOST, PORT, online=False)
 else:
-    robotInterface = RobotInterface.RobotInterface(HOST, PORT)
+    robotInterface = RobotInterface.RobotInterface(HOST, PORT, online=False)
     
 try:
     robotInterface.connect()
 except ConnectionError as e:
     print("Robot not connected",e)
-run_video(bounds_dict=bounds_dict, robotInterface = robotInterface)
+run_video(robotInterface = robotInterface)
         
 
 
