@@ -17,36 +17,26 @@ class Analyse:
         pass
     
     def analysis_pipeline(self, image: np.ndarray):
-        start_time = time.time()
+        
         self.videoDebugger.write_video("original", image, True)
         self.green_robot_mask = self.videoDebugger.run_analysis(self.apply_theshold, "green-mask", image, self.bounds_dict["green"])
         self.red_robot_mask = self.videoDebugger.run_analysis(self.apply_theshold, "red-mask", image, self.bounds_dict["red"])
         self.border_mask = self.videoDebugger.run_analysis(self.isolate_borders, "border", image, self.bounds_dict["border"])
         self.white_mask = self.videoDebugger.run_analysis(self.apply_theshold, "white-ball", image, self.bounds_dict["white"])
         self.orange_mask = self.videoDebugger.run_analysis(self.apply_theshold, "orange-ball", image, self.bounds_dict["orange"])
-        mid_time = time.time()
-        print(f"Masking time: {mid_time - start_time} seconds")
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
-        keypoint_time = time.time()
-        print(f"Keypoint time: {keypoint_time - mid_time} seconds")
         try:
             self.robot_pos, self.red_pos, self.robot_vector = self.find_circle_robot(self.green_robot_mask, self.red_robot_mask)
             self.corners = self.find_border_corners(self.border_mask)
             self.ball_vector = self.find_ball_vector(self.white_ball_keypoints, self.robot_pos)
-            robot_time = time.time()
-            print(f"Robot time: {robot_time - keypoint_time} seconds")
         except BorderNotFoundError as e:
             print(e)
         except RobotNotFoundError as e:
             print(e)
         except Exception as e:
             print(e)
-            
-        end_time = time.time()
-        iteration_time = end_time - start_time
-        print(f"Analysis time: {iteration_time} seconds")
         return
 
     def apply_theshold(self, image: np.ndarray, bounds_dict_entry : np.ndarray) -> np.ndarray:

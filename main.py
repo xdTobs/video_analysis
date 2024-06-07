@@ -31,8 +31,8 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
     frame_number = 0
 
     video = cv2.VideoCapture(1, cv2.CAP_DSHOW)
-    video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920/2)
+    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080/2)
     ##print("Video read")
 
     try:
@@ -45,7 +45,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
 
 
     while True:
-        start_time = time.time()
+        
         try:
             recieved_data = robotInterface.receive_command()
         except ConnectionError as e:
