@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import VideoDebugger
 import BlobDetector
+import time
 
 class Analyse:
     def __init__(self):
@@ -15,95 +16,75 @@ class Analyse:
         self.bounds_dict = read_bounds()
         pass
     
-    def analysis_pipeline(self, image: np.ndarray, bounds_dict : Dict[str,np.ndarray] ):
+    def analysis_pipeline(self, image: np.ndarray):
+        start_time = time.time()
         self.videoDebugger.write_video("original", image, True)
-        self.green_robot_mask = self.videoDebugger.run_analysis(self.isolate_green_robot, "green-mask", image, lower=bounds_dict["green_lower"], upper=bounds_dict["green_upper"])
-        self.red_robot_mask = self.videoDebugger.run_analysis(self.isolate_red_robot, "red-mask", image, lower=bounds_dict["red_lower"], upper=bounds_dict["red_upper"])
-        self.border_mask = self.videoDebugger.run_analysis(self.isolate_borders, "border", image, lower=bounds_dict["border_lower"], upper=bounds_dict["border_upper"])
-        self.white_mask = self.videoDebugger.run_analysis(self.isolate_white_ball, "white-ball", image, lower=bounds_dict["white_lower"], upper=bounds_dict["white_upper"])
-        self.orange_mask = self.videoDebugger.run_analysis(self.isolate_orange_ball, "orange-ball", image, lower=bounds_dict["orange_lower"], upper=bounds_dict["orange_upper"])
-
+        self.green_robot_mask = self.videoDebugger.run_analysis(self.apply_theshold, "green-mask", image, self.bounds_dict["green"])
+        self.red_robot_mask = self.videoDebugger.run_analysis(self.apply_theshold, "red-mask", image, self.bounds_dict["red"])
+        self.border_mask = self.videoDebugger.run_analysis(self.isolate_borders, "border", image, self.bounds_dict["border"])
+        self.white_mask = self.videoDebugger.run_analysis(self.apply_theshold, "white-ball", image, self.bounds_dict["white"])
+        self.orange_mask = self.videoDebugger.run_analysis(self.apply_theshold, "orange-ball", image, self.bounds_dict["orange"])
+        mid_time = time.time()
+        print(f"Masking time: {mid_time - start_time} seconds")
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
-
+        keypoint_time = time.time()
+        print(f"Keypoint time: {keypoint_time - mid_time} seconds")
         try:
             self.robot_pos, self.red_pos, self.robot_vector = self.find_circle_robot(self.green_robot_mask, self.red_robot_mask)
             self.corners = self.find_border_corners(self.border_mask)
             self.ball_vector = self.find_ball_vector(self.white_ball_keypoints, self.robot_pos)
+            robot_time = time.time()
+            print(f"Robot time: {robot_time - keypoint_time} seconds")
         except BorderNotFoundError as e:
             print(e)
         except RobotNotFoundError as e:
             print(e)
         except Exception as e:
             print(e)
+            
+        end_time = time.time()
+        iteration_time = end_time - start_time
+        print(f"Analysis time: {iteration_time} seconds")
         return
 
-    def isolate_green_robot(self, image: np.ndarray, lower : np.ndarray, upper: np.ndarray) -> np.ndarray:
+    def apply_theshold(self, image: np.ndarray, bounds_dict_entry : np.ndarray) -> np.ndarray:
         # Isolate the green robot
         #lower = np.array([0, 160, 0])
         #upper = np.array([220, 255, 220])
+        bounds = bounds_dict_entry[0:3]
+        variance = bounds_dict_entry[3]
+        
+        lower = np.clip(bounds - variance,0,255)
+        upper = np.clip(bounds + variance,0,255)
+        #print(lower, upper)
+        
         mask = cv2.inRange(image, lower, upper)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         mask = cv2.dilate(mask, kernel, iterations=2)
         mask = cv2.erode(mask, kernel, iterations=2)
         return mask
-
-    def isolate_red_robot(self, image: np.ndarray, lower: np.ndarray,upper: np.ndarray)-> np.ndarray:
-        # Isolate the red robot
-        #lower = np.array([0, 0, 160])
-        #upper = np.array([220, 220, 255])
-        mask = cv2.inRange(image, lower, upper)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        mask = cv2.dilate(mask, kernel, iterations=2)
-        mask = cv2.erode(mask, kernel, iterations=2)
-        return mask
-    
-    def isolate_orange_ball(self, image: np.ndarray, lower: np.ndarray,upper: np.ndarray)-> np.ndarray:
-        #hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        #lower = np.array([11, 120, 120])
-        #upper = np.array([30, 255, 255])
-        mask = cv2.inRange(image, lower, upper)
-        res = cv2.bitwise_and(image, image, mask=mask)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        mask = cv2.dilate(mask, kernel, iterations=2)
-        mask = cv2.erode(mask, kernel, iterations=2)
-        return mask
-
-
-    def isolate_white_ball(self, image: np.ndarray,lower: np.ndarray,upper: np.ndarray)-> np.ndarray:
-        # turn into hsl
-        #hsl = cv2.cvtColor(image, cv2.COLOR_BGR2HLS)
-        #lower = np.array([0, 190, 0])
-        #upper = np.array([255, 255, 255])
-        mask = cv2.inRange(image, lower, upper)
-        res = cv2.bitwise_and(image, image, mask=mask)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        mask = cv2.dilate(mask, kernel, iterations=2)
-        mask = cv2.erode(mask, kernel, iterations=2)
-        return mask
-
-
 
     def find_circle_robot(self, green_mask: np.ndarray, red_mask: np.ndarray) -> Tuple[np.ndarray,np.ndarray, np.ndarray]:
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
         red_mask = detector.detect(red_mask)
-        print(f"There are {len(green_keypoints)} green points, there should be 1")
-        print(f"There are {len(red_mask)} red points, there should be 1")
+        #print(f"There are {len(green_keypoints)} green points, there should be 1")
+        #print(f"There are {len(red_mask)} red points, there should be 1")
         if len(green_keypoints) != 1:
             raise RobotNotFoundError(f"Cannot find robot: There are {len(green_keypoints)} green points. There are {len(red_mask)} red points")
         if len(red_mask) != 1:
             raise RobotNotFoundError(f"Cannot find robot: There are {len(green_keypoints)} green points. There are {len(red_mask)} red points")
-        print(f"Green found at: {green_keypoints[0].pt}")
-        print(f"Red found at: {red_mask[0].pt}")
+        #print(f"Green found at: {green_keypoints[0].pt}")
+        #print(f"Red found at: {red_mask[0].pt}")
 
         green_point = self.convert_perspective(green_keypoints[0].pt)
         red_point = self.convert_perspective(red_mask[0].pt)
 
-        print(f"Green converted to: {green_point}")
-        print(f"Red converted to: {red_point}")
+        #print(f"Green converted to: {green_point}")
+        #print(f"Red converted to: {red_point}")
 
         return np.array(green_point), np.array(red_point), self.construct_vector_from_circles(np.array(green_point), np.array(red_point))
 
@@ -129,13 +110,14 @@ class Analyse:
     def construct_vector_from_circles(self, green: np.ndarray, red: np.ndarray) -> np.ndarray:
         return red - green
     
-    def isolate_borders(self, image: np.ndarray,lower: np.ndarray,upper: np.ndarray) -> np.ndarray:
+    def isolate_borders(self, image: np.ndarray, bounds_dict_entry: np.ndarray) -> np.ndarray:
         res = image
         # exagregate the difference between red/orange colors
         #hsv = cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
         #lower = np.array([0, 80, 140])
         #upper = np.array([13, 255, 255])
-        mask = cv2.inRange(image, lower, upper)
+        
+        mask = self.apply_theshold(image, bounds_dict_entry)
         res = cv2.bitwise_and(res, res, mask=mask)
         mask = cv2.bitwise_not(mask)
 
@@ -223,13 +205,13 @@ class Analyse:
         return keypoints
         pass
     
-    def read_bounds():
+def read_bounds():
         bounds_dict = {}
         with open("bounds.txt") as f:
             for line in f:
                 key, value = line.split(";")
                 bounds = value.split(",")
-                bounds_dict[key] = np.array([float(x) for x in bounds])
+                bounds_dict[key] = np.array([int(x) for x in bounds])
         return bounds_dict
 
 class RobotNotFoundError(Exception):

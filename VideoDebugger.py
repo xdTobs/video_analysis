@@ -23,8 +23,8 @@ class VideoDebugger:
         video.write(res)
         return frame
 
-    def run_analysis(self, anal_func, out_name, frame,lower,upper, three_channel=False):
-        mask = anal_func(frame,lower,upper)
+    def run_analysis(self, anal_func, out_name, frame,bounds_dict_entry, three_channel=False):
+        mask = anal_func(frame,bounds_dict_entry)
         self.write_video(out_name, mask, three_channel)
         return mask
     

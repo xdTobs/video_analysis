@@ -23,7 +23,7 @@ import analyse
 HOST = "192.168.226.124"  # The server's hostname or IP address
 PORT = 65438  # The port used by the server
 
-def run_video(robotInterface : RobotInterface.RobotInterface, bounds_dict: Dict[str, np.ndarray] = {}):
+def run_video(robotInterface : RobotInterface.RobotInterface):
     # Takes a video path and runs the analysis on each frame
     # Saves the results to the same directory as the video
     videoDebugger = VideoDebugger.VideoDebugger()
@@ -33,7 +33,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface, bounds_dict: Dict[
     video = cv2.VideoCapture(1, cv2.CAP_DSHOW)
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-    print("Video read")
+    ##print("Video read")
 
     try:
         robotInterface.send_command("belt", 100)
@@ -45,7 +45,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface, bounds_dict: Dict[
 
 
     while True:
-        
+        start_time = time.time()
         try:
             recieved_data = robotInterface.receive_command()
         except ConnectionError as e:
@@ -56,15 +56,35 @@ def run_video(robotInterface : RobotInterface.RobotInterface, bounds_dict: Dict[
         ret, frame = video.read()
         if not ret:
             break
-        print(f"Analysing frame {frame_number}...")
+        ##print(f"Analysing frame {frame_number}...")
         
-        analyser.analysis_pipeline(frame, bounds_dict)
+        analyser.analysis_pipeline(frame)
         
         frame_number += 1   
-        print(f"Frame {frame_number} analysed")
+        ##print(f"Frame {frame_number} analysed")
         
         
 
+        def angle_between_vectors(v1: np.ndarray, v2: np.ndarray) -> float:
+            if v1 is None or v2 is None:
+                return 0
+            dot_prod = np.dot(v1, v2)
+            magnitude_v1 = np.linalg.norm(v1)
+            magnitude_v2 = np.linalg.norm(v2)
+            cos_theta = dot_prod / (magnitude_v1 * magnitude_v2)
+            return np.arccos(cos_theta)
+        
+
+        def angle_between_vectors_signed(v1: np.ndarray, v2: np.ndarray) -> float:
+            if v1 is None or v2 is None:
+                return 0
+            # Dot product of two vectors
+            dot_prod = np.dot(v1, v2)
+            # Determinant (pseudo cross-product) in 2D
+            det = v1[0] * v2[1] - v1[1] * v2[0]
+            # Angle in radians
+            angle_radians = np.arctan2(det, dot_prod)
+            return angle_radians
 
         signed_angle_radians = angle_between_vectors_signed(analyser.robot_vector, analyser.ball_vector) # type: ignore
         signed_angle_degrees = math.degrees(signed_angle_radians)
@@ -84,22 +104,22 @@ def run_video(robotInterface : RobotInterface.RobotInterface, bounds_dict: Dict[
         except Exception as e:
             print("Error sending: ",e)
         
-        #print(f"Angle between robot and ball: {angle_degrees}")
-        #print(f"Signed angle between robot and ball: {signed_angle_degrees}")
+        ###print(f"Angle between robot and ball: {angle_degrees}")
+        ###print(f"Signed angle between robot and ball: {signed_angle_degrees}")
         
-        #print("Corners found at: ")
-        #print(corners)
-        #print(f"{len(keypoints)} balls found")
-        #print("Balls found at: ")
+        ###print("Corners found at: ")
+        ###print(corners)
+        ###print(f"{len(keypoints)} balls found")
+        ###print("Balls found at: ")
         #for keypoint in keypoints:
-        #    print(keypoint.pt)
-        #    print(keypoint.size)
+        #    ##print(keypoint.pt)
+        #    ##print(keypoint.size)
 
         
         # Overlay red vector on robot
-        #print(f"Ball vector: {ball_vector}")
-        #print(f"Robot vector: {robot_vector}")
-        #print(f"Robot pos: {robot_pos}")
+        ###print(f"Ball vector: {ball_vector}")
+        ###print(f"Robot vector: {robot_vector}")
+        ###print(f"Robot pos: {robot_pos}")
         # Display the result
         
         robot_arrows_on_frame = frame
@@ -122,12 +142,12 @@ def run_video(robotInterface : RobotInterface.RobotInterface, bounds_dict: Dict[
             center = (int(analyser.red_pos[0]), int(analyser.red_pos[1]))
             radius = 30
             cv2.circle(red_robot_3channel, center, radius, (0, 0, 255), 4)
-        print(f"Red robot at {center}")
+            ##print(f"Red robot at {center}")
         # Overlay green circle on green robot
         if analyser.robot_pos is not None:
             center = (int(analyser.robot_pos[0]), int(analyser.robot_pos[1]))
             radius = 30
-            print(f"Green robot at {center}")
+            ##print(f"Green robot at {center}")
             cv2.circle(green_robot_3channel, center, radius, (0, 255, 0), 4)
             
         if analyser.robot_vector is not None and analyser.robot_pos is not None:
@@ -175,6 +195,9 @@ def run_video(robotInterface : RobotInterface.RobotInterface, bounds_dict: Dict[
             video.release()
             cv2.destroyAllWindows()
             break
+        end_time = time.time()
+        iteration_time = end_time - start_time
+        print(f"Iteration time: {iteration_time} seconds")
     
 
     video.release()
@@ -195,27 +218,6 @@ except ConnectionError as e:
     print("Robot not connected",e)
 run_video(robotInterface = robotInterface)
         
-
-def angle_between_vectors(v1: np.ndarray, v2: np.ndarray) -> float:
-            if v1 is None or v2 is None:
-                return 0
-            dot_prod = np.dot(v1, v2)
-            magnitude_v1 = np.linalg.norm(v1)
-            magnitude_v2 = np.linalg.norm(v2)
-            cos_theta = dot_prod / (magnitude_v1 * magnitude_v2)
-            return np.arccos(cos_theta)
-        
-
-def angle_between_vectors_signed(v1: np.ndarray, v2: np.ndarray) -> float:
-    if v1 is None or v2 is None:
-        return 0
-    # Dot product of two vectors
-    dot_prod = np.dot(v1, v2)
-    # Determinant (pseudo cross-product) in 2D
-    det = v1[0] * v2[1] - v1[1] * v2[0]
-    # Angle in radians
-    angle_radians = np.arctan2(det, dot_prod)
-    return angle_radians
 
 
 
