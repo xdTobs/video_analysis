@@ -1,7 +1,11 @@
-# TODO
+# TODO Collision Detection
 
-## Binary Border Image
-
-I had problems getting opencv to find the rectangle. It doesn't want to track the inner edge.
-
-As an alternative we coudl use some kind of flood fill, where you start inside the rectangle and go to the bottom right corner. The algorithm is to just go down, right. If you get stuck follow left until you can go down right. Should be good enough but might not work in edge cases, where you get stuck in upper right of mid-cross. Do this for all corners and this will find us the rectangle.
+- [ ] detect is a collision occurs
+    - find a line that leads to ball
+    - let a rectangle representing robot move along line
+    - if rectangle touches obstacle collision has occured
+- [ ] move to one of four safe spots when there are no more available balls in current area
+    - find balls until no more left to find without collision
+    - when no more balls drive to safespot 1
+    - repeat for safespot 2, safespot 3, safespot 4
+    - maybe?? repeat once more if there are balls left
