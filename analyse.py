@@ -12,7 +12,6 @@ class Analyse:
         self.robot_pos = None
         self.robot_vector = None
         self.corners = None
-        self.ball_vector = None
         self.bounds_dict = read_bounds()
         pass
     
@@ -30,7 +29,6 @@ class Analyse:
         try:
             self.robot_pos, self.red_pos, self.robot_vector = self.find_circle_robot(self.green_robot_mask, self.red_robot_mask)
             self.corners = self.find_border_corners(self.border_mask)
-            self.ball_vector = self.find_ball_vector(self.white_ball_keypoints, self.robot_pos)
         except BorderNotFoundError as e:
             print(e)
         except RobotNotFoundError as e:
@@ -43,14 +41,15 @@ class Analyse:
         # Isolate the green robot
         #lower = np.array([0, 160, 0])
         #upper = np.array([220, 255, 220])
+        #print(f"Bounds dict entry {bounds_dict_entry}")
         bounds = bounds_dict_entry[0:3]
         variance = bounds_dict_entry[3]
         
         lower = np.clip(bounds - variance,0,255)
         upper = np.clip(bounds + variance,0,255)
         #print(lower, upper)
-        
-        mask = cv2.inRange(image, lower, upper)
+        frame_HSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(frame_HSV, lower, upper)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         mask = cv2.dilate(mask, kernel, iterations=2)
@@ -137,22 +136,6 @@ class Analyse:
         # need to find a better denoise method
         return cv2.bitwise_not(result)
 
-    def find_ball_vector(self, keypoints : np.ndarray, robot_pos : np.ndarray) -> np.ndarray:
-        if len(keypoints) == 0:
-            raise BallNotFoundError("No balls to be used for vector calculation")
-        if robot_pos is None:
-            raise RobotNotFoundError("No Robot to be used for vector calculation")
-        # Find the closest ball to the robot
-        closest_ball = None
-        closest_distance = None
-        for keypoint in keypoints:
-            ball_pos = np.array(keypoint.pt)
-            distance = np.linalg.norm(ball_pos - robot_pos)
-            if closest_distance is None or distance < closest_distance:
-                closest_ball = ball_pos
-                closest_distance = distance
-
-        return closest_ball - robot_pos
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
         image = cv2.bitwise_not(image)

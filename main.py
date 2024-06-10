@@ -17,6 +17,7 @@ import RobotInterface
 
 import VideoDebugger
 import analyse
+import steering
 
 
 
@@ -42,7 +43,9 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
     except Exception as e:
         print("Error sending: ",e)
 
-
+    ball_vector = None
+    angle_degrees = None
+    signed_angle_degrees = None
 
     while True:
         
@@ -63,7 +66,14 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         frame_number += 1   
         print(f"Frame {frame_number} analysed")
         
-        
+        steering_instance = steering.Steering()
+        if analyser.robot_pos is not None and analyser.robot_vector is not None and analyser.white_ball_keypoints is not None:
+            try:   
+                ball_vector = steering_instance.find_ball_vector(analyser.white_ball_keypoints, analyser.robot_pos, analyser.robot_vector) # type: ignore
+            except analyse.BallNotFoundError as e:
+                print("No balls found",e)
+            except analyse.RobotNotFoundError as e:
+                print("No robot found",e)
 
         def angle_between_vectors(v1: np.ndarray, v2: np.ndarray) -> float:
             if v1 is None or v2 is None:
@@ -85,20 +95,23 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             # Angle in radians
             angle_radians = np.arctan2(det, dot_prod)
             return angle_radians
-
-        signed_angle_radians = angle_between_vectors_signed(analyser.robot_vector, analyser.ball_vector) # type: ignore
-        signed_angle_degrees = math.degrees(signed_angle_radians)
-        angle_radians = angle_between_vectors(analyser.robot_vector, analyser.ball_vector) # type: ignore
-        angle_degrees = math.degrees(angle_radians)
+        
+        if ball_vector is not None:
+            signed_angle_radians = angle_between_vectors_signed(analyser.robot_vector, ball_vector) # type: ignore
+            signed_angle_degrees = math.degrees(signed_angle_radians)
+            angle_radians = angle_between_vectors(analyser.robot_vector, ball_vector) # type: ignore
+            angle_degrees = math.degrees(angle_radians)
 
 
 
         
         try:
-            if angle_degrees < 2 and analyser.robot_pos is not None and analyser.ball_vector is not None:
+            if angle_degrees is not None and signed_angle_degrees is not None and angle_degrees < 2 and analyser.robot_pos is not None and ball_vector is not None:
                 robotInterface.send_command("move", -30)
             else:
-                robotInterface.send_command("turn",signed_angle_degrees *1/3)
+                print(f"Turning {signed_angle_degrees} degrees")
+                if signed_angle_degrees is not None:
+                    robotInterface.send_command("turn",signed_angle_degrees * -1/3)
         except ConnectionError as e:
             print("Robot not connected",e)
         except Exception as e:
@@ -158,8 +171,8 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             cv2.arrowedLine(robot_arrows_on_frame, tuple(robot_pos), tuple(robot_vector_end), (0, 0, 255), 2)
             
         
-        if analyser.ball_vector is not None and analyser.robot_pos is not None:
-            ball_vector_end = analyser.robot_pos + analyser.ball_vector
+        if ball_vector is not None and analyser.robot_pos is not None:
+            ball_vector_end = analyser.robot_pos + ball_vector
             # Cast to int for drawing
             robot_pos = analyser.robot_pos.astype(int)
             ball_vector_end = ball_vector_end.astype(int)
@@ -167,8 +180,9 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             
         
         # Write text in the bottom left corner of the image
-        text = f"Angle: {angle_degrees}  Signed Angle: {signed_angle_degrees}"
-        cv2.putText(robot_arrows_on_frame, text, (10, robot_arrows_on_frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+        if angle_degrees is not None and signed_angle_degrees is not None:
+            text = f"Angle: {angle_degrees}  Signed Angle: {signed_angle_degrees}"
+            cv2.putText(robot_arrows_on_frame, text, (10, robot_arrows_on_frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         
         
         
