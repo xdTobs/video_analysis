@@ -110,7 +110,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             else:
                 print(f"Turning {signed_angle_degrees} degrees")
                 if signed_angle_degrees is not None:
-                    robotInterface.send_command("turn",signed_angle_degrees * -1)
+                    robotInterface.send_command("turn",signed_angle_degrees * -1/3)
         except ConnectionError as e:
             print("Robot not connected",e)
         except Exception as e:
