@@ -1,4 +1,7 @@
 /output
 /__pycache__
 /venv
+/videos
+/.vscode
 bounds.txt
+setup_env.sh
