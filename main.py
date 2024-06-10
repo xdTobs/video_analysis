@@ -41,8 +41,10 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         print("Robot not connected",e)
     except Exception as e:
         print("Error sending: ",e)
-
-
+        
+    last_ball_pos = None
+    last_ball_time = None
+    lost_ball_threshold = 5  # seconds
 
     while True:
         
@@ -59,6 +61,19 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         print(f"Analysing frame {frame_number}...")
         
         analyser.analysis_pipeline(frame)
+
+        current_time = time.time()
+
+        # If ball detected, update last known position and time
+        if analyser.keypoints:
+            keypoint = analyser.keypoints[0]
+            ball_pos = np.array([keypoint.pt[0], keypoint.pt[1]])
+            last_ball_pos = ball_pos
+            last_ball_time = current_time
+        else:
+            # reset last_ball_pos if older than threshold
+            if last_ball_pos is not None and (current_time - last_ball_time) > lost_ball_threshold:
+                last_ball_pos = None
         
         frame_number += 1   
         print(f"Frame {frame_number} analysed")
@@ -86,10 +101,11 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             angle_radians = np.arctan2(det, dot_prod)
             return angle_radians
 
-        signed_angle_radians = angle_between_vectors_signed(analyser.robot_vector, analyser.ball_vector) # type: ignore
-        signed_angle_degrees = math.degrees(signed_angle_radians)
-        angle_radians = angle_between_vectors(analyser.robot_vector, analyser.ball_vector) # type: ignore
-        angle_degrees = math.degrees(angle_radians)
+        if analyser.robot_vector is not None and last_ball_pos is not None:
+            signed_angle_radians = angle_between_vectors_signed(analyser.robot_vector, analyser.ball_vector) # type: ignore
+            signed_angle_degrees = math.degrees(signed_angle_radians)
+            angle_radians = angle_between_vectors(analyser.robot_vector, analyser.ball_vector) # type: ignore
+            angle_degrees = math.degrees(angle_radians)
 
 
 
@@ -165,7 +181,11 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             ball_vector_end = ball_vector_end.astype(int)
             cv2.arrowedLine(robot_arrows_on_frame, tuple(robot_pos), tuple(ball_vector_end), (255, 0, 0), 2)
             
-        
+        if last_ball_pos is not None and analyser.robot_pos is not None:
+            ball_vector_end = analyser.robot_pos + (last_ball_pos - analyser.robot_pos)
+            robot_pos = analyser.robot_pos.astype(int)
+            ball_vector_end = ball_vector_end.astype(int)
+            cv2.arrowedLine(robot_arrows_on_frame, tuple(robot_pos), tuple(ball_vector_end), (255, 0, 0), 2)
         # Write text in the bottom left corner of the image
         text = f"Angle: {angle_degrees}  Signed Angle: {signed_angle_degrees}"
         cv2.putText(robot_arrows_on_frame, text, (10, robot_arrows_on_frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
