@@ -48,7 +48,6 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
     signed_angle_degrees = None
 
     while True:
-        
         #try:
         #    recieved_data = robotInterface.receive_command()
         #except ConnectionError as e:
@@ -111,7 +110,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             else:
                 print(f"Turning {signed_angle_degrees} degrees")
                 if signed_angle_degrees is not None:
-                    robotInterface.send_command("turn",signed_angle_degrees * -1/3)
+                    robotInterface.send_command("turn",signed_angle_degrees * -1)
         except ConnectionError as e:
             print("Robot not connected",e)
         except Exception as e:
@@ -151,11 +150,11 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             cv2.circle(result_3channel, center, radius, (0, 255, 0), 4)
         
         # Overlay red circle on red robot
-        if analyser.red_pos is not None:
-            center = (int(analyser.red_pos[0]), int(analyser.red_pos[1]))
-            radius = 30
-            cv2.circle(red_robot_3channel, center, radius, (0, 0, 255), 4)
-            print(f"Red robot at {center}")
+        #if analyser.red_pos is not None:
+        #    center = (int(analyser.red_pos[0]), int(analyser.red_pos[1]))
+        #    radius = 30
+        #    cv2.circle(red_robot_3channel, center, radius, (0, 0, 255), 4)
+        #    print(f"Red robot at {center}")
         # Overlay green circle on green robot
         if analyser.robot_pos is not None:
             center = (int(analyser.robot_pos[0]), int(analyser.robot_pos[1]))

@@ -8,7 +8,6 @@ import time
 class Analyse:
     def __init__(self):
         self.videoDebugger = VideoDebugger.VideoDebugger()
-        self.red_pos = None
         self.robot_pos = None
         self.robot_vector = None
         self.corners = None
@@ -27,7 +26,7 @@ class Analyse:
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
         try:
-            self.robot_pos, self.red_pos, self.robot_vector = self.find_circle_robot(self.green_robot_mask, self.red_robot_mask)
+            self.robot_pos, self.robot_vector = self.find_triple_green_robot(self.green_robot_mask)
             self.corners = self.find_border_corners(self.border_mask)
         except BorderNotFoundError as e:
             print(e)
@@ -56,7 +55,35 @@ class Analyse:
         mask = cv2.erode(mask, kernel, iterations=2)
         return mask
 
-    def find_circle_robot(self, green_mask: np.ndarray, red_mask: np.ndarray) -> Tuple[np.ndarray,np.ndarray, np.ndarray]:
+    def find_triple_green_robot(self, green_mask: np.ndarray):
+        #Errode from green mask
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
+        green_mask = cv2.erode(green_mask, kernel, iterations=2)
+        detector = BlobDetector.get_robot_circle_detector()
+        green_keypoints = detector.detect(green_mask)
+        print(f"Green points {[green_keypoint.pt for green_keypoint in green_keypoints]}")
+        if len(green_keypoints) != 3:
+            raise RobotNotFoundError(f"Cannot find robot: There are {len(green_keypoints)} green points")
+        #Find closest pairing of green points
+        green_points = [np.array(keypoint.pt) for keypoint in green_keypoints]
+        parings = []
+        for i in range(0,3):
+            for j in range(i+1,3):
+                parings.append((i,j,np.linalg.norm(green_points[i] - green_points[j])))
+        parings.sort(key=lambda x: x[2])
+        print(f"Parings: {parings}")
+        bottom_points = [parings[0][0],parings[0][1]]
+        top_point = 3 - bottom_points[0] - bottom_points[1]
+        bottom_pos = np.array(self.convert_perspective((green_points[bottom_points[0]] + green_points[bottom_points[1]]) / 2))
+        print(f"Bottom points: {bottom_points}")
+        print(f"Top point: {top_point}")
+        top_pos = np.array(self.convert_perspective(green_points[top_point]))
+        print(f"Bottom pos: {bottom_pos}")
+        print(f"Top pos: {top_pos}")
+        return bottom_pos, top_pos - bottom_pos
+        
+    
+    def find_red_green_robot(self, green_mask: np.ndarray, red_mask: np.ndarray) -> Tuple[np.ndarray,np.ndarray, np.ndarray]:
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
         red_mask = detector.detect(red_mask)

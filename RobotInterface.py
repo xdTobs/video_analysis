@@ -53,8 +53,6 @@ class RobotInterface:
             }
             serialized_data = json.dumps(data).encode()
             self.sock.sendall(serialized_data)
-            #sleep for 0.5s
-            time.sleep(0.5)
             print("Data sent",data)
         except:
             raise DataSendError("Failed to send data")
