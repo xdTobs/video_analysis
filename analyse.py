@@ -84,9 +84,9 @@ class Analyse:
         robot_height = 40
 
         # Heights in pixels cm / px
-        conversionFactor = 180 / (1920*5/6)
+        conversionFactor = 180 / (1920/2*5/6)
 
-        vector_from_middle = np.array([point[0] - 1920/2, point[1] - 1080/2])
+        vector_from_middle = np.array([point[0] - 1920/2/2, point[1] - 1080/2/2])
         # Convert to cm
         vector_from_middle *= conversionFactor
         projected_vector = vector_from_middle/cam_height * (cam_height - robot_height)
@@ -94,7 +94,7 @@ class Analyse:
         # Convert back to pixels
         projected_vector /= conversionFactor
 
-        result = (projected_vector[0] + 1920/2, projected_vector[1] + 1080/2)
+        result = (projected_vector[0] + 1920/2/2, projected_vector[1] + 1080/2/2)
         return result
 
     def construct_vector_from_circles(self, green: np.ndarray, red: np.ndarray) -> np.ndarray:

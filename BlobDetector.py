@@ -8,8 +8,8 @@ def get_ball_detector():
     params.filterByColor = True
     params.blobColor = 255
     params.filterByArea = True
-    params.minArea = 200
-    params.maxArea = 2000
+    params.minArea = 50
+    params.maxArea = 500
     params.filterByCircularity = True
     params.minCircularity = 0.6
     params.filterByConvexity = False
@@ -25,7 +25,7 @@ def get_robot_circle_detector():
     params.filterByColor = True
     params.blobColor = 255
     params.filterByArea = True
-    params.minArea = 600
+    params.minArea = 150
     params.maxArea = 10000000
     params.filterByCircularity = True
     params.minCircularity = 0.5

@@ -33,7 +33,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
     video = cv2.VideoCapture(1, cv2.CAP_DSHOW)
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920/2)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080/2)
-    ##print("Video read")
+    print("Video read")
 
     try:
         robotInterface.send_command("belt", 100)
@@ -56,12 +56,12 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         ret, frame = video.read()
         if not ret:
             break
-        ##print(f"Analysing frame {frame_number}...")
+        print(f"Analysing frame {frame_number}...")
         
         analyser.analysis_pipeline(frame)
         
         frame_number += 1   
-        ##print(f"Frame {frame_number} analysed")
+        print(f"Frame {frame_number} analysed")
         
         
 
@@ -96,7 +96,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         
         try:
             if angle_degrees < 2 and analyser.robot_pos is not None and analyser.ball_vector is not None:
-                robotInterface.send_command("move", 30)
+                robotInterface.send_command("move", -30)
             else:
                 robotInterface.send_command("turn",signed_angle_degrees *1/3)
         except ConnectionError as e:
@@ -104,22 +104,22 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         except Exception as e:
             print("Error sending: ",e)
         
-        ###print(f"Angle between robot and ball: {angle_degrees}")
-        ###print(f"Signed angle between robot and ball: {signed_angle_degrees}")
+        #print(f"Angle between robot and ball: {angle_degrees}")
+        #print(f"Signed angle between robot and ball: {signed_angle_degrees}")
         
-        ###print("Corners found at: ")
-        ###print(corners)
-        ###print(f"{len(keypoints)} balls found")
-        ###print("Balls found at: ")
+        #print("Corners found at: ")
+        #print(corners)
+        print(f"{len(analyser.white_ball_keypoints)} balls found")
+        print("Balls found at: ")
         #for keypoint in keypoints:
-        #    ##print(keypoint.pt)
-        #    ##print(keypoint.size)
+        #    print(keypoint.pt)
+        #    print(keypoint.size)
 
         
         # Overlay red vector on robot
-        ###print(f"Ball vector: {ball_vector}")
-        ###print(f"Robot vector: {robot_vector}")
-        ###print(f"Robot pos: {robot_pos}")
+        #print(f"Ball vector: {ball_vector}")
+        #print(f"Robot vector: {robot_vector}")
+        #print(f"Robot pos: {robot_pos}")
         # Display the result
         
         robot_arrows_on_frame = frame
@@ -142,12 +142,12 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
             center = (int(analyser.red_pos[0]), int(analyser.red_pos[1]))
             radius = 30
             cv2.circle(red_robot_3channel, center, radius, (0, 0, 255), 4)
-            ##print(f"Red robot at {center}")
+            print(f"Red robot at {center}")
         # Overlay green circle on green robot
         if analyser.robot_pos is not None:
             center = (int(analyser.robot_pos[0]), int(analyser.robot_pos[1]))
             radius = 30
-            ##print(f"Green robot at {center}")
+            print(f"Green robot at {center}")
             cv2.circle(green_robot_3channel, center, radius, (0, 255, 0), 4)
             
         if analyser.robot_vector is not None and analyser.robot_pos is not None:

@@ -1,6 +1,7 @@
 import json
 import time
 import socket
+import sys
 
 class RobotInterface:
     def __init__(self, host : str, port : int, online : bool = True):
@@ -41,6 +42,7 @@ class RobotInterface:
             raise ConnectionError("Failed to disconnect from the robot")
 
     def send_command(self, command : str, value : float):
+        time.sleep(0.5)
         if self.online == False:
             return
         if not self.connected:
