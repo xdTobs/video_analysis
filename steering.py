@@ -7,7 +7,7 @@ class Steering():
         self.last_target_time = 0
         self.target_position = None
         self.update_interval = 5  # Time in seconds
-        self.distance_threshold = 50  # Distance threshold for starting the timer
+        self.distance_threshold = 100  # Distance threshold for starting the timer
 
     def find_ball_vector(self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray) -> np.ndarray:
         current_time = time.time()
