@@ -37,7 +37,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
     print("Video read")
 
     try:
-        robotInterface.send_command("belt", speedPercentage=100)
+        robotInterface.send_command("belt", 0,speedPercentage=100)
     except ConnectionError as e:
         print("Robot not connected",e)
     except Exception as e:
@@ -203,7 +203,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         cv2.imshow("Combined Images", combined_images)
 
         if cv2.waitKey(25) & 0xFF == ord('q'): 
-            robotInterface.send_command("belt", speedPercentage=100)
+            robotInterface.send_command("belt", 0,speedPercentage=100)
             videoDebugger.close_videos()
             video.release()
             cv2.destroyAllWindows()
