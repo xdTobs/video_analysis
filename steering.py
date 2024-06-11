@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import time
 from analyse import BallNotFoundError, RobotNotFoundError
 
@@ -8,7 +9,6 @@ class Steering():
         self.target_position = None
         self.update_interval = 5  # Time in seconds
         self.distance_threshold = 100  # Distance threshold for starting the timer
-
     def find_ball_vector(self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray) -> np.ndarray:
         current_time = time.time()
 
