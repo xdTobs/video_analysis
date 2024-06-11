@@ -37,7 +37,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
     print("Video read")
 
     try:
-        robotInterface.send_command("belt", 100)
+        robotInterface.send_command("belt", speedPercentage=100)
     except ConnectionError as e:
         print("Robot not connected",e)
     except Exception as e:
@@ -106,11 +106,11 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         
         try:
             if angle_degrees is not None and signed_angle_degrees is not None and angle_degrees < 2 and analyser.robot_pos is not None and ball_vector is not None:
-                robotInterface.send_command("move", -30)
+                robotInterface.send_command("move", 30, 100)
             else:
                 print(f"Turning {signed_angle_degrees} degrees")
                 if signed_angle_degrees is not None:
-                    robotInterface.send_command("turn",signed_angle_degrees * -1/3)
+                    robotInterface.send_command("turn",signed_angle_degrees * -1/3,50)
         except ConnectionError as e:
             print("Robot not connected",e)
         except Exception as e:
@@ -203,7 +203,7 @@ def run_video(robotInterface : RobotInterface.RobotInterface):
         cv2.imshow("Combined Images", combined_images)
 
         if cv2.waitKey(25) & 0xFF == ord('q'): 
-            robotInterface.send_command("belt", 0)
+            robotInterface.send_command("belt", speedPercentage=100)
             videoDebugger.close_videos()
             video.release()
             cv2.destroyAllWindows()
@@ -227,7 +227,3 @@ try:
 except ConnectionError as e:
     print("Robot not connected",e)
 run_video(robotInterface = robotInterface)
-        
-
-
-

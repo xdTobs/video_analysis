@@ -41,7 +41,7 @@ class RobotInterface:
         except:
             raise ConnectionError("Failed to disconnect from the robot")
 
-    def send_command(self, command : str, value : float):
+    def send_command(self, command : str, value : float,speedPercentage: int):
         if self.online == False:
             return
         if not self.connected:
@@ -49,7 +49,8 @@ class RobotInterface:
         try:
             data = {
             "command": command,
-            "value": value
+            "value": value,
+            "speedPercentage":speedPercentage
             }
             serialized_data = json.dumps(data).encode()
             self.sock.sendall(serialized_data)
