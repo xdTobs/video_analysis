@@ -63,7 +63,7 @@ class Analyse:
         green_mask = cv2.erode(green_mask, kernel, iterations=2)
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
-        print(f"Green points {[green_keypoint.pt for green_keypoint in green_keypoints]}")
+        #print(f"Green points {[green_keypoint.pt for green_keypoint in green_keypoints]}")
         if len(green_keypoints) != 3:
             raise RobotNotFoundError(f"Cannot find robot: There are {len(green_keypoints)} green points")
         #Find closest pairing of green points
@@ -73,15 +73,15 @@ class Analyse:
             for j in range(i+1,3):
                 parings.append((i,j,np.linalg.norm(green_points[i] - green_points[j])))
         parings.sort(key=lambda x: x[2])
-        print(f"Parings: {parings}")
+        #print(f"Parings: {parings}")
         bottom_points = [parings[0][0],parings[0][1]]
         top_point = 3 - bottom_points[0] - bottom_points[1]
         bottom_pos = np.array(self.convert_perspective((green_points[bottom_points[0]] + green_points[bottom_points[1]]) / 2))
-        print(f"Bottom points: {bottom_points}")
-        print(f"Top point: {top_point}")
+        #print(f"Bottom points: {bottom_points}")
+        #print(f"Top point: {top_point}")
         top_pos = np.array(self.convert_perspective(green_points[top_point]))
-        print(f"Bottom pos: {bottom_pos}")
-        print(f"Top pos: {top_pos}")
+        #print(f"Bottom pos: {bottom_pos}")
+        #print(f"Top pos: {top_pos}")
         return bottom_pos, top_pos - bottom_pos
         
     
@@ -108,8 +108,8 @@ class Analyse:
 
     def convert_perspective(self, point : np.ndarray) -> tuple[float, float]:
         # Heights in cm
-        cam_height = 200
-        robot_height = 40
+        cam_height = 178
+        robot_height = 47
 
         # Heights in pixels cm / px
         conversionFactor = 180 / (1920/2*5/6)
@@ -207,12 +207,28 @@ class Analyse:
         return keypoints
         pass
 
+    def distance_point_to_segment(self, p: np.ndarray, v: np.ndarray, w: np.ndarray) -> float:
+        l2 = np.sum((w - v) ** 2)
+        if l2 == 0.0:
+            return np.linalg.norm(p - v)
+        t = max(0, min(1, np.dot(p - v, w - v) / l2))
+        projection = v + t * (w - v)
+        return np.linalg.norm(p - projection)
+
     def distance_to_closest_border(self) -> float:
         if self.robot_pos is None or self.corners is None:
             raise ValueError("Robot position or border corners are not set.")
-        
-        distances = [np.linalg.norm(self.robot_pos - corner) for corner in self.corners]
-        return min(distances)
+
+        num_corners = len(self.corners)
+        min_distance = float('inf')
+        for i in range(num_corners):
+            v = self.corners[i]
+            w = self.corners[(i + 1) % num_corners]
+            distance = self.distance_point_to_segment(self.robot_pos, v, w)
+            if distance < min_distance:
+                min_distance = distance
+
+        return min_distance
     
 def read_bounds():
         bounds_dict = {}
