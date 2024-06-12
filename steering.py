@@ -15,6 +15,7 @@ class Steering():
         self.target_position = None
         self.update_interval = 5  # Time in seconds
         self.distance_threshold = 100  # Distance threshold for starting the timer
+
     def find_ball_vector(self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray) -> np.ndarray:
         print(f"Finding ball vector, robot pos: {robot_pos}, robot vector: {robot_vector}")
         current_time = time.time()
@@ -59,7 +60,7 @@ class Steering():
     def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
         return True
     
-    def pick_program(self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray):
+    def pick_program(self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray, distance_to_closest_border: float):
         if len(keypoints) == 0:
             raise BallNotFoundError("No balls to be used for program selection")
         if robot_pos is None:
@@ -80,8 +81,18 @@ class Steering():
         dist_to_ball = math.sqrt(self.ball_vector[0] ** 2 + self.ball_vector[1] ** 2)
         print(f"Ball vector: {self.ball_vector}")
         print(f"Ball vector length: {dist_to_ball}")
+
+        
         
         try:
+
+            if distance_to_closest_border < 30:
+                print("Close to border")
+                self.robot_interface.send_command("move", 0, 0)
+                time.sleep(1)
+                self.robot_interface.send_command("move", -20, 0)
+                return
+            
             if dist_to_ball < 140:
                 print("Ball is close")
                 self.collect_ball(signed_angle_degrees, angle_degrees)
