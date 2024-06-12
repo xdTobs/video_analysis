@@ -12,7 +12,7 @@ class Analyse:
         self.robot_vector = None
         self.corners = None
         self.bounds_dict = read_bounds()
-        self.distance_to_closest_border = None
+        self.distance_to_closest_border = float('inf')
         pass
     
     def analysis_pipeline(self, image: np.ndarray):

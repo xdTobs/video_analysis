@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import time
-from analyse import BallNotFoundError, RobotNotFoundError
+from analyse import BallNotFoundError, RobotNotFoundError, BorderNotFoundError
 import RobotInterface
 from utils import angle_between_vectors, angle_between_vectors_signed
 
@@ -67,6 +67,8 @@ class Steering():
             raise RobotNotFoundError("No Robot to be used for program selection")
         if robot_vector is None:
             raise RobotNotFoundError("No Robot vector to be used for program selection")
+        if distance_to_closest_border is None:
+            raise BorderNotFoundError("No distance to closest border to be used for program selection")
         
             
         self.ball_vector = self.find_ball_vector(keypoints, robot_pos, robot_vector)
@@ -85,7 +87,6 @@ class Steering():
         
         
         try:
-
             if distance_to_closest_border < 30:
                 print("Close to border")
                 self.robot_interface.send_command("move", 0, 0)
