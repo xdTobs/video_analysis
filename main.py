@@ -23,7 +23,7 @@ def run_video(online = True):
     steering_instance = steering.Steering(online, HOST, PORT)
     frame_number = 0
 
-    video = cv2.VideoCapture(0)
+    video = cv2.VideoCapture(1,cv2.CAP_DSHOW)
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920 / 2)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080 / 2)
     print("Video read")
@@ -178,6 +178,7 @@ def run_video(online = True):
             video.release()
             cv2.destroyAllWindows()
             steering_instance.stop_belt()
+            steering_instance.disconnect()
 
             break
 
