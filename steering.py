@@ -137,4 +137,8 @@ class Steering():
         time.sleep(5)
         self.robot_interface.send_command("belt", 0, speedPercentage=0)
     
-    
+    def disconnect(self):
+        print("Disconnecting from robot")
+        self.robot_interface.disconnect()
+        return
+        
