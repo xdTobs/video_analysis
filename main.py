@@ -23,14 +23,11 @@ def run_video(online = True):
     steering_instance = steering.Steering(online, HOST, PORT)
     frame_number = 0
 
-    video = cv2.VideoCapture(1,cv2.CAP_DSHOW)
+    video = cv2.VideoCapture(0, cv2.CAP_DSHOW) 
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920 / 2)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080 / 2)
     print("Video read")
 
-    ball_vector = None
-    angle_degrees = None
-    signed_angle_degrees = None
     steering_instance.start_belt()
     while True:
         ret, frame = video.read()
@@ -80,9 +77,11 @@ def run_video(online = True):
         data_dict = {
             'Robot position': analyser.robot_pos,
             'Robot vector': analyser.robot_vector,
-            'Ball vector': ball_vector,
-            'Angle': angle_degrees,
-            'Signed angle': signed_angle_degrees
+            'Ball vector': steering_instance.ball_vector,
+            'Angle': steering_instance.angle_degrees,
+            'Signed angle': steering_instance.signed_angle_degrees,
+            'Close to Ball': steering_instance.close_to_ball,
+            'Time to switch target': steering_instance.time_to_switch_target,
         }
 
         y_offset = 20
@@ -144,18 +143,7 @@ def run_video(online = True):
                 2,
             )
 
-        # Write text in the bottom left corner of the image
-        if angle_degrees is not None and signed_angle_degrees is not None:
-            text = f"Angle: {angle_degrees}  Signed Angle: {signed_angle_degrees}"
-            cv2.putText(
-                robot_arrows_on_frame,
-                text,
-                (10, robot_arrows_on_frame.shape[0] - 10),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.5,
-                (255, 255, 255),
-                1,
-            )
+       
 
         videoDebugger.write_video("result", result_3channel, True)
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
