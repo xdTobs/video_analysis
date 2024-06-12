@@ -12,7 +12,7 @@ class VideoDebugger:
     def write_video(self, out_name : str, frame: np.ndarray, three_channel=False):
         if out_name not in self.videos:
             os.makedirs(f"output/{out_name}", exist_ok=True)
-            video = cv2.VideoWriter(f"output/{out_name}/{self.current_time}.avi", self.fourcc, 10.0, (1920, 1080))
+            video = cv2.VideoWriter(f"output/{out_name}/{self.current_time}.avi", self.fourcc, 10.0, (1024, 576))
             self.videos[out_name] = video
         
         video = self.videos[out_name]
@@ -20,6 +20,7 @@ class VideoDebugger:
             res = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
         else:
             res = frame
+        
         video.write(res)
         return frame
 

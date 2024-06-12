@@ -82,7 +82,7 @@ class Steering():
         print(f"Ball vector length: {dist_to_ball}")
         
         try:
-            if dist_to_ball < 140:
+            if dist_to_ball < 250:
                 print("Ball is close")
                 self.collect_ball(signed_angle_degrees, angle_degrees)
                 return
