@@ -25,6 +25,7 @@ class Analyse:
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
+
         try:
             self.robot_pos, self.robot_vector = self.find_triple_green_robot(self.green_robot_mask)
             self.corners = self.find_border_corners(self.border_mask)
@@ -204,7 +205,20 @@ class Analyse:
         
         return keypoints
         pass
-    
+
+    def find_closest_border_distance(self, robot_pos: np.ndarray, corners: np.ndarray) -> float:
+        top_left, top_right, bottom_right, bottom_left = corners
+
+        distance_to_left_border = abs(robot_pos[0] - top_left[0])
+        distance_to_right_border = abs(robot_pos[0] - top_right[0])
+        distance_to_top_border = abs(robot_pos[1] - top_left[1])
+        distance_to_bottom_border = abs(robot_pos[1] - bottom_left[1])
+
+        closest_distance = min(distance_to_left_border, distance_to_right_border, distance_to_top_border,
+                               distance_to_bottom_border)
+
+        return closest_distance
+
 def read_bounds():
         bounds_dict = {}
         with open("bounds.txt") as f:
@@ -213,6 +227,8 @@ def read_bounds():
                 bounds = value.split(",")
                 bounds_dict[key] = np.array([int(x) for x in bounds])
         return bounds_dict
+
+
 
 class RobotNotFoundError(Exception):
     def __init__(self, message="Robot not found", *args):
