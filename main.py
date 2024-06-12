@@ -41,7 +41,7 @@ def run_video(online = True):
         analyser.analysis_pipeline(frame)
         
         try:
-            steering_instance.pick_program(analyser.keypoints, analyser.robot_pos, analyser.robot_vector)
+            steering_instance.pick_program(analyser.keypoints, analyser.robot_pos, analyser.robot_vector, analyser.distance_to_closest_border)
         except BallNotFoundError as e:
             print(f"Ball not found: {e}")
         except RobotNotFoundError as e:

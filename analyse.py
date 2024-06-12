@@ -207,12 +207,28 @@ class Analyse:
         return keypoints
         pass
 
+    def distance_point_to_segment(self, p: np.ndarray, v: np.ndarray, w: np.ndarray) -> float:
+        l2 = np.sum((w - v) ** 2)
+        if l2 == 0.0:
+            return np.linalg.norm(p - v)
+        t = max(0, min(1, np.dot(p - v, w - v) / l2))
+        projection = v + t * (w - v)
+        return np.linalg.norm(p - projection)
+
     def distance_to_closest_border(self) -> float:
         if self.robot_pos is None or self.corners is None:
             raise ValueError("Robot position or border corners are not set.")
-        
-        distances = [np.linalg.norm(self.robot_pos - corner) for corner in self.corners]
-        return min(distances)
+
+        num_corners = len(self.corners)
+        min_distance = float('inf')
+        for i in range(num_corners):
+            v = self.corners[i]
+            w = self.corners[(i + 1) % num_corners]
+            distance = self.distance_point_to_segment(self.robot_pos, v, w)
+            if distance < min_distance:
+                min_distance = distance
+
+        return min_distance
     
 def read_bounds():
         bounds_dict = {}
