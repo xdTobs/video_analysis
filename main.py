@@ -121,6 +121,7 @@ def run_video(robotInterface: RobotInterface.RobotInterface):
                     and ball_vector is not None
                 ):
                     robotInterface.send_command("move", 30, 30)
+                    print("Moving forward")
                 else:
                     print(f"Turning {signed_angle_degrees} degrees")
                     if signed_angle_degrees is not None:

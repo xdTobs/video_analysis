@@ -12,6 +12,7 @@ class Analyse:
         self.robot_vector = None
         self.corners = None
         self.bounds_dict = read_bounds()
+        self.distance_to_closest_border = None
         pass
     
     def analysis_pipeline(self, image: np.ndarray):
@@ -28,6 +29,7 @@ class Analyse:
         try:
             self.robot_pos, self.robot_vector = self.find_triple_green_robot(self.green_robot_mask)
             self.corners = self.find_border_corners(self.border_mask)
+            self.distance_to_border = self.distance_to_closest_border()
         except BorderNotFoundError as e:
             print(e)
         except RobotNotFoundError as e:
@@ -204,6 +206,13 @@ class Analyse:
         
         return keypoints
         pass
+
+    def distance_to_closest_border(self) -> float:
+        if self.robot_pos is None or self.corners is None:
+            raise ValueError("Robot position or border corners are not set.")
+        
+        distances = [np.linalg.norm(self.robot_pos - corner) for corner in self.corners]
+        return min(distances)
     
 def read_bounds():
         bounds_dict = {}
