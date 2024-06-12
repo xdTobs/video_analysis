@@ -82,7 +82,8 @@ def run_video(online = True):
             'Robot vector': analyser.robot_vector,
             'Ball vector': ball_vector,
             'Angle': angle_degrees,
-            'Signed angle': signed_angle_degrees
+            'Signed angle': signed_angle_degrees,
+            'Distance to closest border': analyser.distance_to_closest_border
         }
 
         y_offset = 20
