@@ -18,6 +18,7 @@ PORT = 65438  # The port used by the server
 def run_video(online = True):
     # Takes a video path and runs the analysis on each frame
     # Saves the results to the same directory as the video
+    video = cv2.VideoCapture(1,cv2.CAP_DSHOW)
     videoDebugger = VideoDebugger.VideoDebugger()
     analyser = analyse.Analyse()
     steering_instance = steering.Steering(online, HOST, PORT)
