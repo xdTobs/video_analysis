@@ -12,7 +12,7 @@ import analyse
 import steering
 
 
-HOST = "172.20.10.3"  # Robot IP
+HOST = "172.20.10.5"  # Robot IP
 PORT = 65438  # The port used by the server
 
 
@@ -23,7 +23,7 @@ def run_video(robotInterface: RobotInterface.RobotInterface):
     analyser = analyse.Analyse()
     frame_number = 0
 
-    video = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+    video = cv2.VideoCapture(0)
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920 / 2)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080 / 2)
     print("Video read")
@@ -63,7 +63,7 @@ def run_video(robotInterface: RobotInterface.RobotInterface):
                     analyser.robot_vector,
                 )
 
-                dist_to_ball = np.linalg.norm(ball_vector)
+                dist_to_ball = ball_vector
                 print(f"Ball vector: {ball_vector}")
                 print(f"Ball vector length: {dist_to_ball}")
                 if dist_to_ball < 100:
@@ -71,7 +71,6 @@ def run_video(robotInterface: RobotInterface.RobotInterface):
                 else:
                     print("Ball is not close")
 
-                steering_instance.catch_ball(ball_vector, analyser.robot_vector)
             except analyse.BallNotFoundError as e:
                 print("No balls found", e)
             except analyse.RobotNotFoundError as e:
@@ -142,7 +141,27 @@ def run_video(robotInterface: RobotInterface.RobotInterface):
 
         robot_arrows_on_frame = frame
 
-        red_robot_3channel = cv2.cvtColor(analyser.red_robot_mask, cv2.COLOR_GRAY2BGR)
+        height, width = 360, 640
+        black_image = np.zeros((height, width, 3), dtype=np.uint8)
+
+
+
+        data_dict = {
+            'Robot position': analyser.robot_pos,
+            'Robot vector': analyser.robot_vector,
+            'Ball vector': ball_vector,
+            'Angle': angle_degrees,
+            'Signed angle': signed_angle_degrees
+        }
+
+        y_offset = 20
+        for key, value in data_dict.items():
+            text = f"{key}: {value}"
+            cv2.putText(black_image, text, (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            y_offset += 20
+
+
+
         green_robot_3channel = cv2.cvtColor(
             analyser.green_robot_mask, cv2.COLOR_GRAY2BGR
         )
@@ -214,7 +233,7 @@ def run_video(robotInterface: RobotInterface.RobotInterface):
 
         im2 = cv2.resize(result_3channel, (640, 360))
 
-        im3 = cv2.resize(red_robot_3channel, (640, 360))
+        im3 = cv2.resize(black_image, (640, 360))
 
         im4 = cv2.resize(green_robot_3channel, (640, 360))
 
