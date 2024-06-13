@@ -1,31 +1,35 @@
 import cv2
-import os
-import datetime
-from typing import List, Dict
+from typing import Dict
 import numpy as np
-from analyse import Analyse
-from steering import Steering
-from VideoDebugger import VideoDebugger
 
 
-class VideoOutput():
-    def __init__(self, analyser, steering_instance, videoDebugger, data_dict: Dict[str, any]):
+class VideoOutput:
+    def __init__(
+        self, analyser, steering_instance, videoDebugger, data_dict: Dict[str, any]
+    ):
         self.analyser = analyser
         self.steering_instance = steering_instance
         self.videoDebugger = videoDebugger
         self.data_dict = data_dict
-    
-    def showFrame(self,frame):
-        robot_arrows_on_frame = frame
 
+    def showFrame(self, frame):
+        robot_arrows_on_frame = frame
 
         height, width = 360, 640
         text_overview = np.zeros((height, width, 3), dtype=np.uint8)
-        
+
         y_offset = 20
         for key, value in self.data_dict.items():
             text = f"{key}: {value}"
-            cv2.putText(text_overview, text, (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            cv2.putText(
+                text_overview,
+                text,
+                (10, y_offset),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (255, 255, 255),
+                1,
+            )
             y_offset += 20
 
         green_robot_3channel = cv2.cvtColor(
@@ -33,7 +37,9 @@ class VideoOutput():
         )
 
         # Convert result to 3 channel image
-        result_binary = cv2.bitwise_or(self.analyser.white_mask, self.analyser.orange_mask)
+        result_binary = cv2.bitwise_or(
+            self.analyser.white_mask, self.analyser.orange_mask
+        )
         result_3channel = cv2.cvtColor(result_binary, cv2.COLOR_GRAY2BGR)
 
         # Overlay green circle on each keypoint
@@ -55,7 +61,10 @@ class VideoOutput():
             print(f"Green robot at {center}")
             cv2.circle(green_robot_3channel, center, radius, (0, 255, 0), 4)
 
-        if self.analyser.robot_vector is not None and self.analyser.robot_pos is not None:
+        if (
+            self.analyser.robot_vector is not None
+            and self.analyser.robot_pos is not None
+        ):
             robot_vector_end = self.analyser.robot_pos + self.analyser.robot_vector
             # Cast to int for drawing
             robot_pos = self.analyser.robot_pos.astype(int)
@@ -68,8 +77,13 @@ class VideoOutput():
                 2,
             )
 
-        if self.steering_instance.ball_vector is not None and self.analyser.robot_pos is not None:
-            ball_vector_end = self.analyser.robot_pos + self.steering_instance.ball_vector
+        if (
+            self.steering_instance.ball_vector is not None
+            and self.analyser.robot_pos is not None
+        ):
+            ball_vector_end = (
+                self.analyser.robot_pos + self.steering_instance.ball_vector
+            )
             # Cast to int for drawing
             robot_pos = self.analyser.robot_pos.astype(int)
             ball_vector_end = ball_vector_end.astype(int)
@@ -80,8 +94,6 @@ class VideoOutput():
                 (255, 0, 0),
                 2,
             )
-
-       
 
         self.videoDebugger.write_video("result", result_3channel, True)
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
