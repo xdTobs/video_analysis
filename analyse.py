@@ -8,7 +8,8 @@ import BlobDetector
 class Analyse:
     def __init__(self):
         self.videoDebugger = VideoDebugger.VideoDebugger()
-        self.alpha = 0.05
+        self.alpha = 0.1
+        self.average_threshold = 100
         self.robot_pos = None
         self.robot_pos_not_translated = None
         self.robot_vector_not_translated = None
@@ -18,9 +19,19 @@ class Analyse:
         self.large_goal_coords = None
         self.goal_vector = None
         self.green_points_not_translated = None
+        
+        self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
         self.white_mask = np.zeros((576, 1024), dtype=np.float32)
-        self.new_white_mask = None
+        
+        self.new_border_mask = None
+        self.border_average = np.zeros((576, 1024), dtype=np.float32)
+        self.border_mask = np.zeros((576, 1024), dtype=np.float32)
+        
+        self.new_orange_mask = None
+        self.orange_average = np.zeros((576, 1024), dtype=np.float32)
+        self.orange_mask = np.zeros((576, 1024), dtype=np.float32)
+        
         self.bounds_dict = read_bounds()
         self.distance_to_closest_border = float("inf")
         pass
@@ -34,19 +45,26 @@ class Analyse:
         self.red_robot_mask = self.videoDebugger.run_analysis(
             self.apply_theshold, "red-mask", image, self.bounds_dict["red"]
         )
-        self.border_mask = self.videoDebugger.run_analysis(
-            self.isolate_borders, "border", image, self.bounds_dict["border"]
-        )
         
         self.new_white_mask = self.videoDebugger.run_analysis(
             self.apply_theshold, "white-ball", image, self.bounds_dict["white"]
         )
-                
         self.white_average = self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
-        self.white_mask = (self.white_average.astype(np.uint8) > 0).astype(np.uint8) * 255
-        self.orange_mask = self.videoDebugger.run_analysis(
+        self.white_mask = (self.white_average.astype(np.uint8) > self.average_threshold).astype(np.uint8) * 255
+        
+        
+        
+        self.new_orange_mask = self.videoDebugger.run_analysis(
             self.apply_theshold, "orange-ball", image, self.bounds_dict["orange"]
         )
+        self.orange_average = self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
+        self.orange_mask = (self.orange_average.astype(np.uint8) > self.average_threshold).astype(np.uint8) * 255
+        
+        self.new_border_mask = self.videoDebugger.run_analysis(
+            self.isolate_borders, "border", image, self.bounds_dict["border"]
+        )
+        self.border_average = self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
+        self.border_mask = (self.border_average.astype(np.uint8) > self.average_threshold).astype(np.uint8) * 255
         
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
@@ -64,7 +82,7 @@ class Analyse:
         except Exception as e:
             print(e)
         return
-
+    
     def apply_theshold(
         self, image: np.ndarray, bounds_dict_entry: np.ndarray
     ) -> np.ndarray:
