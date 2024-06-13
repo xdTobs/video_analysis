@@ -15,9 +15,13 @@ class Analyse:
         self.robot_vector_not_translated = None
         self.robot_vector = None
         self.corners = None
-        self.small_goal_coords = None
-        self.large_goal_coords = None
+        self.small_goal_coords: np.ndarray = None
+        self.large_goal_coords: np.ndarray = None
+        self.course_length_px = None
+        self.course_height_px = None
+        self.distance_to_goal = 100
         self.goal_vector = None
+        self.delivery_vector = None
         self.green_points_not_translated = None
         
         self.new_white_mask = None
@@ -178,6 +182,47 @@ class Analyse:
                 np.array(green_point), np.array(red_point)
             ),
         )
+        
+    def calculate_course_dimensions(self):
+        if self.corners is not None:
+            corner1 = self.corners[0]
+            corner2 = self.corners[1]
+            corner3 = self.corners[2]
+            self.course_length_px = np.linalg.norm(corner1 - corner2)
+            self.course_height_px = np.linalg.norm(corner2 - corner3)
+        
+    def calculate_goals(self):
+        print(f"corners: {self.corners}")
+        if self.corners is not None:
+            # Find the middle of the two corners
+            goal_side_right = True
+            print(f"Goal side right: {goal_side_right}")
+            corner1 = self.corners[0]
+            corner2 = self.corners[1]
+            corner3 = self.corners[2]
+            corner4 = self.corners[3]
+            
+            if goal_side_right:
+                self.small_goal_coords = (corner1 + corner2) / 2
+                self.large_goal_coords = (corner3 + corner4) / 2
+            else:
+                self.small_goal_coords = (corner3 + corner4) / 2
+                self.large_goal_coords = (corner1 + corner2) / 2
+                
+            print(f"Small goal coords: {self.small_goal_coords}")
+            print(f"Large goal coords: {self.large_goal_coords}")
+            
+            
+            self.goal_vector = self.coordinates_to_vector(self.small_goal_coords, self.large_goal_coords)
+            v = self.small_goal_coords
+            
+            v_magnitude = np.linalg.norm(v)
+            u = v / v_magnitude
+            
+            u_prime = self.distance_to_goal * u
+            
+            self.delivery_vector = self.analyser.small_goal_coords - u_prime.astype(int)
+            print(f"delivery vector: {self.delivery_vector}")
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
@@ -185,6 +230,8 @@ class Analyse:
 
         # Heights in pixels cm / px
         #TODO fish eye ???
+        if self.course_length_px is None:
+            raise ValueError("Course length is not set")
         conversionFactor = self.course_length_cm / (self.course_length_px * 1024 / self.course_length_cm)
 
         vector_from_middle = np.array(
@@ -208,7 +255,7 @@ class Analyse:
     ) -> np.ndarray:
         return red - green
     
-    def coordinates_to_vector(self, point1: int,point2: int) -> tuple[int, int]:
+    def coordinates_to_vector(self, point1: int,point2: int) -> np.ndarray[int, int]:
         return (point2[0] - point1[0], point2[1] - point1[1])
 
     def isolate_borders(

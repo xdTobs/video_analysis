@@ -89,11 +89,13 @@ if __name__ == "__main__":
     HOST = os.getenv("HOST")
     PORT = os.getenv("PORT")
     WEBCAM_INDEX = os.getenv("WEBCAM_INDEX")
+    IS_GOAL_RIGHT_SIDE = os.getenv("IS_GOAL_RIGHT_SIDE")
     is_offline = "offline" in sys.argv
 
     print("HOST: ", HOST)
     print("PORT: ", PORT)
     print("WEBCAM_INDEX: ", WEBCAM_INDEX)
+    print("IS_GOAL_RIGHT_SIDE: ", IS_GOAL_RIGHT_SIDE)
     should_quit = False
     if HOST is None:
         print("No HOST provided in .env file")
@@ -103,6 +105,9 @@ if __name__ == "__main__":
         should_quit = True
     if WEBCAM_INDEX is None:
         print("No WEBCAM_INDEX provided in .env file. 0 or 1 is the most common index")
+        should_quit = True
+    if IS_GOAL_RIGHT_SIDE is None:
+        print("No IS_GOAL_RIGHT_SIDE provided in .env file. True or False")
         should_quit = True
 
     print("HOST: ", HOST)
