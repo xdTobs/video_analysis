@@ -68,9 +68,9 @@ def run_video(online = True):
             videoDebugger.close_videos()
             video.release()
             cv2.destroyAllWindows()
-            steering_instance.stop_belt()
-            steering_instance.disconnect()
-
+            if online:
+                steering_instance.stop_belt()
+                steering_instance.disconnect()
             break
 
     video.release()
@@ -82,4 +82,3 @@ if "offline" in sys.argv:
     run_video(False)
 else:
     run_video()
-
