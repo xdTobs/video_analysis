@@ -1,7 +1,7 @@
 import cv2
 from typing import Dict
 import numpy as np
-from analyse import Analyser
+from analyse import Analyse
 from VideoDebugger import VideoDebugger
 from steering import Steering
 
@@ -10,7 +10,7 @@ class VideoOutput:
     def __init__(
         self, analyser, steering_instance, videoDebugger, data_dict: Dict[str, any]
     ):
-        self.analyser: Analyser = analyser
+        self.analyser: Analyse = analyser
         self.steering_instance: Steering = steering_instance
         self.videoDebugger: VideoDebugger = videoDebugger
         self.data_dict = data_dict
