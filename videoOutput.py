@@ -174,12 +174,12 @@ class VideoOutput:
                 2
             )
             
-            
-                for corner in self.analyser.corners:
-                    cv2.circle(frame, self.analyser.small_goal_coords, 5, (0, 255, 0), -1)
+        
+            for corner in self.analyser.corners:
+                cv2.circle(frame, self.analyser.small_goal_coords, 5, (0, 255, 0), -1)
                 cv2.circle(frame, self.analyser.large_goal_coords, 5, (0, 255, 255), -1)
-                    print(f"Corner at {corner}")
-                    cv2.circle(frame, tuple(corner), 5, (0, 255,255), -1)
+                print(f"Corner at {corner}")
+                cv2.circle(frame, tuple(corner), 5, (0, 255,255), -1)
         
         
         self.videoDebugger.write_video("result", result_3channel, True)
