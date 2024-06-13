@@ -1,15 +1,18 @@
 import cv2
 from typing import Dict
 import numpy as np
+from analyse import Analyse
+from VideoDebugger import VideoDebugger
+from steering import Steering
 
 
 class VideoOutput:
     def __init__(
         self, analyser, steering_instance, videoDebugger, data_dict: Dict[str, any]
     ):
-        self.analyser = analyser
-        self.steering_instance = steering_instance
-        self.videoDebugger = videoDebugger
+        self.analyser: Analyse = analyser
+        self.steering_instance: Steering = steering_instance
+        self.videoDebugger: VideoDebugger = videoDebugger
         self.data_dict = data_dict
 
     def update_data_dict(self):
@@ -120,7 +123,19 @@ class VideoOutput:
                 (255, 0, 0),
                 2,
             )
-
+        
+        print(f"corners: {self.analyser.corners}")
+        if self.analyser.corners is not None:
+            # Find the middle of the two corners
+            corner1 = self.analyser.corners[0]
+            corner2 = self.analyser.corners[1]
+            middle_point = tuple((corner1 + corner2) // 2)
+        for corner in self.analyser.corners:
+            cv2.circle(robot_arrows_on_frame, middle_point, 5, (0, 255, 255), -1)
+            print(f"Corner at {corner}")
+            cv2.circle(robot_arrows_on_frame, tuple(corner), 5, (0, 255,255), -1)
+        
+        
         self.videoDebugger.write_video("result", result_3channel, True)
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
         im2 = cv2.resize(result_3channel, (640, 360))
