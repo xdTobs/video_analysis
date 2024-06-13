@@ -20,6 +20,7 @@ class VideoOutput:
 
         y_offset = 20
         for key, value in self.data_dict.items():
+            self.update_data_dict({key: value})
             text = f"{key}: {value}"
             cv2.putText(
                 text_overview,
@@ -48,13 +49,6 @@ class VideoOutput:
             radius = int(keypoint.size / 2)
             cv2.circle(result_3channel, center, radius, (0, 255, 0), 4)
 
-        # Overlay red circle on red robot
-        # if self.analyser.red_pos is not None:
-        #    center = (int(self.analyser.red_pos[0]), int(self.analyser.red_pos[1]))
-        #    radius = 30
-        #    cv2.circle(red_robot_3channel, center, radius, (0, 0, 255), 4)
-        #    print(f"Red robot at {center}")
-        # Overlay green circle on green robot
         if self.analyser.robot_pos is not None:
             center = (int(self.analyser.robot_pos[0]), int(self.analyser.robot_pos[1]))
             radius = 30
