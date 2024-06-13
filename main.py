@@ -41,8 +41,8 @@ def run_video(host, webcam_index, online, port=65438):
     frame_number = 0
 
     # video = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920 / 2)
-    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080 / 2)
+    video.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
+    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 576)
     print("Video read")
 
     steering_instance.start_belt()
@@ -50,7 +50,7 @@ def run_video(host, webcam_index, online, port=65438):
         ret, frame = video.read()
         if not ret:
             break
-
+        print(frame.shape)
         analyser.analysis_pipeline(frame)
 
         try:

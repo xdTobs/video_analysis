@@ -30,8 +30,8 @@ class VideoOutput:
         robot_arrows_on_frame = frame
 
         height, width = 360, 640
-        text_overview = np.zeros((height, width, 3), dtype=np.uint8)
-
+        #text_overview = np.zeros((height, width, 3), dtype=np.uint8)
+        text_overview = cv2.cvtColor(self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR)
         y_offset = 20
         for key, value in self.data_dict.items():
             text = f"{key}: {value}"
@@ -54,7 +54,7 @@ class VideoOutput:
             self.analyser.white_mask, self.analyser.orange_mask
         )
         result_3channel = cv2.cvtColor(result_binary, cv2.COLOR_GRAY2BGR)
-
+        #result_3channel = cv2.cvtColor(self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR)
         for keypoint in self.analyser.keypoints:
             center = (int(keypoint.pt[0]), int(keypoint.pt[1]))
             radius = int(keypoint.size / 2)
@@ -130,10 +130,10 @@ class VideoOutput:
             corner1 = self.analyser.corners[0]
             corner2 = self.analyser.corners[1]
             middle_point = tuple((corner1 + corner2) // 2)
-        for corner in self.analyser.corners:
-            cv2.circle(robot_arrows_on_frame, middle_point, 5, (0, 255, 255), -1)
-            print(f"Corner at {corner}")
-            cv2.circle(robot_arrows_on_frame, tuple(corner), 5, (0, 255,255), -1)
+            for corner in self.analyser.corners:
+                cv2.circle(robot_arrows_on_frame, middle_point, 5, (0, 255, 255), -1)
+                print(f"Corner at {corner}")
+                cv2.circle(robot_arrows_on_frame, tuple(corner), 5, (0, 255,255), -1)
         
         
         self.videoDebugger.write_video("result", result_3channel, True)
