@@ -35,9 +35,10 @@ class Analyse:
             self.isolate_borders, "border", image, self.bounds_dict["border"]
         )
         
-        self.new_new_white_mask = self.videoDebugger.run_analysis(
+        self.new_white_mask = self.videoDebugger.run_analysis(
             self.apply_theshold, "white-ball", image, self.bounds_dict["white"]
         )
+                
         self.white_average = self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         self.white_mask = (self.white_average.astype(np.uint8) > 0).astype(np.uint8) * 255
         self.orange_mask = self.videoDebugger.run_analysis(
