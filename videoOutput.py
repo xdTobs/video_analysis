@@ -4,6 +4,8 @@ import numpy as np
 from analyse import Analyse
 from VideoDebugger import VideoDebugger
 from steering import Steering
+import os
+
 
 
 class VideoOutput:
@@ -14,6 +16,8 @@ class VideoOutput:
         self.steering_instance: Steering = steering_instance
         self.videoDebugger: VideoDebugger = videoDebugger
         self.data_dict = data_dict
+        
+        self.distance_to_goal = 100
 
     def update_data_dict(self):
         self.data_dict["Robot position"] = self.analyser.robot_pos
@@ -127,13 +131,55 @@ class VideoOutput:
         print(f"corners: {self.analyser.corners}")
         if self.analyser.corners is not None:
             # Find the middle of the two corners
+            goal_side_right = False
+            print(f"Goal side right: {goal_side_right}")
             corner1 = self.analyser.corners[0]
             corner2 = self.analyser.corners[1]
-            middle_point = tuple((corner1 + corner2) // 2)
-            for corner in self.analyser.corners:
-                cv2.circle(robot_arrows_on_frame, middle_point, 5, (0, 255, 255), -1)
-                print(f"Corner at {corner}")
-                cv2.circle(robot_arrows_on_frame, tuple(corner), 5, (0, 255,255), -1)
+            corner3 = self.analyser.corners[2]
+            corner4 = self.analyser.corners[3]
+            
+            if goal_side_right:
+                self.analyser.small_goal_coords = tuple(corner1 + corner2 // 2)
+                self.analyser.large_goal_coords = tuple(corner3 + corner4 // 2)
+            else:
+                self.analyser.small_goal_coords = tuple(corner3 + corner4 // 2)
+                self.analyser.large_goal_coords = tuple(corner1 + corner2 // 2)
+            
+            
+            self.analyser.goal_vector = self.analyser.coordinates_to_vector(self.analyser.small_goal_coords, self.analyser.large_goal_coords)
+            v = self.analyser.small_goal_coords
+            
+            v_magnitude = np.linalg.norm(v)
+            u = v / v_magnitude
+            
+            u_prime = self.distance_to_goal * u
+            
+            P_new = self.analyser.small_goal_coords - u_prime.astype(int)
+            print(f"New point: {P_new}")
+            
+            
+            cv2.arrowedLine(
+                frame,
+                self.analyser.small_goal_coords,
+                self.analyser.large_goal_coords,
+                (0, 0, 255),
+                2
+            )
+            
+            cv2.arrowedLine(
+                frame,
+                self.analyser.small_goal_coords,
+                P_new,
+                (0, 0, 255),
+                2
+            )
+            
+            
+                for corner in self.analyser.corners:
+                    cv2.circle(frame, self.analyser.small_goal_coords, 5, (0, 255, 0), -1)
+                cv2.circle(frame, self.analyser.large_goal_coords, 5, (0, 255, 255), -1)
+                    print(f"Corner at {corner}")
+                    cv2.circle(frame, tuple(corner), 5, (0, 255,255), -1)
         
         
         self.videoDebugger.write_video("result", result_3channel, True)
