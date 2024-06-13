@@ -282,6 +282,16 @@ def read_bounds():
             bounds_dict[key] = np.array([int(x) for x in bounds])
     return bounds_dict
 
+def read_goal():
+    goal_coordinates = np.array([])
+    with open("bounds.txt") as f:
+        for line in f:
+            key, value = line.split(";")
+            bounds = value.split(",")
+            if key == "goal":
+                goal_coordinates.append([int(x) for x in bounds])
+        return goal_coordinates
+
 
 class RobotNotFoundError(Exception):
     def __init__(self, message="Robot not found", *args):

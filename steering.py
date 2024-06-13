@@ -24,6 +24,7 @@ class Steering:
         self.close_to_ball = False
         self.current_time = 0
         self.time_to_switch_target = 0
+        self.target_goal = np.array([0, 0])
 
     def find_ball_vector(
         self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray
@@ -170,3 +171,13 @@ class Steering:
         print("Disconnecting from robot")
         self.robot_interface.disconnect()
         return
+    
+    def deliver_balls_to_target(self, target_goal: np.ndarray):
+        # Calculate the direction vector from the current position to the target position
+        direction_vector = target_goal - self.robot_pos
+        # Normalize the direction vector
+        direction_vector = direction_vector / np.linalg.norm(direction_vector)
+        # Calculate the distance to the target position
+        distance = np.linalg.norm(target_goal - self.robot_pos)
+        # Send a command to the robot to move in the direction of the target position
+        self.robot_interface.send_command("move", direction_vector, distance)
