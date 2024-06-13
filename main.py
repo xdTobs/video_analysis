@@ -41,8 +41,8 @@ def run_video(host, webcam_index, online, port=65438):
     frame_number = 0
 
     # video = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920 / 2)
-    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080 / 2)
+    video.set(cv2.CAP_PROP_FRAME_WIDTH, 960)
+    video.set(cv2.CAP_PROP_FRAME_HEIGHT, 540)
     print("Video read")
 
     steering_instance.start_belt()
@@ -50,7 +50,9 @@ def run_video(host, webcam_index, online, port=65438):
         ret, frame = video.read()
         if not ret:
             break
-
+        print(f"frame shape {frame.shape}")
+        if frame.shape[0] == 576 or frame.shape[1] == 1024:
+            continue
         analyser.analysis_pipeline(frame)
 
         try:
@@ -114,5 +116,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     run_video(
-        host=HOST, webcam_index=int(WEBCAM_INDEX), online=not is_offline, port=int(PORT)
+        host=HOST, webcam_index=int(WEBCAM_INDEX), online=False, port=int(PORT)
     )

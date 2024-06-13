@@ -8,12 +8,16 @@ import BlobDetector
 class Analyse:
     def __init__(self):
         self.videoDebugger = VideoDebugger.VideoDebugger()
+        self.alpha = 0.05
         self.robot_pos = None
         self.robot_pos_not_translated = None
         self.robot_vector_not_translated = None
         self.robot_vector = None
         self.corners = None
         self.green_points_not_translated = None
+        self.white_average = np.zeros((540, 960), dtype=np.float32)
+        self.white_mask = np.zeros((540, 960), dtype=np.float32)
+        self.new_white_mask = None
         self.bounds_dict = read_bounds()
         self.distance_to_closest_border = float("inf")
         pass
@@ -30,12 +34,18 @@ class Analyse:
         self.border_mask = self.videoDebugger.run_analysis(
             self.isolate_borders, "border", image, self.bounds_dict["border"]
         )
-        self.white_mask = self.videoDebugger.run_analysis(
+        
+        self.new_white_mask = self.videoDebugger.run_analysis(
             self.apply_theshold, "white-ball", image, self.bounds_dict["white"]
         )
+        print(image.shape)
+        self.white_average = self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+        self.white_mask = (self.white_average > 0.5).astype(np.uint8)
+        
         self.orange_mask = self.videoDebugger.run_analysis(
             self.apply_theshold, "orange-ball", image, self.bounds_dict["orange"]
         )
+        
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
