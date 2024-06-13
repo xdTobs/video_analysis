@@ -12,7 +12,18 @@ class VideoOutput:
         self.videoDebugger = videoDebugger
         self.data_dict = data_dict
 
+    def update_data_dict(self):
+        self.data_dict["Robot position"] = self.analyser.robot_pos
+        self.data_dict["Robot vector"] = self.analyser.robot_vector
+        self.data_dict["Ball vector"] = self.steering_instance.ball_vector
+        self.data_dict["Angle"] = self.steering_instance.angle_degrees
+        self.data_dict["Signed angle"] = self.steering_instance.signed_angle_degrees
+        self.data_dict["Close to Ball"] = self.steering_instance.close_to_ball
+        self.data_dict["Time to switch target"] = self.steering_instance.time_to_switch_target
+
     def showFrame(self, frame):
+        self.update_data_dict()
+        
         robot_arrows_on_frame = frame
 
         height, width = 360, 640
@@ -20,7 +31,6 @@ class VideoOutput:
 
         y_offset = 20
         for key, value in self.data_dict.items():
-            self.update_data_dict({key: value})
             text = f"{key}: {value}"
             cv2.putText(
                 text_overview,
@@ -37,13 +47,11 @@ class VideoOutput:
             self.analyser.green_robot_mask, cv2.COLOR_GRAY2BGR
         )
 
-        # Convert result to 3 channel image
         result_binary = cv2.bitwise_or(
             self.analyser.white_mask, self.analyser.orange_mask
         )
         result_3channel = cv2.cvtColor(result_binary, cv2.COLOR_GRAY2BGR)
 
-        # Overlay green circle on each keypoint
         for keypoint in self.analyser.keypoints:
             center = (int(keypoint.pt[0]), int(keypoint.pt[1]))
             radius = int(keypoint.size / 2)
@@ -60,7 +68,6 @@ class VideoOutput:
             and self.analyser.robot_pos is not None
         ):
             robot_vector_end = self.analyser.robot_pos + self.analyser.robot_vector
-            # Cast to int for drawing
             robot_pos = self.analyser.robot_pos.astype(int)
             robot_vector_end = robot_vector_end.astype(int)
             cv2.arrowedLine(
@@ -78,7 +85,6 @@ class VideoOutput:
             ball_vector_end = (
                 self.analyser.robot_pos + self.steering_instance.ball_vector
             )
-            # Cast to int for drawing
             robot_pos = self.analyser.robot_pos.astype(int)
             ball_vector_end = ball_vector_end.astype(int)
             cv2.arrowedLine(
@@ -91,14 +97,10 @@ class VideoOutput:
 
         self.videoDebugger.write_video("result", result_3channel, True)
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
-
         im2 = cv2.resize(result_3channel, (640, 360))
-
         im3 = cv2.resize(text_overview, (640, 360))
-
         im4 = cv2.resize(green_robot_3channel, (640, 360))
 
-        # Split the frame into four equal parts
         hstack1 = np.hstack((im1, im2))
         hstack2 = np.hstack((im3, im4))
         combined_images = np.vstack((hstack1, hstack2))
