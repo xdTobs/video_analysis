@@ -14,6 +14,9 @@ class Analyse:
         self.robot_vector_not_translated = None
         self.robot_vector = None
         self.corners = None
+        self.small_goal_coords = None
+        self.large_goal_coords = None
+        self.goal_vector = None
         self.green_points_not_translated = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
         self.white_mask = np.zeros((576, 1024), dtype=np.float32)
@@ -180,6 +183,9 @@ class Analyse:
         self, green: np.ndarray, red: np.ndarray
     ) -> np.ndarray:
         return red - green
+    
+    def coordinates_to_vector(self, point1: int,point2: int) -> tuple[int, int]:
+        return (point2[0] - point1[0], point2[1] - point1[1])
 
     def isolate_borders(
         self, image: np.ndarray, bounds_dict_entry: np.ndarray
@@ -294,17 +300,6 @@ def read_bounds():
             bounds = value.split(",")
             bounds_dict[key] = np.array([int(x) for x in bounds])
     return bounds_dict
-
-def read_goal():
-    goal_coordinates = np.array([])
-    with open("bounds.txt") as f:
-        for line in f:
-            key, value = line.split(";")
-            bounds = value.split(",")
-            if key == "goal":
-                goal_coordinates.append([int(x) for x in bounds])
-        return goal_coordinates
-
 
 class RobotNotFoundError(Exception):
     def __init__(self, message="Robot not found", *args):

@@ -26,7 +26,6 @@ class Steering:
         self.close_to_ball = False
         self.current_time = 0
         self.time_to_switch_target = 0
-        self.target_goal = np.array([0, 0])
 
     def find_ball_vector(
         self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray
