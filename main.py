@@ -1,44 +1,46 @@
 #!/usr/bin/env python3
+import os
+from dotenv import load_dotenv
 import analyse
 import sys
 import cv2
-import numpy as np
-import math
-import time
 from analyse import BallNotFoundError, RobotNotFoundError
 import VideoDebugger
 import analyse
 import steering
 import videoOutput
+import platform
 
 
-HOST = "172.20.10.5"  # Robot IP
-PORT = 65438  # The port used by the server
-
-
-
-def run_video(online = True):
+def run_video(host, webcam_index, online, port=65438):
     # Takes a video path and runs the analysis on each frame
-    # Saves the results to the same directory as the video
-    video = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+    # darwin is mac
+    if platform.system() == "Windows":
+        video = cv2.VideoCapture(webcam_index, cv2.CAP_DSHOW)
+    elif platform.system() == "Linux" or platform.system() == "Darwin":
+        video = cv2.VideoCapture(webcam_index)
+    else:
+        raise Exception("Unsupported platform. Please use Windows, Linux or Mac.")
     videoDebugger = VideoDebugger.VideoDebugger()
     analyser = analyse.Analyse()
-    steering_instance = steering.Steering(online, HOST, PORT)
-    
+    steering_instance = steering.Steering(online, host, port)
+
     data_dict = {
-            'Robot position': analyser.robot_pos,
-            'Robot vector': analyser.robot_vector,
-            'Ball vector': steering_instance.ball_vector,
-            'Angle': steering_instance.angle_degrees,
-            'Signed angle': steering_instance.signed_angle_degrees,
-            'Close to Ball': steering_instance.close_to_ball,
-            'Time to switch target': steering_instance.time_to_switch_target,
-        }
-    
-    video_output = videoOutput.VideoOutput(analyser, steering_instance, videoDebugger, data_dict)
+        "Robot position": analyser.robot_pos,
+        "Robot vector": analyser.robot_vector,
+        "Ball vector": steering_instance.ball_vector,
+        "Angle": steering_instance.angle_degrees,
+        "Signed angle": steering_instance.signed_angle_degrees,
+        "Close to Ball": steering_instance.close_to_ball,
+        "Time to switch target": steering_instance.time_to_switch_target,
+    }
+
+    video_output = videoOutput.VideoOutput(
+        analyser, steering_instance, videoDebugger, data_dict
+    )
     frame_number = 0
 
-    video = cv2.VideoCapture(0, cv2.CAP_DSHOW) 
+    # video = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1920 / 2)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080 / 2)
     print("Video read")
@@ -50,36 +52,67 @@ def run_video(online = True):
             break
 
         analyser.analysis_pipeline(frame)
-        
+
         try:
-            steering_instance.pick_program(analyser.keypoints, analyser.robot_pos, analyser.robot_vector, analyser.distance_to_closest_border)
+            steering_instance.pick_program(
+                analyser.keypoints,
+                analyser.robot_pos,
+                analyser.robot_vector,
+                analyser.distance_to_closest_border,
+            )
         except BallNotFoundError as e:
             print(f"Ball not found: {e}")
         except RobotNotFoundError as e:
             print(f"Robot not found: {e}")
         except Exception as e:
             print(f"Error: {e}")
-            
+
         video_output.showFrame(frame)
-        
+
         frame_number += 1
-    
+
         if cv2.waitKey(25) & 0xFF == ord("q"):
             videoDebugger.close_videos()
             video.release()
             cv2.destroyAllWindows()
-            steering_instance.stop_belt()
-            steering_instance.disconnect()
-
+            if online:
+                steering_instance.stop_belt()
+                steering_instance.disconnect()
             break
 
     video.release()
     cv2.destroyAllWindows()
 
 
-# Run video analysis
-if "offline" in sys.argv:
-    run_video(False)
-else:
-    run_video()
+if __name__ == "__main__":
+    load_dotenv(override=True)
+    HOST = os.getenv("HOST")
+    PORT = os.getenv("PORT")
+    WEBCAM_INDEX = os.getenv("WEBCAM_INDEX")
+    is_offline = "offline" in sys.argv
 
+    print("HOST: ", HOST)
+    print("PORT: ", PORT)
+    print("WEBCAM_INDEX: ", WEBCAM_INDEX)
+    should_quit = False
+    if HOST is None:
+        print("No HOST provided in .env file")
+        should_quit = True
+    if PORT is None:
+        print("No PORT provided in .env file. 65438 is the most common port")
+        should_quit = True
+    if WEBCAM_INDEX is None:
+        print("No WEBCAM_INDEX provided in .env file. 0 or 1 is the most common index")
+        should_quit = True
+
+    print("HOST: ", HOST)
+    print("PORT: ", PORT)
+    print("WEBCAM_INDEX: ", WEBCAM_INDEX)
+    print("is_offline: ", is_offline)
+    if should_quit:
+        print("Exiting... Please provide the missing values in the .env file")
+        sys.exit(1)
+
+    run_video(
+        host=HOST, webcam_index=int(WEBCAM_INDEX), online=not is_offline, port=int(PORT)
+    )
