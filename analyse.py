@@ -34,6 +34,11 @@ class Analyse:
         
         self.bounds_dict = read_bounds()
         self.distance_to_closest_border = float("inf")
+        
+        self.cam_height = 178
+        self.robot_height = 47
+        self.course_length_cm = 167
+        self.course_width_cm = 121
         pass
 
     def analysis_pipeline(self, image: np.ndarray):
@@ -176,25 +181,25 @@ class Analyse:
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
-        cam_height = 178
-        robot_height = 47
+        
 
         # Heights in pixels cm / px
-        conversionFactor = 180 / (1920 / 2 * 5 / 6)
+        #TODO fish eye ???
+        conversionFactor = self.course_length_cm / (self.course_length_px * 1024 / self.course_length_cm)
 
         vector_from_middle = np.array(
-            [point[0] - 1920 / 2 / 2, point[1] - 1080 / 2 / 2]
+            [point[0] - 1024/2, point[1] - 576 / 2]
         )
         # Convert to cm
         vector_from_middle *= conversionFactor
-        projected_vector = vector_from_middle / cam_height * (cam_height - robot_height)
+        projected_vector = vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
 
         # Convert back to pixels
         projected_vector /= conversionFactor
 
         result = (
-            projected_vector[0] + 1920 / 2 / 2,
-            projected_vector[1] + 1080 / 2 / 2,
+            projected_vector[0] + 1024 / 2,
+            projected_vector[1] + 576 / 2,
         )
         return result
 

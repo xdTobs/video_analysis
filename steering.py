@@ -17,7 +17,7 @@ class Steering:
         self.target_position = None
         self.update_interval = 25  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
-        self.distance_threshold_min = 50
+        self.distance_threshold_min = 100
         self.collect_ball_distance = 250
         self.signed_angle_radians = None
         self.signed_angle_degrees = None
