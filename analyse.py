@@ -9,8 +9,11 @@ class Analyse:
     def __init__(self):
         self.videoDebugger = VideoDebugger.VideoDebugger()
         self.robot_pos = None
+        self.robot_pos_not_translated = None
+        self.robot_vector_not_translated = None
         self.robot_vector = None
         self.corners = None
+        self.green_points_not_translated = None
         self.bounds_dict = read_bounds()
         self.distance_to_closest_border = float("inf")
         pass
@@ -83,12 +86,12 @@ class Analyse:
                 f"Cannot find robot: There are {len(green_keypoints)} green points"
             )
         # Find closest pairing of green points
-        green_points = [np.array(keypoint.pt) for keypoint in green_keypoints]
+        self.green_points_not_translated = [np.array(keypoint.pt) for keypoint in green_keypoints]
         parings = []
         for i in range(0, 3):
             for j in range(i + 1, 3):
                 parings.append(
-                    (i, j, np.linalg.norm(green_points[i] - green_points[j]))
+                    (i, j, np.linalg.norm(self.green_points_not_translated[i] - self.green_points_not_translated[j]))
                 )
         parings.sort(key=lambda x: x[2])
         # print(f"Parings: {parings}")
@@ -96,14 +99,16 @@ class Analyse:
         top_point = 3 - bottom_points[0] - bottom_points[1]
         bottom_pos = np.array(
             self.convert_perspective(
-                (green_points[bottom_points[0]] + green_points[bottom_points[1]]) / 2
+                (self.green_points_not_translated[bottom_points[0]] + self.green_points_not_translated[bottom_points[1]]) / 2
             )
         )
         # print(f"Bottom points: {bottom_points}")
         # print(f"Top point: {top_point}")
-        top_pos = np.array(self.convert_perspective(green_points[top_point]))
+        top_pos = np.array(self.convert_perspective(self.green_points_not_translated[top_point]))
         # print(f"Bottom pos: {bottom_pos}")
         # print(f"Top pos: {top_pos}")
+        self.robot_vector_not_translated = np.array(self.green_points_not_translated[top_point]) - np.array(self.green_points_not_translated[bottom_points[0]] + self.green_points_not_translated[bottom_points[1]])/2
+        self.robot_pos_not_translated = (self.green_points_not_translated[bottom_points[0]] + self.green_points_not_translated[bottom_points[1]]) / 2
         return bottom_pos, top_pos - bottom_pos
 
     def find_red_green_robot(

@@ -61,7 +61,19 @@ class VideoOutput:
             center = (int(self.analyser.robot_pos[0]), int(self.analyser.robot_pos[1]))
             radius = 30
             print(f"Green robot at {center}")
-            cv2.circle(green_robot_3channel, center, radius, (0, 255, 0), 4)
+            
+            cv2.circle(green_robot_3channel, center, radius, (255, 0, 0), 4)
+        
+        if self.analyser.green_points_not_translated is not None:
+            for point in self.analyser.green_points_not_translated:
+                cv2.circle(
+                    green_robot_3channel,
+                    (int(point[0]), int(point[1])),
+                    20,
+                    (0, 255, 0),
+                    4,
+                )
+        
 
         if (
             self.analyser.robot_vector is not None
@@ -77,6 +89,20 @@ class VideoOutput:
                 (0, 0, 255),
                 2,
             )
+        if self.analyser.robot_vector_not_translated is not None:
+            robot_vector_end = self.analyser.robot_pos_not_translated + self.analyser.robot_vector_not_translated
+            print(f"Robot vector end: {robot_vector_end}")
+            print(f"Robot pos: {self.analyser.robot_pos_not_translated}")
+            print(f"Robot vector: {self.analyser.robot_vector_not_translated}")
+            cv2.arrowedLine(
+                robot_arrows_on_frame,
+                tuple(self.analyser.robot_pos_not_translated.astype(int)),
+                tuple(robot_vector_end.astype(int)),
+                (0, 255, 0),
+                2,
+            )
+            
+                
 
         if (
             self.steering_instance.ball_vector is not None
