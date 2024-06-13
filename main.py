@@ -75,9 +75,9 @@ def run_video(host, webcam_index, online, port=65438):
             videoDebugger.close_videos()
             video.release()
             cv2.destroyAllWindows()
-            steering_instance.stop_belt()
-            steering_instance.disconnect()
-
+            if online:
+                steering_instance.stop_belt()
+                steering_instance.disconnect()
             break
 
     video.release()
