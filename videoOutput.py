@@ -30,8 +30,8 @@ class VideoOutput:
         robot_arrows_on_frame = frame
 
         height, width = 360, 640
-        text_overview = np.zeros((height, width, 3), dtype=np.uint8)
-
+        #text_overview = np.zeros((height, width, 3), dtype=np.uint8)
+        text_overview = cv2.cvtColor(self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR)
         y_offset = 20
         for key, value in self.data_dict.items():
             text = f"{key}: {value}"
@@ -50,12 +50,11 @@ class VideoOutput:
             self.analyser.green_robot_mask, cv2.COLOR_GRAY2BGR
         )
 
-        #result_binary = cv2.bitwise_or(
-        #    self.analyser.white_mask, self.analyser.orange_mask
-        #)
-        #result_binary = self.analyser.white_mask
-        result_3channel = cv2.cvtColor(self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR)
-
+        result_binary = cv2.bitwise_or(
+            self.analyser.white_mask, self.analyser.orange_mask
+        )
+        result_3channel = cv2.cvtColor(result_binary, cv2.COLOR_GRAY2BGR)
+        #result_3channel = cv2.cvtColor(self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR)
         for keypoint in self.analyser.keypoints:
             center = (int(keypoint.pt[0]), int(keypoint.pt[1]))
             radius = int(keypoint.size / 2)
