@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 import math
 import time
 from analyse import BallNotFoundError, RobotNotFoundError, BorderNotFoundError
@@ -14,9 +15,10 @@ class Steering:
         self.ball_vector = None
         self.last_target_time = 0
         self.target_position = None
-        self.update_interval = 15  # Time in seconds
+        self.update_interval = 25  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
-        self.distance_threshold_min = 100
+        self.distance_threshold_min = 50
+        self.collect_ball_distance = 250
         self.signed_angle_radians = None
         self.signed_angle_degrees = None
         self.angle_radians = None
@@ -89,7 +91,8 @@ class Steering:
         robot_vector: np.ndarray,
         distance_to_closest_border: float,
     ):
-        if len(keypoints) == 0:
+        # if we have a target and no keypoints we still want to catch last ball
+        if len(keypoints) == 0 and not self.target_position:
             raise BallNotFoundError("No balls to be used for program selection")
         if robot_pos is None:
             raise RobotNotFoundError("No Robot to be used for program selection")
@@ -99,7 +102,6 @@ class Steering:
             raise BorderNotFoundError(
                 "No distance to closest border to be used for program selection"
             )
-
         self.ball_vector = self.find_ball_vector(keypoints, robot_pos, robot_vector)
         if self.ball_vector is None:
             raise BallNotFoundError("No ball vector to be used for program selection")
@@ -121,7 +123,7 @@ class Steering:
                 self.robot_interface.send_command("move", -20, 0)
                 return
 
-            if dist_to_ball < self.distance_threshold_max:
+            if dist_to_ball < self.collect_ball_distance:
                 self.close_to_ball = True
                 print("Ball is close")
                 self.collect_ball(self.signed_angle_degrees, self.angle_degrees)
@@ -137,26 +139,41 @@ class Steering:
         except Exception as e:
             print(f"Error: {e}")
             return
-        return
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees):
         if angle_degrees < 10:
             # move 10cm at full speeed
+            print(f"GET NEAR FORWARD", file=sys.stderr)
             self.robot_interface.send_command("move", 100, 100)
             print("Moving forward")
         else:
-            print(f"Turning {signed_angle_degrees} degrees")
-            self.robot_interface.send_command("turn", signed_angle_degrees * -1 / 3, 15)
-
-        pass
+            turn = signed_angle_degrees * -1 / 3
+            speed=min(turn*4, 100)
+            speed=max(speed, -100)
+            if turn < 0:
+                turn -= 30
+            else:
+                turn += 30
+            print(f"GET NEAR Turning {turn} degrees, from {signed_angle_degrees} with SPEED {speed}", file=sys.stderr)
+            self.robot_interface.send_command("turn", turn, speed)
 
     def collect_ball(self, signed_angle_degrees, angle_degrees):
         if angle_degrees < 10:
+            print(f"COLLECT FORWARD", file=sys.stderr)
             self.robot_interface.send_command("move", 30, 30)
             print("Moving forward")
         else:
-            print(f"Turning {signed_angle_degrees} degrees")
-            self.robot_interface.send_command("turn", signed_angle_degrees * -1 / 3, 15)
+            # turn 10 degrees to overcorrect so we look slightly to the side of the ball.
+            turn = signed_angle_degrees * -1 / 3 
+            
+            speed=min(turn*4, 100)
+            speed=max(speed, -100)
+            if turn < 0:
+                turn -=10 
+            else:
+                turn +=10
+            print(f"COLLECT Turning {turn} degrees, from {signed_angle_degrees} with SPEED {speed}", file=sys.stderr)
+            self.robot_interface.send_command("turn",turn , speed)
         pass
 
     def start_belt(self):
