@@ -6,3 +6,4 @@
 bounds.txt
 setup_env.sh
 .env
+*.log
