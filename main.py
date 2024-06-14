@@ -55,7 +55,7 @@ def run_video(host, webcam_index, online, port=65438):
 
         try:
             steering_instance.pick_program(
-                analyser.keypoints,
+                analyser.middle_keypoints,
                 analyser.robot_pos,
                 analyser.robot_vector,
                 analyser.distance_to_closest_border,

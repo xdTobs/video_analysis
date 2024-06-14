@@ -56,7 +56,7 @@ class VideoOutput:
         )
         result_3channel = cv2.cvtColor(result_binary, cv2.COLOR_GRAY2BGR)
         #result_3channel = cv2.cvtColor(self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR)
-        for keypoint in self.analyser.keypoints:
+        for keypoint in self.analyser.middle_keypoints:
             center = (int(keypoint.pt[0]), int(keypoint.pt[1]))
             radius = int(keypoint.size / 2)
             cv2.circle(result_3channel, center, radius, (0, 255, 0), 4)

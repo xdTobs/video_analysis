@@ -77,17 +77,23 @@ class Analyse:
         
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
-        self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
+        total_keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
+        
+        
         try:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
             self.distance_to_border = self.distance_to_closest_border()
         except BorderNotFoundError as e:
             print(e)
-       
         except Exception as e:
             print(e)
-        
+            
+        try:
+            self.border_keypoints, self.middle_keypoints = seperate_keypoints(total_keypoints, self.corners)
+        except Exception as e:
+            print(e)
+            
         try: 
              self.robot_pos, self.robot_vector = self.find_triple_green_robot(
                 self.green_robot_mask
@@ -99,7 +105,12 @@ class Analyse:
      
             
         
-    
+    def seperate_keypoints(total_keypoints: np.ndarray, corners: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        border_keypoints = []
+        middle_keypoints = []
+        for keypoint in total_keypoints:
+            
+        return border_keypoints, middle_keypoints
     
     def calculate_course_dimensions(self):
         if self.corners is not None:
