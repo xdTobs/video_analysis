@@ -162,4 +162,5 @@ class VideoOutput:
         hstack1 = np.hstack((im1, im2))
         hstack2 = np.hstack((im3, im4))
         combined_images = np.vstack((hstack1, hstack2))
+        self.videoDebugger.write_video("combined_images", combined_images, True)
         cv2.imshow("Combined Images", combined_images)
