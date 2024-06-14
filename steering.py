@@ -116,22 +116,26 @@ class Steering:
         print(f"Ball vector length: {dist_to_ball}")
 
         try:
-            #if distance_to_closest_border < self.distance_to_border_threshold:
-             #   print("Close to border")
-              #  self.robot_interface.send_command("stop", 0, 0)
-               # #time.sleep(1)
-                #self.robot_interface.send_command("move", -20, 50)
-                #return
+            # if distance_to_closest_border < self.distance_to_border_threshold:
+            #   print("Close to border")
+            #  self.robot_interface.send_command("stop", 0, 0)
+            # #time.sleep(1)
+            # self.robot_interface.send_command("move", -20, 50)
+            # return
 
             if dist_to_ball < self.collect_ball_distance:
                 self.close_to_ball = True
                 print("Ball is close")
-                self.collect_ball(self.signed_angle_degrees, self.angle_degrees, dist_to_ball)
+                self.get_near_ball(
+                    self.signed_angle_degrees, self.angle_degrees, dist_to_ball
+                )
                 return
             else:
                 print("Ball is not close")
                 self.close_to_ball = False
-                self.get_near_ball(self.signed_angle_degrees, self.angle_degrees, dist_to_ball)
+                self.get_near_ball(
+                    self.signed_angle_degrees, self.angle_degrees, dist_to_ball
+                )
                 return
         except ConnectionError as e:
             print(f"Connection error {e}")
@@ -141,34 +145,25 @@ class Steering:
             return
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        if angle_degrees < 8:
-            # move 10cm at full speeed
-            print(f"GET NEAR FORWARD", file=sys.stderr)
-            self.robot_interface.send_command("move", 100, 50)
-            print("Moving forward")
-        else:
-            turn = signed_angle_degrees * -1 / 3
-          #  print(f"GET NEAR Turning {turn} degrees, from {signed_angle_degrees} with SPEED {speed}", file=sys.stderr)
-            if angle_degrees < 20:
-                self.robot_interface.send_command("turn", turn, 20)
-            else:
-                self.robot_interface.send_command("turn", turn, 50)
+        max_speed = 100
+        min_speed = 10
+        max_dist = 700
 
-    def collect_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        if angle_degrees < 2:
-            print(f"COLLECT FORWARD", file=sys.stderr)
-            self.robot_interface.send_command("move", 30, 20)
-            print("Moving forward")
+        if angle_degrees < 8:
+            move_speed = max(
+                min_speed, min(max_speed, (dist_to_ball / max_dist) * max_speed)
+            )
+            self.robot_interface.send_command("move", move_speed, move_speed)
         else:
-            # turn 10 degrees to overcorrect so we look slightly to the side of the ball.
-            turn = signed_angle_degrees * -1 / 3 
-            speed= 2*(turn if turn > 0 else turn * -1)
-            clamped_speed=sorted((10, speed, 40))[1]
-            print(f"TURN COLLECT {str(turn)} speed {speed} clamped speed {clamped_speed}", file=sys.stderr)
-    
-         #   print(f"COLLECT Turning {turn} degrees, from {signed_angle_degrees} with SPEED {speed}", file=sys.stderr)
-            self.robot_interface.send_command("turn",turn , clamped_speed)
-        pass
+            max_turn_speed = 100
+            min_turn_speed = 10
+            turn_speed = max(
+                min_turn_speed,
+                min(max_turn_speed, (dist_to_ball / max_dist) * max_turn_speed),
+            )
+            turn = signed_angle_degrees * -1 / 3
+
+            self.robot_interface.send_command("turn", turn, turn_speed)
 
     def start_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=100)
