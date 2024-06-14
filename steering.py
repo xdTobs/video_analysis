@@ -176,7 +176,6 @@ class Steering:
     def disconnect(self):
         print("Disconnecting from robot")
         self.robot_interface.disconnect()
-        return
 
     def deliver_balls_to_target(self, target_goal: np.ndarray):
         # Calculate the direction vector from the current position to the target position
