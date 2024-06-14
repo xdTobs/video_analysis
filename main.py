@@ -39,6 +39,7 @@ def run_video(host, webcam_index, online, port=65438):
         "Signed angle": steering_instance.signed_angle_degrees,
         "Close to Ball": steering_instance.close_to_ball,
         "Time to switch target": steering_instance.time_to_switch_target,
+        "Distance to closest border": analyser.distance_to_closest_border,
     }
 
     video_output = videoOutput.VideoOutput(
@@ -58,7 +59,7 @@ def run_video(host, webcam_index, online, port=65438):
             break
 
         analyser.analysis_pipeline(frame)
-
+        
         try:
             steering_instance.pick_program(
                 analyser.keypoints,
