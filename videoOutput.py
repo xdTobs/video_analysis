@@ -6,16 +6,15 @@ from VideoDebugger import VideoDebugger
 from steering import Steering
 
 
-
 class VideoOutput:
     def __init__(
-        self, analyser, steering_instance, videoDebugger, data_dict: Dict[str, any]
+            self, analyser, steering_instance, videoDebugger, data_dict: Dict[str, any]
     ):
         self.analyser: Analyse = analyser
         self.steering_instance: Steering = steering_instance
         self.videoDebugger: VideoDebugger = videoDebugger
         self.data_dict = data_dict
-        
+
     def update_data_dict(self):
         self.data_dict["Robot position"] = self.analyser.robot_pos
         self.data_dict["Robot vector"] = self.analyser.robot_vector
@@ -26,10 +25,9 @@ class VideoOutput:
         self.data_dict["Time to switch target"] = self.steering_instance.time_to_switch_target
         self.data_dict["Distance to closest border"] = self.analyser.distance_to_closest_border
 
-
     def showFrame(self, frame):
         self.update_data_dict()
-        
+
         robot_arrows_on_frame = frame
 
         height, width = 360, 640
@@ -67,9 +65,9 @@ class VideoOutput:
             center = (int(self.analyser.robot_pos[0]), int(self.analyser.robot_pos[1]))
             radius = 30
             print(f"Green robot at {center}")
-            
+
             cv2.circle(green_robot_3channel, center, radius, (255, 0, 0), 4)
-        
+
         if self.analyser.green_points_not_translated is not None:
             for point in self.analyser.green_points_not_translated:
                 cv2.circle(
@@ -91,16 +89,15 @@ class VideoOutput:
                 (255, 255, 0),
                 2,
             )
-        
 
         if (
-            self.analyser.robot_vector is not None
-            and self.analyser.robot_pos is not None
+                self.analyser.robot_vector is not None
+                and self.analyser.robot_pos is not None
         ):
             robot_vector_end = self.analyser.robot_pos + self.analyser.robot_vector
             robot_pos = self.analyser.robot_pos.astype(int)
             robot_vector_end = robot_vector_end.astype(int)
-            
+
             cv2.arrowedLine(
                 robot_arrows_on_frame,
                 tuple(robot_pos),
@@ -120,15 +117,13 @@ class VideoOutput:
                 (0, 255, 0),
                 2,
             )
-            
-                
 
         if (
-            self.steering_instance.ball_vector is not None
-            and self.analyser.robot_pos is not None
+                self.steering_instance.ball_vector is not None
+                and self.analyser.robot_pos is not None
         ):
             ball_vector_end = (
-                self.analyser.robot_pos + self.steering_instance.ball_vector
+                    self.analyser.robot_pos + self.steering_instance.ball_vector
             )
             robot_pos = self.analyser.robot_pos.astype(int)
             ball_vector_end = ball_vector_end.astype(int)
@@ -139,37 +134,30 @@ class VideoOutput:
                 (255, 0, 0),
                 2
             )
-            
-            
-            
-            
-            
+
         for corner in self.analyser.corners:
             print(f"Corner at {corner}")
-            cv2.circle(frame, tuple(corner), 5, (0, 255,255), -1)
-        
+            cv2.circle(frame, tuple(corner), 5, (0, 255, 255), -1)
+
         if self.analyser.small_goal_coords is not None and self.analyser.large_goal_coords is not None:
             print(f"Small goal at {self.analyser.small_goal_coords}")
             print(f"Large goal at {self.analyser.large_goal_coords}")
-            cv2.circle(frame, tuple(self.analyser.small_goal_coords), 5, (0, 255, 0), -1)
-            cv2.circle(frame, tuple(self.analyser.large_goal_coords), 5, (0, 255, 255), -1)
-            
+            cv2.circle(frame, tuple(self.analyser.small_goal_coords.astype(int)), 5, (0, 255, 0), -1)
+            cv2.circle(frame, tuple(self.analyser.large_goal_coords.astype(int)), 5, (0, 255, 255), -1)
+
             print(f"Goal vector: {self.analyser.goal_vector}")
             if self.analyser.translation_vector is not None:
                 cv2.arrowedLine(
-                frame,
-                self.analyser.large_goal_coords+self.analyser.translation_vector.astype(int),
-                self.analyser.small_goal_coords.astype(int),
-                (255, 0, 0),
-                2
+                    frame,
+                    self.analyser.large_goal_coords.astype(int) + self.analyser.translation_vector.astype(int),
+                    self.analyser.small_goal_coords.astype(int),
+                    (255, 0, 0),
+                    2
                 )
-            
+
             if self.analyser.delivery_vector is not None:
                 print(f"Delivery vector: {self.analyser.delivery_vector}")
-            
-            
-        
-        
+
         self.videoDebugger.write_video("result", result_3channel, True)
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
         im2 = cv2.resize(result_3channel, (640, 360))

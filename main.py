@@ -59,7 +59,7 @@ def run_video(host, webcam_index, online, port=65438):
             break
 
         analyser.analysis_pipeline(frame)
-        
+
         try:
             steering_instance.pick_program(
                 analyser.keypoints,
@@ -126,5 +126,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     run_video(
-        host=HOST, webcam_index=int(WEBCAM_INDEX), online=False, port=int(PORT)
+        host=HOST, webcam_index=(WEBCAM_INDEX), online=False, port=int(PORT)
     )
