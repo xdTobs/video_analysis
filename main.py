@@ -16,7 +16,13 @@ def run_video(host, webcam_index, online, port=65438):
     # Takes a video path and runs the analysis on each frame
     # darwin is mac
     if platform.system() == "Windows":
-        video = cv2.VideoCapture(webcam_index, cv2.CAP_DSHOW)
+        # test if webcam_index is a number
+        is_number = webcam_index.isdigit()
+        if is_number:
+            video = cv2.VideoCapture(int(webcam_index), cv2.CAP_DSHOW)
+        else:
+            print("Webcam index is not a number, trying to open as a file")
+            video = cv2.VideoCapture(webcam_index)
     elif platform.system() == "Linux" or platform.system() == "Darwin":
         video = cv2.VideoCapture(webcam_index)
     else:
@@ -33,6 +39,7 @@ def run_video(host, webcam_index, online, port=65438):
         "Signed angle": steering_instance.signed_angle_degrees,
         "Close to Ball": steering_instance.close_to_ball,
         "Time to switch target": steering_instance.time_to_switch_target,
+        "Distance to closest border": analyser.distance_to_closest_border,
     }
 
     video_output = videoOutput.VideoOutput(
@@ -52,7 +59,7 @@ def run_video(host, webcam_index, online, port=65438):
             break
 
         analyser.analysis_pipeline(frame)
-
+        
         try:
             steering_instance.pick_program(
                 analyser.keypoints,

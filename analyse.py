@@ -15,7 +15,10 @@ class Analyse:
         self.robot_pos_not_translated = None
         self.robot_vector_not_translated = None
         self.robot_vector = None
+        self.goal_vector = None
+        self.delivery_vector = None
         self.corners = None
+        self.border_vector = None
         self.small_goal_coords: np.ndarray = None
         self.large_goal_coords: np.ndarray = None
         self.course_length_px = None
@@ -26,6 +29,7 @@ class Analyse:
         self.translation_vector = None
         self.green_points_not_translated = None
         self.dropoff_coords = None
+
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -68,6 +72,13 @@ class Analyse:
             self.white_average.astype(np.uint8) > self.average_threshold
         ).astype(np.uint8) * 255
 
+        self.white_average = (
+            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+        )
+        self.white_mask = (
+            self.white_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
+
         self.new_orange_mask = self.videoDebugger.run_analysis(
             self.apply_threshold, "orange-ball", image, self.bounds_dict["orange"]
         )
@@ -95,7 +106,8 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
             self.calculate_goals()
-            #self.distance_to_border = self.distance_to_closest_border()
+            self.distance_to_closest_border = self.calculate_distance_to_closest_border(self.robot_pos)
+
         except BorderNotFoundError as e:
             print(e)
 
@@ -155,6 +167,9 @@ class Analyse:
         self.green_points_not_translated = [
             np.array(keypoint.pt) for keypoint in green_keypoints
         ]
+        self.green_points_not_translated = [
+            np.array(keypoint.pt) for keypoint in green_keypoints
+        ]
         parings = []
         for i in range(0, 3):
             for j in range(i + 1, 3):
@@ -186,8 +201,23 @@ class Analyse:
         top_pos = np.array(
             self.convert_perspective(self.green_points_not_translated[top_point])
         )
+        top_pos = np.array(
+            self.convert_perspective(self.green_points_not_translated[top_point])
+        )
         # print(f"Bottom pos: {bottom_pos}")
         # print(f"Top pos: {top_pos}")
+        self.robot_vector_not_translated = (
+            np.array(self.green_points_not_translated[top_point])
+            - np.array(
+                self.green_points_not_translated[bottom_points[0]]
+                + self.green_points_not_translated[bottom_points[1]]
+            )
+            / 2
+        )
+        self.robot_pos_not_translated = (
+            self.green_points_not_translated[bottom_points[0]]
+            + self.green_points_not_translated[bottom_points[1]]
+        ) / 2
         self.robot_vector_not_translated = (
             np.array(self.green_points_not_translated[top_point])
             - np.array(
@@ -241,34 +271,34 @@ class Analyse:
             # Find the middle of the two corners
             goal_side_right = True
             print(f"Goal side right: {goal_side_right}")
-            
-            
             corner1 = self.corners[0]
             corner2 = self.corners[1]
             corner3 = self.corners[2]
             corner4 = self.corners[3]
-            
-            
 
             if goal_side_right:
-                self.small_goal_coords = (corner3 + corner4) // 2
-                self.large_goal_coords = (corner1 + corner2) // 2
+                self.small_goal_coords = (corner1 + corner2) / 2
+                self.large_goal_coords = (corner3 + corner4) / 2
             else:
-                self.small_goal_coords = (corner1 + corner2) // 2
-                self.large_goal_coords = (corner3 + corner4) // 2
-                
+                self.small_goal_coords = (corner3 + corner4) / 2
+                self.large_goal_coords = (corner1 + corner2) / 2
+
             print(f"Small goal coords: {self.small_goal_coords}")
             print(f"Large goal coords: {self.large_goal_coords}")
 
             self.goal_vector = self.coordinates_to_vector(
+                self.small_goal_coords, self.large_goal_coords
+            )
+
+            self.goal_vector = self.coordinates_to_vector(
                 self.large_goal_coords, self.small_goal_coords
             )
-            
+
             self.translation_vector = self.goal_vector * 4/5
-            
+
             print(f"translation vector: {self.translation_vector}")
-            
-            
+
+
             self.delivery_vector = self.coordinates_to_vector(self.large_goal_coords+self.translation_vector, self.small_goal_coords)
 
             print(f"delivery vector: {self.delivery_vector}")
@@ -284,10 +314,17 @@ class Analyse:
         conversionFactor = self.course_length_cm / (
             self.course_length_px * 1024 / self.course_length_cm
         )
+        conversionFactor = self.course_length_cm / (
+            self.course_length_px * 1024 / self.course_length_cm
+        )
 
+        vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
         vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
         # Convert to cm
         vector_from_middle *= conversionFactor
+        projected_vector = (
+            vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
+        )
         projected_vector = (
             vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
         )
@@ -398,21 +435,27 @@ class Analyse:
             return np.linalg.norm(p - v)
         t = max(0, min(1, np.dot(p - v, w - v) / l2))
         projection = v + t * (w - v)
-        return np.linalg.norm(p - projection)
+        return np.linalg.norm(p - projection), projection - p
 
-    def distance_to_closest_border(self) -> float:
-        if self.robot_pos is None or self.corners is None:
+    def calculate_distance_to_closest_border(self, pos: np.ndarray) -> float:
+
+        if pos is None or self.corners is None:
             raise ValueError("Robot position or border corners are not set.")
 
         num_corners = len(self.corners)
         min_distance = float("inf")
+        closest_projection = None
         for i in range(num_corners):
             v = self.corners[i]
             w = self.corners[(i + 1) % num_corners]
-            distance = self.distance_point_to_segment(self.robot_pos, v, w)
+            distance, projection_vector = self.distance_point_to_segment(self.robot_pos, v, w)
             if distance < min_distance:
                 min_distance = distance
+                closest_projection = projection_vector
 
+        self.border_vector = closest_projection
+
+        print(f"Distance to closest border: {min_distance}")
         return min_distance
 
 
