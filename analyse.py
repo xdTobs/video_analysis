@@ -14,14 +14,16 @@ class Analyse:
         self.robot_pos_not_translated = None
         self.robot_vector_not_translated = None
         self.robot_vector = None
+        self.goal_vector = None
+        self.delivery_vector = None
         self.corners = None
+        self.border_vector = None
         self.small_goal_coords: np.ndarray = None
         self.large_goal_coords: np.ndarray = None
         self.course_length_px = None
         self.course_height_px = None
         self.distance_to_goal = 100
-        self.goal_vector = None
-        self.delivery_vector = None
+        
         self.green_points_not_translated = None
 
 
@@ -448,7 +450,7 @@ class Analyse:
             return np.linalg.norm(p - v)
         t = max(0, min(1, np.dot(p - v, w - v) / l2))
         projection = v + t * (w - v)
-        return np.linalg.norm(p - projection)
+        return np.linalg.norm(p - projection), projection - p
 
     def calculate_distance_to_closest_border(self, pos: np.ndarray) -> float:
 
@@ -457,12 +459,16 @@ class Analyse:
                 
         num_corners = len(self.corners)
         min_distance = float("inf")
+        closest_projection = None
         for i in range(num_corners):
             v = self.corners[i]
             w = self.corners[(i + 1) % num_corners]
-            distance = self.distance_point_to_segment(self.robot_pos, v, w)
+            distance, projection_vector = self.distance_point_to_segment(self.robot_pos, v, w)
             if distance < min_distance:
                 min_distance = distance
+                closest_projection = projection_vector
+
+        self.border_vector = closest_projection
 
         print(f"Distance to closest border: {min_distance}")
         return min_distance

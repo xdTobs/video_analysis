@@ -79,6 +79,18 @@ class VideoOutput:
                     (0, 255, 0),
                     4,
                 )
+
+        if self.analyser.border_vector is not None and self.analyser.robot_pos is not None:
+            border_vector_end = self.analyser.robot_pos + self.analyser.border_vector
+            robot_pos = self.analyser.robot_pos.astype(int)
+            border_vector_end = border_vector_end.astype(int)
+            cv2.arrowedLine(
+                robot_arrows_on_frame,
+                tuple(robot_pos),
+                tuple(border_vector_end),
+                (255, 255, 0),
+                2,
+            )
         
 
         if (
