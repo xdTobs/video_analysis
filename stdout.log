@@ -1,0 +1,13 @@
+HOST:  172.20.10.5
+PORT:  65438
+WEBCAM_INDEX:  0
+HOST:  172.20.10.5
+PORT:  65438
+WEBCAM_INDEX:  0
+is_offline:  False
+Trying to connect to robot at 172.20.10.5 on port 65438
+Attempt 1 failed: [Errno 61] Connection refused
+Trying to connect to robot at 172.20.10.5 on port 65438
+Attempt 2 failed: [Errno 61] Connection refused
+Trying to connect to robot at 172.20.10.5 on port 65438
+Attempt 3 failed: [Errno 61] Connection refused
