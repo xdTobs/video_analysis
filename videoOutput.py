@@ -129,29 +129,36 @@ class VideoOutput:
             
             
             
-            cv2.arrowedLine(
-                frame,
-                self.analyser.small_goal_coords,
-                self.analyser.large_goal_coords,
-                (0, 0, 255),
-                2
-            )
-            
-            cv2.arrowedLine(
-                frame,
-                self.analyser.small_goal_coords,
-                self.analyser.delivery_vector,
-                (255, 0, 255),
-                2
-            )
-            
-            cv2.circle(frame, self.analyser.small_goal_coords, 5, (0, 255, 0), -1)
-            cv2.circle(frame, self.analyser.large_goal_coords, 5, (0, 255, 255), -1)
             
             
             for corner in self.analyser.corners:
                 print(f"Corner at {corner}")
                 cv2.circle(frame, tuple(corner), 5, (0, 255,255), -1)
+            
+            if self.analyser.small_goal_coords is not None and self.analyser.large_goal_coords is not None:
+                print(f"Small goal at {self.analyser.small_goal_coords}")
+                print(f"Large goal at {self.analyser.large_goal_coords}")
+                cv2.circle(frame, tuple(self.analyser.small_goal_coords), 5, (0, 255, 0), -1)
+                cv2.circle(frame, tuple(self.analyser.large_goal_coords), 5, (0, 255, 255), -1)
+                
+                # Red vector from large goal to small goal
+                cv2.arrowedLine(
+                frame,
+                self.analyser.small_goal_coords,
+                self.analyser.large_goal_coords,
+                (0, 0, 255),
+                2
+                )
+
+                # delivery vector to small goal
+                cv2.arrowedLine(
+                    frame,
+                    self.analyser.delivery_vector,
+                    self.analyser.large_goal_coords,
+                    (255, 0, 255),
+                    2
+                )
+            
             
         
         
