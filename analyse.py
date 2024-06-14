@@ -234,30 +234,6 @@ class Analyse:
                 np.array(green_point), np.array(red_point)
             ),
         )
-    
-    def create_shorter_vector(self,goal_vector, L):
-        goal_vector = np.array(goal_vector)
-        print(f"goal vector: {goal_vector}")
-
-        # Calculate the magnitude of the goal vector
-        magnitude = np.linalg.norm(goal_vector)
-
-        # Normalize the goal vector to get the unit vector
-        unit_vector = goal_vector / magnitude
-
-        # Scale the unit vector to the desired length
-        shorter_vector = unit_vector * L
-
-        # Calculate the translation needed to align endpoints
-        self.translation_vector = goal_vector - shorter_vector
-        
-        self.dropoff_coords = self.translation_vector+self.large_goal_coords
-
-        # Translate the shorter vector
-        self.delivery_vector = self.coordinates_to_vector(self.dropoff_coords, self.small_goal_coords)
-       
-
-        return self.delivery_vector
 
     def calculate_goals(self):
         print(f"corners: {self.corners}")
@@ -295,7 +271,6 @@ class Analyse:
             
             self.delivery_vector = self.coordinates_to_vector(self.large_goal_coords+self.translation_vector, self.small_goal_coords)
 
-            #self.delivery_vector = self.create_shorter_vector(self.goal_vector, self.distance_to_goal)
             print(f"delivery vector: {self.delivery_vector}")
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
