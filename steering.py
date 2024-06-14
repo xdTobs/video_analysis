@@ -142,7 +142,6 @@ class Steering:
     def get_near_ball(self, signed_angle_degrees, angle_degrees):
         if angle_degrees < 10:
             # move 10cm at full speeed
-            print(f"GET NEAR FORWARD", file=sys.stderr)
             self.robot_interface.send_command("move", 100, 100)
             print("Moving forward")
         else:
@@ -175,7 +174,7 @@ class Steering:
         print("Disconnecting from robot")
         self.robot_interface.disconnect()
         return
-    
+
     def deliver_balls_to_target(self, target_goal: np.ndarray):
         # Calculate the direction vector from the current position to the target position
         direction_vector = target_goal - self.robot_pos
