@@ -86,6 +86,7 @@ class VideoOutput:
             robot_vector_end = self.analyser.robot_pos + self.analyser.robot_vector
             robot_pos = self.analyser.robot_pos.astype(int)
             robot_vector_end = robot_vector_end.astype(int)
+            
             cv2.arrowedLine(
                 robot_arrows_on_frame,
                 tuple(robot_pos),
@@ -122,40 +123,35 @@ class VideoOutput:
                 tuple(robot_pos),
                 tuple(ball_vector_end),
                 (255, 0, 0),
-                2,
+                2
             )
             
             
             
             
             
-            for corner in self.analyser.corners:
-                print(f"Corner at {corner}")
-                cv2.circle(frame, tuple(corner), 5, (0, 255,255), -1)
+        for corner in self.analyser.corners:
+            print(f"Corner at {corner}")
+            cv2.circle(frame, tuple(corner), 5, (0, 255,255), -1)
+        
+        if self.analyser.small_goal_coords is not None and self.analyser.large_goal_coords is not None:
+            print(f"Small goal at {self.analyser.small_goal_coords}")
+            print(f"Large goal at {self.analyser.large_goal_coords}")
+            cv2.circle(frame, tuple(self.analyser.small_goal_coords), 5, (0, 255, 0), -1)
+            cv2.circle(frame, tuple(self.analyser.large_goal_coords), 5, (0, 255, 255), -1)
             
-            if self.analyser.small_goal_coords is not None and self.analyser.large_goal_coords is not None:
-                print(f"Small goal at {self.analyser.small_goal_coords}")
-                print(f"Large goal at {self.analyser.large_goal_coords}")
-                cv2.circle(frame, tuple(self.analyser.small_goal_coords), 5, (0, 255, 0), -1)
-                cv2.circle(frame, tuple(self.analyser.large_goal_coords), 5, (0, 255, 255), -1)
-                
-                # Red vector from large goal to small goal
+            print(f"Goal vector: {self.analyser.goal_vector}")
+            if self.analyser.translation_vector is not None:
                 cv2.arrowedLine(
                 frame,
-                self.analyser.small_goal_coords,
-                self.analyser.large_goal_coords,
-                (0, 0, 255),
+                self.analyser.large_goal_coords+self.analyser.translation_vector.astype(int),
+                self.analyser.small_goal_coords.astype(int),
+                (255, 0, 0),
                 2
                 )
-
-                # delivery vector to small goal
-                cv2.arrowedLine(
-                    frame,
-                    self.analyser.delivery_vector,
-                    self.analyser.large_goal_coords,
-                    (255, 0, 255),
-                    2
-                )
+            
+            if self.analyser.delivery_vector is not None:
+                print(f"Delivery vector: {self.analyser.delivery_vector}")
             
             
         
@@ -165,6 +161,7 @@ class VideoOutput:
         im2 = cv2.resize(result_3channel, (640, 360))
         im3 = cv2.resize(text_overview, (640, 360))
         im4 = cv2.resize(green_robot_3channel, (640, 360))
+        im5 = cv2.resize(frame, (640, 360))
 
         hstack1 = np.hstack((im1, im2))
         hstack2 = np.hstack((im3, im4))

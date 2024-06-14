@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import VideoDebugger
 import BlobDetector
+import traceback
 
 
 class Analyse:
@@ -22,7 +23,9 @@ class Analyse:
         self.distance_to_goal = 100
         self.goal_vector = None
         self.delivery_vector = None
+        self.translation_vector = None
         self.green_points_not_translated = None
+        self.dropoff_coords = None
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -92,12 +95,12 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
             self.calculate_goals()
-            self.distance_to_border = self.distance_to_closest_border()
+            #self.distance_to_border = self.distance_to_closest_border()
         except BorderNotFoundError as e:
             print(e)
 
         except Exception as e:
-            print(e)
+            traceback.print_exc()
 
         try:
             self.robot_pos, self.robot_vector = self.find_triple_green_robot(
@@ -232,8 +235,9 @@ class Analyse:
             ),
         )
     
-    def create_shorter_vector(goal_vector, L):
+    def create_shorter_vector(self,goal_vector, L):
         goal_vector = np.array(goal_vector)
+        print(f"goal vector: {goal_vector}")
 
         # Calculate the magnitude of the goal vector
         magnitude = np.linalg.norm(goal_vector)
@@ -245,12 +249,15 @@ class Analyse:
         shorter_vector = unit_vector * L
 
         # Calculate the translation needed to align endpoints
-        translation_vector = goal_vector - shorter_vector
+        self.translation_vector = goal_vector - shorter_vector
+        
+        self.dropoff_coords = self.translation_vector+self.large_goal_coords
 
         # Translate the shorter vector
-        delivery_vector = shorter_vector + translation_vector
+        self.delivery_vector = self.coordinates_to_vector(self.dropoff_coords, self.small_goal_coords)
+       
 
-        return np.array(delivery_vector)
+        return self.delivery_vector
 
     def calculate_goals(self):
         print(f"corners: {self.corners}")
@@ -264,6 +271,8 @@ class Analyse:
             corner2 = self.corners[1]
             corner3 = self.corners[2]
             corner4 = self.corners[3]
+            
+            
 
             if goal_side_right:
                 self.small_goal_coords = (corner3 + corner4) // 2
@@ -276,11 +285,17 @@ class Analyse:
             print(f"Large goal coords: {self.large_goal_coords}")
 
             self.goal_vector = self.coordinates_to_vector(
-                self.small_goal_coords, self.large_goal_coords
+                self.large_goal_coords, self.small_goal_coords
             )
             
+            self.translation_vector = self.goal_vector * 4/5
+            
+            print(f"translation vector: {self.translation_vector}")
+            
+            
+            self.delivery_vector = self.coordinates_to_vector(self.large_goal_coords+self.translation_vector, self.small_goal_coords)
 
-            self.delivery_vector = self.create_shorter_vector(self.goal_vector, self.distance_to_goal)
+            #self.delivery_vector = self.create_shorter_vector(self.goal_vector, self.distance_to_goal)
             print(f"delivery vector: {self.delivery_vector}")
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
@@ -316,8 +331,10 @@ class Analyse:
     ) -> np.ndarray:
         return red - green
 
-    def coordinates_to_vector(self, point1: int, point2: int) -> np.ndarray[int, int]:
-        return (point2[0] - point1[0], point2[1] - point1[1])
+    def coordinates_to_vector(self, point1: float, point2: float) -> np.ndarray[int, int]:
+        point1_int = np.array([int(point1[0]), int(point1[1])])
+        point2_int = np.array([int(point2[0]), int(point2[1])])
+        return point2_int - point1_int
 
     def isolate_borders(
         self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
