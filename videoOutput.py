@@ -24,6 +24,8 @@ class VideoOutput:
         self.data_dict["Signed angle"] = self.steering_instance.signed_angle_degrees
         self.data_dict["Close to Ball"] = self.steering_instance.close_to_ball
         self.data_dict["Time to switch target"] = self.steering_instance.time_to_switch_target
+        self.data_dict["Distance to closest border"] = self.analyser.distance_to_closest_border
+
 
     def showFrame(self, frame):
         self.update_data_dict()

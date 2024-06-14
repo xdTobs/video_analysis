@@ -16,7 +16,7 @@ def run_video(host, webcam_index, online, port=65438):
     # Takes a video path and runs the analysis on each frame
     # darwin is mac
     if platform.system() == "Windows":
-        video = cv2.VideoCapture(webcam_index)
+        video = cv2.VideoCapture(webcam_index, cv2.CAP_DSHOW)
     elif platform.system() == "Linux" or platform.system() == "Darwin":
         video = cv2.VideoCapture(webcam_index)
     else:
@@ -53,8 +53,6 @@ def run_video(host, webcam_index, online, port=65438):
             break
 
         analyser.analysis_pipeline(frame)
-
-        data_dict["Distance to closest border"] = analyser.distance_to_closest_border
         
         try:
             steering_instance.pick_program(
@@ -122,5 +120,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     run_video(
-        host=HOST, webcam_index=str(WEBCAM_INDEX), online=not is_offline, port=int(PORT)
+        host=HOST, webcam_index=int(WEBCAM_INDEX), online=not is_offline, port=int(PORT)
     )
