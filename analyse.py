@@ -79,19 +79,36 @@ class Analyse:
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
         try:
-            self.robot_pos, self.robot_vector = self.find_triple_green_robot(
-                self.green_robot_mask
-            )
             self.corners = self.find_border_corners(self.border_mask)
+            self.calculate_course_dimensions()
             self.distance_to_border = self.distance_to_closest_border()
         except BorderNotFoundError as e:
             print(e)
-        except RobotNotFoundError as e:
-            print(e)
+       
         except Exception as e:
+            print(e)
+        
+        try: 
+             self.robot_pos, self.robot_vector = self.find_triple_green_robot(
+                self.green_robot_mask
+            )
+        except RobotNotFoundError as e:
             print(e)
         return
     
+     
+            
+        
+    
+    
+    def calculate_course_dimensions(self):
+        if self.corners is not None:
+            corner1 = self.corners[0]
+            corner2 = self.corners[1]
+            corner3 = self.corners[2]
+            self.course_length_px = np.linalg.norm(corner1 - corner2)
+            self.course_height_px = np.linalg.norm(corner2 - corner3)
+
     def apply_theshold(
         self, image: np.ndarray, bounds_dict_entry: np.ndarray
     ) -> np.ndarray:
@@ -183,13 +200,6 @@ class Analyse:
             ),
         )
         
-    def calculate_course_dimensions(self):
-        if self.corners is not None:
-            corner1 = self.corners[0]
-            corner2 = self.corners[1]
-            corner3 = self.corners[2]
-            self.course_length_px = np.linalg.norm(corner1 - corner2)
-            self.course_height_px = np.linalg.norm(corner2 - corner3)
         
     def calculate_goals(self):
         print(f"corners: {self.corners}")
@@ -226,8 +236,8 @@ class Analyse:
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
+        print(f"course length px {self.course_height_px} {self.course_length_px}")
         
-
         # Heights in pixels cm / px
         #TODO fish eye ???
         if self.course_length_px is None:
