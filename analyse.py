@@ -81,7 +81,8 @@ class Analyse:
         try:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
-            self.distance_to_border = self.distance_to_closest_border()
+            self.distance_to_closest_border = self.calculate_distance_to_closest_border(self.robot_pos)
+
         except BorderNotFoundError as e:
             print(e)
        
@@ -94,11 +95,9 @@ class Analyse:
             )
         except RobotNotFoundError as e:
             print(e)
+
         return
     
-     
-            
-        
     
     
     def calculate_course_dimensions(self):
@@ -320,6 +319,7 @@ class Analyse:
                 corners = approx.squeeze()
         if corners is None:
             raise BorderNotFoundError()
+        
         return corners
 
     def find_ball_keypoints(self, mask: np.ndarray) -> np.ndarray:
@@ -357,10 +357,11 @@ class Analyse:
         projection = v + t * (w - v)
         return np.linalg.norm(p - projection)
 
-    def distance_to_closest_border(self) -> float:
-        if self.robot_pos is None or self.corners is None:
-            raise ValueError("Robot position or border corners are not set.")
+    def calculate_distance_to_closest_border(self, pos: np.ndarray) -> float:
 
+        if pos is None or self.corners is None:
+            raise ValueError("Robot position or border corners are not set.")
+                
         num_corners = len(self.corners)
         min_distance = float("inf")
         for i in range(num_corners):
@@ -370,6 +371,7 @@ class Analyse:
             if distance < min_distance:
                 min_distance = distance
 
+        print(f"Distance to closest border: {min_distance}")
         return min_distance
 
 
