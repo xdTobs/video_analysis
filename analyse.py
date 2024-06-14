@@ -91,6 +91,7 @@ class Analyse:
         try:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
+            self.calculate_goals()
             self.distance_to_border = self.distance_to_closest_border()
         except BorderNotFoundError as e:
             print(e)
@@ -237,18 +238,20 @@ class Analyse:
             # Find the middle of the two corners
             goal_side_right = True
             print(f"Goal side right: {goal_side_right}")
+            
+            
             corner1 = self.corners[0]
             corner2 = self.corners[1]
             corner3 = self.corners[2]
             corner4 = self.corners[3]
 
             if goal_side_right:
-                self.small_goal_coords = (corner1 + corner2) / 2
-                self.large_goal_coords = (corner3 + corner4) / 2
+                self.small_goal_coords = (corner1 + corner2) // 2
+                self.large_goal_coords = (corner3 + corner4) // 2
             else:
-                self.small_goal_coords = (corner3 + corner4) / 2
-                self.large_goal_coords = (corner1 + corner2) / 2
-
+                self.small_goal_coords = (corner3 + corner4) // 2
+                self.large_goal_coords = (corner1 + corner2) // 2
+                
             print(f"Small goal coords: {self.small_goal_coords}")
             print(f"Large goal coords: {self.large_goal_coords}")
 

@@ -16,7 +16,7 @@ def run_video(host, webcam_index, online, port=65438):
     # Takes a video path and runs the analysis on each frame
     # darwin is mac
     if platform.system() == "Windows":
-        video = cv2.VideoCapture(webcam_index, cv2.CAP_DSHOW)
+        video = cv2.VideoCapture(webcam_index)
     elif platform.system() == "Linux" or platform.system() == "Darwin":
         video = cv2.VideoCapture(webcam_index)
     else:
