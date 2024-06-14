@@ -15,7 +15,7 @@ class Steering:
         self.ball_vector = None
         self.last_target_time = 0
         self.target_position = None
-        self.update_interval = 25  # Time in seconds
+        self.update_interval = 1  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
         self.distance_threshold_min = 100
         self.collect_ball_distance = 250
@@ -147,32 +147,20 @@ class Steering:
             print("Moving forward")
         else:
             turn = signed_angle_degrees * -1 / 3
-            speed=min(turn*4, 100)
-            speed=max(speed, -100)
-            if turn < 0:
-                turn -= 30
-            else:
-                turn += 30
-            print(f"GET NEAR Turning {turn} degrees, from {signed_angle_degrees} with SPEED {speed}", file=sys.stderr)
-            self.robot_interface.send_command("turn", turn, speed)
+          #  print(f"GET NEAR Turning {turn} degrees, from {signed_angle_degrees} with SPEED {speed}", file=sys.stderr)
+            self.robot_interface.send_command("turn", turn, 50)
 
     def collect_ball(self, signed_angle_degrees, angle_degrees):
-        if angle_degrees < 10:
+        if angle_degrees < 5:
             print(f"COLLECT FORWARD", file=sys.stderr)
             self.robot_interface.send_command("move", 30, 30)
             print("Moving forward")
         else:
             # turn 10 degrees to overcorrect so we look slightly to the side of the ball.
             turn = signed_angle_degrees * -1 / 3 
-            
-            speed=min(turn*4, 100)
-            speed=max(speed, -100)
-            if turn < 0:
-                turn -=10 
-            else:
-                turn +=10
-            print(f"COLLECT Turning {turn} degrees, from {signed_angle_degrees} with SPEED {speed}", file=sys.stderr)
-            self.robot_interface.send_command("turn",turn , speed)
+    
+         #   print(f"COLLECT Turning {turn} degrees, from {signed_angle_degrees} with SPEED {speed}", file=sys.stderr)
+            self.robot_interface.send_command("turn",turn , 20)
         pass
 
     def start_belt(self):
