@@ -26,6 +26,7 @@ class Steering:
         self.close_to_ball = False
         self.current_time = 0
         self.time_to_switch_target = 0
+        self.distance_to_border_threshold = 100
 
     def find_ball_vector(
         self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray
@@ -115,11 +116,11 @@ class Steering:
         print(f"Ball vector length: {dist_to_ball}")
 
         try:
-            if distance_to_closest_border < 200:
+            if distance_to_closest_border < self.distance_to_border_threshold:
                 print("Close to border")
-                self.robot_interface.send_command("move", 0, 0)
-                time.sleep(1)
-                self.robot_interface.send_command("move", -20, 0)
+                self.robot_interface.send_command("stop", 0, 0)
+                #time.sleep(1)
+                self.robot_interface.send_command("move", -20, 50)
                 return
 
             if dist_to_ball < self.collect_ball_distance:
@@ -143,12 +144,12 @@ class Steering:
         if angle_degrees < 10:
             # move 10cm at full speeed
             print(f"GET NEAR FORWARD", file=sys.stderr)
-            self.robot_interface.send_command("move", 100, 100)
+            self.robot_interface.send_command("move", 100, 50)
             print("Moving forward")
         else:
             turn = signed_angle_degrees * -1 / 3
             speed=min(turn*4, 100)
-            speed=max(speed, -100)
+            speed=max(speed, 100)
             if turn < 0:
                 turn -= 30
             else:
