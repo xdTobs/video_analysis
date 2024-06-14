@@ -19,8 +19,9 @@ def run_video(host, webcam_index, online, port=65438):
         # test if webcam_index is a number
         is_number = webcam_index.isdigit()
         if is_number:
-            video = cv2.VideoCapture(webcam_index, cv2.CAP_DSHOW)
+            video = cv2.VideoCapture(int(webcam_index), cv2.CAP_DSHOW)
         else:
+            print("Webcam index is not a number, trying to open as a file")
             video = cv2.VideoCapture(webcam_index)
     elif platform.system() == "Linux" or platform.system() == "Darwin":
         video = cv2.VideoCapture(webcam_index)

@@ -24,20 +24,25 @@ class Analyse:
         self.delivery_vector = None
         self.green_points_not_translated = None
 
+
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
         self.white_mask = np.zeros((576, 1024), dtype=np.float32)
+
 
         self.new_border_mask = None
         self.border_average = np.zeros((576, 1024), dtype=np.float32)
         self.border_mask = np.zeros((576, 1024), dtype=np.float32)
 
+
         self.new_orange_mask = None
         self.orange_average = np.zeros((576, 1024), dtype=np.float32)
         self.orange_mask = np.zeros((576, 1024), dtype=np.float32)
 
+
         self.bounds_dict = read_bounds()
         self.distance_to_closest_border = float("inf")
+
 
         self.cam_height = 178
         self.robot_height = 47
@@ -65,6 +70,13 @@ class Analyse:
             self.white_average.astype(np.uint8) > self.average_threshold
         ).astype(np.uint8) * 255
 
+        self.white_average = (
+            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+        )
+        self.white_mask = (
+            self.white_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
+
         self.new_orange_mask = self.videoDebugger.run_analysis(
             self.apply_threshold, "orange-ball", image, self.bounds_dict["orange"]
         )
@@ -85,6 +97,13 @@ class Analyse:
             self.border_average.astype(np.uint8) > self.average_threshold
         ).astype(np.uint8) * 255
 
+        self.border_average = (
+            self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
+        )
+        self.border_mask = (
+            self.border_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
+
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
@@ -95,8 +114,10 @@ class Analyse:
         except BorderNotFoundError as e:
             print(e)
 
+
         except Exception as e:
             print(e)
+
 
         try:
             self.robot_pos, self.robot_vector = self.find_triple_green_robot(
@@ -151,6 +172,9 @@ class Analyse:
         self.green_points_not_translated = [
             np.array(keypoint.pt) for keypoint in green_keypoints
         ]
+        self.green_points_not_translated = [
+            np.array(keypoint.pt) for keypoint in green_keypoints
+        ]
         parings = []
         for i in range(0, 3):
             for j in range(i + 1, 3):
@@ -182,8 +206,23 @@ class Analyse:
         top_pos = np.array(
             self.convert_perspective(self.green_points_not_translated[top_point])
         )
+        top_pos = np.array(
+            self.convert_perspective(self.green_points_not_translated[top_point])
+        )
         # print(f"Bottom pos: {bottom_pos}")
         # print(f"Top pos: {top_pos}")
+        self.robot_vector_not_translated = (
+            np.array(self.green_points_not_translated[top_point])
+            - np.array(
+                self.green_points_not_translated[bottom_points[0]]
+                + self.green_points_not_translated[bottom_points[1]]
+            )
+            / 2
+        )
+        self.robot_pos_not_translated = (
+            self.green_points_not_translated[bottom_points[0]]
+            + self.green_points_not_translated[bottom_points[1]]
+        ) / 2
         self.robot_vector_not_translated = (
             np.array(self.green_points_not_translated[top_point])
             - np.array(
@@ -231,6 +270,7 @@ class Analyse:
             ),
         )
 
+
     def calculate_goals(self):
         print(f"corners: {self.corners}")
         if self.corners is not None:
@@ -241,6 +281,7 @@ class Analyse:
             corner2 = self.corners[1]
             corner3 = self.corners[2]
             corner4 = self.corners[3]
+
 
             if goal_side_right:
                 self.small_goal_coords = (corner1 + corner2) / 2
@@ -255,12 +296,19 @@ class Analyse:
             self.goal_vector = self.coordinates_to_vector(
                 self.small_goal_coords, self.large_goal_coords
             )
+
+            self.goal_vector = self.coordinates_to_vector(
+                self.small_goal_coords, self.large_goal_coords
+            )
             v = self.small_goal_coords
+
 
             v_magnitude = np.linalg.norm(v)
             u = v / v_magnitude
 
+
             u_prime = self.distance_to_goal * u
+
 
             self.delivery_vector = self.analyser.small_goal_coords - u_prime.astype(int)
             print(f"delivery vector: {self.delivery_vector}")
@@ -269,17 +317,26 @@ class Analyse:
         # Heights in cm
         print(f"course length px {self.course_height_px} {self.course_length_px}")
 
+
         # Heights in pixels cm / px
+        # TODO fish eye ???
         # TODO fish eye ???
         if self.course_length_px is None:
             raise ValueError("Course length is not set")
         conversionFactor = self.course_length_cm / (
             self.course_length_px * 1024 / self.course_length_cm
         )
+        conversionFactor = self.course_length_cm / (
+            self.course_length_px * 1024 / self.course_length_cm
+        )
 
+        vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
         vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
         # Convert to cm
         vector_from_middle *= conversionFactor
+        projected_vector = (
+            vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
+        )
         projected_vector = (
             vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
         )
@@ -414,6 +471,7 @@ def read_bounds():
             bounds = value.split(",")
             bounds_dict[key] = np.array([int(x) for x in bounds])
     return bounds_dict
+
 
 
 class RobotNotFoundError(Exception):
