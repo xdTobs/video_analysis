@@ -115,7 +115,7 @@ class Steering:
         print(f"Ball vector length: {dist_to_ball}")
 
         try:
-            if distance_to_closest_border < 30:
+            if distance_to_closest_border < 200:
                 print("Close to border")
                 self.robot_interface.send_command("move", 0, 0)
                 time.sleep(1)
