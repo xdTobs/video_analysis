@@ -266,11 +266,11 @@ class Analyse:
             corner4 = self.corners[3]
 
             if goal_side_right:
-                self.small_goal_coords = (corner1 + corner2) // 2
-                self.large_goal_coords = (corner3 + corner4) // 2
-            else:
                 self.small_goal_coords = (corner3 + corner4) // 2
                 self.large_goal_coords = (corner1 + corner2) // 2
+            else:
+                self.small_goal_coords = (corner1 + corner2) // 2
+                self.large_goal_coords = (corner3 + corner4) // 2
                 
             print(f"Small goal coords: {self.small_goal_coords}")
             print(f"Large goal coords: {self.large_goal_coords}")
