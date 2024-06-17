@@ -191,9 +191,9 @@ class VideoOutput:
         self.videoDebugger.write_video("result", result_3channel, True)
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
         im2 = cv2.resize(result_3channel, (640, 360))
-        # im3 = cv2.resize(text_overview, (640, 360))
-        border_mask = cv2.cvtColor(self.analyser.border_mask, cv2.COLOR_GRAY2BGR)
-        im3 = cv2.resize(border_mask, (640, 360))
+        im3 = cv2.resize(text_overview, (640, 360))
+        #border_mask = cv2.cvtColor(self.analyser.border_mask, cv2.COLOR_GRAY2BGR)
+        #im3 = cv2.resize(border_mask, (640, 360))
         im4 = cv2.resize(green_robot_3channel, (640, 360))
 
         hstack1 = np.hstack((im1, im2))
