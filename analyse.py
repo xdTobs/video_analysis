@@ -30,14 +30,13 @@ class Analyse:
         self.green_points_not_translated = None
         self.dropoff_coords = None
 
-
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
         self.white_mask = np.zeros((576, 1024), dtype=np.float32)
 
-        self.new_border_mask = None
         self.border_average = np.zeros((576, 1024), dtype=np.float32)
         self.border_mask = np.zeros((576, 1024), dtype=np.float32)
+        self.new_border_mask = None
 
         self.new_orange_mask = None
         self.orange_average = np.zeros((576, 1024), dtype=np.float32)
@@ -106,7 +105,9 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
             self.calculate_goals()
-            self.distance_to_closest_border = self.calculate_distance_to_closest_border(self.robot_pos)
+            self.distance_to_closest_border = self.calculate_distance_to_closest_border(
+                self.robot_pos
+            )
 
         except BorderNotFoundError as e:
             print(e)
@@ -294,12 +295,13 @@ class Analyse:
                 self.large_goal_coords, self.small_goal_coords
             )
 
-            self.translation_vector = self.goal_vector * 4/5
+            self.translation_vector = self.goal_vector * 4 / 5
 
             print(f"translation vector: {self.translation_vector}")
 
-
-            self.delivery_vector = self.coordinates_to_vector(self.large_goal_coords+self.translation_vector, self.small_goal_coords)
+            self.delivery_vector = self.coordinates_to_vector(
+                self.large_goal_coords + self.translation_vector, self.small_goal_coords
+            )
 
             print(f"delivery vector: {self.delivery_vector}")
 
@@ -337,7 +339,9 @@ class Analyse:
     ) -> np.ndarray:
         return red - green
 
-    def coordinates_to_vector(self, point1: float, point2: float) -> np.ndarray[int, int]:
+    def coordinates_to_vector(
+        self, point1: float, point2: float
+    ) -> np.ndarray[int, int]:
         point1_int = np.array([int(point1[0]), int(point1[1])])
         point2_int = np.array([int(point2[0]), int(point2[1])])
         return point2_int - point1_int
@@ -345,44 +349,36 @@ class Analyse:
     def isolate_borders(
         self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
     ) -> np.ndarray:
-        res = image
-        # exagregate the difference between red/orange colors
-        # hsv = cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
-        # lower = np.array([0, 80, 140])
-        # upper = np.array([13, 255, 255])
-
+        # res = image
+        cv2.imwrite(f"./output/{outname}_img.jpg", image)
         mask = self.apply_threshold(image, bounds_dict_entry, outname)
-        res = cv2.bitwise_and(res, res, mask=mask)
-        #mask = cv2.bitwise_not(mask)
-
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        print(f"Contours: {contours}")
-        print(f"Contours: {len(contours)}")
-        # Assuming the largest contour is the square
-        square_contour = max(contours, key=cv2.contourArea)
-
-        # Create an all black mask
-        black_mask = np.zeros_like(mask)
-
-        # Fill the mask with white where the square is
-        cv2.drawContours(black_mask, [square_contour], -1, (255), thickness=cv2.FILLED)
-
-        # Apply the mask to the binary image
-        result = cv2.bitwise_and(mask, black_mask)
+        cv2.imwrite(f"./output/{outname}_threshold.jpg", mask)
+        mask = cv2.bitwise_not(mask)
+        # res = cv2.bitwise_and(res, res, mask=mask)
         # flood fill black all white that are touching edge of images
 
-        # h, w = mask.shape[:2]
-        # mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
-        # mask[0, :] = 0  # Set top row to black
-        # mask[:, 0] = 0  # Set left column to black
-        # mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1: h + 1, 1: w + 1]
-        # mask = cv2.bitwise_not(mask)
+        h, w = mask.shape[:2]
+        mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
+        mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
+        mask = cv2.bitwise_not(mask)
+        # save image
+        cv2.imwrite(f"./output/{outname}_mask.jpg", mask)
+        return cv2.bitwise_not(mask)
 
-        # need to find a better denoise method
-        return cv2.bitwise_not(result)
+        # res = image
+        # mask = self.apply_threshold(image, bounds_dict_entry, outname)
+        # res = cv2.bitwise_and(res, res, mask=mask)
+        # contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # square_contour = max(contours, key=cv2.contourArea)
+        # black_mask = np.zeros_like(mask)
+        # cv2.drawContours(black_mask, [square_contour], -1, (255), thickness=cv2.FILLED)
+        # result = cv2.bitwise_and(mask, black_mask)
+        # return cv2.bitwise_not(result)
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
-        image = cv2.bitwise_not(image)
+        # image = cv2.bitwise_not(image)
+        image = self.border_average.astype(np.uint8)
+        cv2.imwrite("./output/find_border.jpg", image)
         contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = contours[0] if len(contours) == 2 else contours[1]
         corners = None
@@ -443,7 +439,9 @@ class Analyse:
         for i in range(num_corners):
             v = self.corners[i]
             w = self.corners[(i + 1) % num_corners]
-            distance, projection_vector = self.distance_point_to_segment(self.robot_pos, v, w)
+            distance, projection_vector = self.distance_point_to_segment(
+                self.robot_pos, v, w
+            )
             if distance < min_distance:
                 min_distance = distance
                 closest_projection = projection_vector
