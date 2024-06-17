@@ -342,44 +342,19 @@ class Analyse:
         point2_int = np.array([int(point2[0]), int(point2[1])])
         return point2_int - point1_int
 
-    def isolate_borders(
-        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
-    ) -> np.ndarray:
-        res = image
+    def isolate_borders(self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str) -> np.ndarray:
         # exagregate the difference between red/orange colors
-        # hsv = cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
-        # lower = np.array([0, 80, 140])
-        # upper = np.array([13, 255, 255])
-
         mask = self.apply_threshold(image, bounds_dict_entry, outname)
-        res = cv2.bitwise_and(res, res, mask=mask)
-        #mask = cv2.bitwise_not(mask)
-
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        print(f"Contours: {contours}")
-        print(f"Contours: {len(contours)}")
-        # Assuming the largest contour is the square
-        square_contour = max(contours, key=cv2.contourArea)
-
-        # Create an all black mask
-        black_mask = np.zeros_like(mask)
-
-        # Fill the mask with white where the square is
-        cv2.drawContours(black_mask, [square_contour], -1, (255), thickness=cv2.FILLED)
-
-        # Apply the mask to the binary image
-        result = cv2.bitwise_and(mask, black_mask)
+        mask = cv2.bitwise_not(mask)
         # flood fill black all white that are touching edge of images
-
-        # h, w = mask.shape[:2]
-        # mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
-        # mask[0, :] = 0  # Set top row to black
-        # mask[:, 0] = 0  # Set left column to black
-        # mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1: h + 1, 1: w + 1]
-        # mask = cv2.bitwise_not(mask)
-
+    
+        h, w = mask.shape[:2]
+        mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
+        mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
+        mask = cv2.bitwise_not(mask)
+    
         # need to find a better denoise method
-        return cv2.bitwise_not(result)
+        return (mask, mask)
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
         image = cv2.bitwise_not(image)
