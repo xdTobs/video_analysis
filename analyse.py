@@ -91,6 +91,7 @@ class Analyse:
         self.new_border_mask = self.videoDebugger.run_analysis(
             self.isolate_borders, "border", image, self.bounds_dict["border"]
         )
+        print("Bounds border:",self.bounds_dict["border"])
         self.border_average = (
                 self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
         )
@@ -270,17 +271,18 @@ class Analyse:
             # Find the middle of the two corners
             goal_side_right = True
             print(f"Goal side right: {goal_side_right}")
-            corner1 = self.corners[0]
-            corner2 = self.corners[1]
-            corner3 = self.corners[2]
-            corner4 = self.corners[3]
+            corner1 = max(self.corners, key=lambda c: sum(c))
+            remaining_corners = [c for c in self.corners if c != corner1]
+            corner3 = min(remaining_corners, key=lambda c: sum(c))
+            remaining_corners.remove(corner3)
+            corner2, corner4 = sorted(remaining_corners, key=lambda c: c[1])
 
             if goal_side_right:
-                self.small_goal_coords = (corner3 + corner4) / 2
-                self.large_goal_coords = (corner1 + corner2) / 2
+                self.small_goal_coords = (corner2 + corner3) / 2
+                self.large_goal_coords = (corner1 + corner4) / 2
             else:
-                self.small_goal_coords = (corner1 + corner2) / 2
-                self.large_goal_coords = (corner3 + corner4) / 2
+                self.small_goal_coords = (corner1 + corner4) / 2
+                self.large_goal_coords = (corner2 + corner3) / 2
 
             print(f"Small goal coords: {self.small_goal_coords}")
             print(f"Large goal coords: {self.large_goal_coords}")

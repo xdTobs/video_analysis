@@ -124,5 +124,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     run_video(
-        host=HOST, webcam_index=(WEBCAM_INDEX), online=not is_offline, port=int(PORT)
+        host=HOST, webcam_index=int(WEBCAM_INDEX), online=False, port=int(PORT)
     )
