@@ -1,4 +1,4 @@
 numpy==1.26.4
 opencv-python==4.9.0.80
-Pillow==10.3.0
-Flask
+pillow==10.3.0
+python-dotenv==1.0.1
