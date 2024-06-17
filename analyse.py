@@ -314,17 +314,11 @@ class Analyse:
         conversionFactor = self.course_length_cm / (
             self.course_length_px * 1024 / self.course_length_cm
         )
-        conversionFactor = self.course_length_cm / (
-            self.course_length_px * 1024 / self.course_length_cm
-        )
 
-        vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
         vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
         # Convert to cm
         vector_from_middle *= conversionFactor
-        projected_vector = (
-            vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
-        )
+
         projected_vector = (
             vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
         )
