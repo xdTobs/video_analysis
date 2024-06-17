@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def angle_between_vectors(v1: np.ndarray, v2: np.ndarray) -> float:
     if v1 is None or v2 is None:
         return 0
@@ -8,6 +9,7 @@ def angle_between_vectors(v1: np.ndarray, v2: np.ndarray) -> float:
     magnitude_v2 = np.linalg.norm(v2)
     cos_theta = dot_prod / (magnitude_v1 * magnitude_v2)
     return np.arccos(cos_theta)
+
 
 def angle_between_vectors_signed(v1: np.ndarray, v2: np.ndarray) -> float:
     if v1 is None or v2 is None:
@@ -19,3 +21,9 @@ def angle_between_vectors_signed(v1: np.ndarray, v2: np.ndarray) -> float:
     # Angle in radians
     angle_radians = np.arctan2(det, dot_prod)
     return angle_radians
+
+
+def coordinates_to_vector(point1: float, point2: float) -> np.ndarray[int, int]:
+    point1_int = np.array([int(point1[0]), int(point1[1])])
+    point2_int = np.array([int(point2[0]), int(point2[1])])
+    return point2_int - point1_int

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 from dotenv import load_dotenv
-import analyse
 import sys
 import cv2
 from analyse import BallNotFoundError, RobotNotFoundError
@@ -66,9 +65,8 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.robot_pos,
                 analyser.robot_vector,
                 analyser.distance_to_closest_border,
+                analyser.dropoff_coords
             )
-        except BallNotFoundError as e:
-            print(f"Ball not found: {e}")
         except RobotNotFoundError as e:
             print(f"Robot not found: {e}")
         except Exception as e:
@@ -126,5 +124,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     run_video(
-        host=HOST, webcam_index=(WEBCAM_INDEX), online=False, port=int(PORT)
+        host=HOST, webcam_index=(WEBCAM_INDEX), online=not is_offline, port=int(PORT)
     )

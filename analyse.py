@@ -4,6 +4,7 @@ import numpy as np
 import VideoDebugger
 import BlobDetector
 import traceback
+from utils import coordinates_to_vector
 
 
 class Analyse:
@@ -23,13 +24,11 @@ class Analyse:
         self.large_goal_coords: np.ndarray = None
         self.course_length_px = None
         self.course_height_px = None
-        self.distance_to_goal = 100
         self.goal_vector = None
         self.delivery_vector = None
         self.translation_vector = None
         self.green_points_not_translated = None
         self.dropoff_coords = None
-
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -66,38 +65,38 @@ class Analyse:
             self.apply_threshold, "white-ball", image, self.bounds_dict["white"]
         )
         self.white_average = (
-            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+                self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         )
         self.white_mask = (
-            self.white_average.astype(np.uint8) > self.average_threshold
-        ).astype(np.uint8) * 255
+                                  self.white_average.astype(np.uint8) > self.average_threshold
+                          ).astype(np.uint8) * 255
 
         self.white_average = (
-            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+                self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         )
         self.white_mask = (
-            self.white_average.astype(np.uint8) > self.average_threshold
-        ).astype(np.uint8) * 255
+                                  self.white_average.astype(np.uint8) > self.average_threshold
+                          ).astype(np.uint8) * 255
 
         self.new_orange_mask = self.videoDebugger.run_analysis(
             self.apply_threshold, "orange-ball", image, self.bounds_dict["orange"]
         )
         self.orange_average = (
-            self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
+                self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
         )
         self.orange_mask = (
-            self.orange_average.astype(np.uint8) > self.average_threshold
-        ).astype(np.uint8) * 255
+                                   self.orange_average.astype(np.uint8) > self.average_threshold
+                           ).astype(np.uint8) * 255
 
         self.new_border_mask = self.videoDebugger.run_analysis(
             self.isolate_borders, "border", image, self.bounds_dict["border"]
         )
         self.border_average = (
-            self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
+                self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
         )
         self.border_mask = (
-            self.border_average.astype(np.uint8) > self.average_threshold
-        ).astype(np.uint8) * 255
+                                   self.border_average.astype(np.uint8) > self.average_threshold
+                           ).astype(np.uint8) * 255
 
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
@@ -131,7 +130,7 @@ class Analyse:
             self.course_height_px = np.linalg.norm(corner2 - corner3)
 
     def apply_threshold(
-        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str
+            self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str
     ) -> np.ndarray:
         bounds = bounds_dict_entry[0:3]
         variance = bounds_dict_entry[3]
@@ -190,8 +189,8 @@ class Analyse:
         bottom_pos = np.array(
             self.convert_perspective(
                 (
-                    self.green_points_not_translated[bottom_points[0]]
-                    + self.green_points_not_translated[bottom_points[1]]
+                        self.green_points_not_translated[bottom_points[0]]
+                        + self.green_points_not_translated[bottom_points[1]]
                 )
                 / 2
             )
@@ -207,33 +206,33 @@ class Analyse:
         # print(f"Bottom pos: {bottom_pos}")
         # print(f"Top pos: {top_pos}")
         self.robot_vector_not_translated = (
-            np.array(self.green_points_not_translated[top_point])
-            - np.array(
-                self.green_points_not_translated[bottom_points[0]]
-                + self.green_points_not_translated[bottom_points[1]]
-            )
-            / 2
-        )
-        self.robot_pos_not_translated = (
+                np.array(self.green_points_not_translated[top_point])
+                - np.array(
             self.green_points_not_translated[bottom_points[0]]
             + self.green_points_not_translated[bottom_points[1]]
-        ) / 2
+        )
+                / 2
+        )
+        self.robot_pos_not_translated = (
+                                                self.green_points_not_translated[bottom_points[0]]
+                                                + self.green_points_not_translated[bottom_points[1]]
+                                        ) / 2
         self.robot_vector_not_translated = (
-            np.array(self.green_points_not_translated[top_point])
-            - np.array(
-                self.green_points_not_translated[bottom_points[0]]
-                + self.green_points_not_translated[bottom_points[1]]
-            )
-            / 2
-        )
-        self.robot_pos_not_translated = (
+                np.array(self.green_points_not_translated[top_point])
+                - np.array(
             self.green_points_not_translated[bottom_points[0]]
             + self.green_points_not_translated[bottom_points[1]]
-        ) / 2
+        )
+                / 2
+        )
+        self.robot_pos_not_translated = (
+                                                self.green_points_not_translated[bottom_points[0]]
+                                                + self.green_points_not_translated[bottom_points[1]]
+                                        ) / 2
         return bottom_pos, top_pos - bottom_pos
 
     def find_red_green_robot(
-        self, green_mask: np.ndarray, red_mask: np.ndarray
+            self, green_mask: np.ndarray, red_mask: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
@@ -286,20 +285,20 @@ class Analyse:
             print(f"Small goal coords: {self.small_goal_coords}")
             print(f"Large goal coords: {self.large_goal_coords}")
 
-            self.goal_vector = self.coordinates_to_vector(
+            self.goal_vector = coordinates_to_vector(
                 self.small_goal_coords, self.large_goal_coords
             )
 
-            self.goal_vector = self.coordinates_to_vector(
+            self.goal_vector = coordinates_to_vector(
                 self.large_goal_coords, self.small_goal_coords
             )
 
-            self.translation_vector = self.goal_vector * 4/5
+            self.translation_vector = self.goal_vector * 4 / 5
 
             print(f"translation vector: {self.translation_vector}")
 
-
-            self.delivery_vector = self.coordinates_to_vector(self.large_goal_coords+self.translation_vector, self.small_goal_coords)
+            self.dropoff_coords = self.large_goal_coords + self.translation_vector
+            self.delivery_vector = coordinates_to_vector(self.dropoff_coords, self.small_goal_coords)
 
             print(f"delivery vector: {self.delivery_vector}")
 
@@ -312,7 +311,7 @@ class Analyse:
         if self.course_length_px is None:
             raise ValueError("Course length is not set")
         conversionFactor = self.course_length_cm / (
-            self.course_length_px * 1024 / self.course_length_cm
+                self.course_length_px * 1024 / self.course_length_cm
         )
 
         vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
@@ -320,7 +319,7 @@ class Analyse:
         vector_from_middle *= conversionFactor
 
         projected_vector = (
-            vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
+                vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
         )
 
         # Convert back to pixels
@@ -333,17 +332,14 @@ class Analyse:
         return result
 
     def construct_vector_from_circles(
-        self, green: np.ndarray, red: np.ndarray
+            self, green: np.ndarray, red: np.ndarray
     ) -> np.ndarray:
         return red - green
 
-    def coordinates_to_vector(self, point1: float, point2: float) -> np.ndarray[int, int]:
-        point1_int = np.array([int(point1[0]), int(point1[1])])
-        point2_int = np.array([int(point2[0]), int(point2[1])])
-        return point2_int - point1_int
+
 
     def isolate_borders(
-        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
+            self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
     ) -> np.ndarray:
         res = image
         # exagregate the difference between red/orange colors
@@ -422,7 +418,7 @@ class Analyse:
         pass
 
     def distance_point_to_segment(
-        self, p: np.ndarray, v: np.ndarray, w: np.ndarray
+            self, p: np.ndarray, v: np.ndarray, w: np.ndarray
     ) -> float:
         l2 = np.sum((w - v) ** 2)
         if l2 == 0.0:
