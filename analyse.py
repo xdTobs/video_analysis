@@ -46,10 +46,13 @@ class Analyse:
         self.bounds_dict = read_bounds()
         self.distance_to_closest_border = float("inf")
 
-        self.cam_height = 178
+        self.cam_height = 200
         self.robot_height = 47
         self.course_length_cm = 167
         self.course_width_cm = 121
+        
+        self.default_keypoints = None
+        self.near_wall_keypoints = None
         pass
 
     def analysis_pipeline(self, image: np.ndarray):
@@ -101,7 +104,16 @@ class Analyse:
 
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
-        self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
+        
+        keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
+        
+        self.near_wall_keypoints = [keypoint for keypoint in keypoints if self.calculate_distance_to_closest_border(keypoint.pt) < 50]
+        
+        self.default_keypoints = [keypoint for keypoint in keypoints if keypoint not in self.near_wall_keypoints]
+        
+        print(f"Amount of default keypoints: {len(self.default_keypoints)}")
+        print(f"Amount of near wall keypoints: {len(self.near_wall_keypoints)}")
+        
         try:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
