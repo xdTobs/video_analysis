@@ -66,6 +66,8 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.robot_pos,
                 analyser.robot_vector,
                 analyser.distance_to_closest_border,
+                analyser.border_vector,
+                analyser.corners,
             )
         except BallNotFoundError as e:
             print(f"Ball not found: {e}")

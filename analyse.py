@@ -106,7 +106,8 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
             self.calculate_goals()
-            self.distance_to_closest_border = self.calculate_distance_to_closest_border(self.robot_pos)
+            self.distance_to_closest_border, self.border_vector = self.calculate_distance_to_closest_border(self.robot_pos)
+
 
         except BorderNotFoundError as e:
             print(e)
@@ -434,7 +435,7 @@ class Analyse:
     def calculate_distance_to_closest_border(self, pos: np.ndarray) -> float:
 
         if pos is None or self.corners is None:
-            raise ValueError("Robot position or border corners are not set.")
+            raise ValueError("Position or border corners are not set.")
 
         num_corners = len(self.corners)
         min_distance = float("inf")
@@ -447,10 +448,17 @@ class Analyse:
                 min_distance = distance
                 closest_projection = projection_vector
 
-        self.border_vector = closest_projection
-
         print(f"Distance to closest border: {min_distance}")
-        return min_distance
+        return min_distance, closest_projection
+    
+    def angle_between_vectors(vec1, vec2):
+        dot_product = np.dot(vec1, vec2)
+        norm_vec1 = np.linalg.norm(vec1)
+        norm_vec2 = np.linalg.norm(vec2)
+        cos_theta = dot_product / (norm_vec1 * norm_vec2)
+        angle_radians = np.arccos(np.clip(cos_theta, -1.0, 1.0))  # Clip to handle numerical issues
+        angle_degrees = np.degrees(angle_radians)
+        return angle_radians, angle_degrees
 
 
 def read_bounds():

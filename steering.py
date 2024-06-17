@@ -5,7 +5,7 @@ import time
 from analyse import BallNotFoundError, RobotNotFoundError, BorderNotFoundError
 import RobotInterface
 from utils import angle_between_vectors, angle_between_vectors_signed
-
+from analyse import Analyse
 
 class Steering:
     def __init__(self, online=True, host="", port=0):
@@ -27,10 +27,11 @@ class Steering:
         self.current_time = 0
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
+        
 
     def find_ball_vector(
-        self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray
-    ) -> np.ndarray:
+        self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray    
+        ) -> np.ndarray:
         print(
             f"Finding ball vector, robot pos: {robot_pos}, robot vector: {robot_vector}"
         )
@@ -75,6 +76,7 @@ class Steering:
                 print(
                     f"Closest valid ball is at {self.target_position}, distance {point_distance[1]}, index {idx}"
                 )
+                
                 return self.target_position - robot_pos
 
         print("No valid path to any ball")
@@ -90,6 +92,7 @@ class Steering:
         robot_pos: np.ndarray,
         robot_vector: np.ndarray,
         distance_to_closest_border: float,
+        border_vector: np.ndarray
     ):
         # if we have a target and no keypoints we still want to catch last ball
         if len(keypoints) == 0 and not self.target_position:
@@ -116,23 +119,35 @@ class Steering:
         print(f"Ball vector length: {dist_to_ball}")
 
         try:
-            #if distance_to_closest_border < self.distance_to_border_threshold:
-             #   print("Close to border")
-              #  self.robot_interface.send_command("stop", 0, 0)
-               # #time.sleep(1)
-                #self.robot_interface.send_command("move", -20, 50)
-                #return
+            #if dist_to_ball < self.collect_ball_distance and distance_to_closest_border < self.distance_to_border_threshold:
+             #   print("Ball is close and close to border")
+              #  self.close_to_ball = True
 
-            if dist_to_ball < self.collect_ball_distance:
+
+
+               # return
+            
+            #if dist_to_ball > self.collect_ball_distance and distance_to_closest_border < self.distance_to_border_threshold:
+             #   print("Ball is not close and close to border")
+              #  self.close_to_ball = False
+
+
+               # return
+
+            if dist_to_ball < self.collect_ball_distance and distance_to_closest_border > self.distance_to_border_threshold:
                 self.close_to_ball = True
                 print("Ball is close")
                 self.collect_ball(self.signed_angle_degrees, self.angle_degrees, dist_to_ball)
                 return
-            else:
+            
+            if dist_to_ball > self.collect_ball_distance and distance_to_closest_border > self.distance_to_border_threshold:
                 print("Ball is not close")
                 self.close_to_ball = False
                 self.get_near_ball(self.signed_angle_degrees, self.angle_degrees, dist_to_ball)
                 return
+            else:
+                print("No program picked")
+            
         except ConnectionError as e:
             print(f"Connection error {e}")
             return

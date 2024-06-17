@@ -1,6 +1,7 @@
 /output
 /__pycache__
 /venv
+/.venv
 /videos
 /.vscode
 setup_env.sh
