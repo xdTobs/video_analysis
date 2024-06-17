@@ -34,9 +34,9 @@ class Analyse:
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
         self.white_mask = np.zeros((576, 1024), dtype=np.float32)
 
-        self.new_border_mask = None
         self.border_average = np.zeros((576, 1024), dtype=np.float32)
         self.border_mask = np.zeros((576, 1024), dtype=np.float32)
+        self.new_border_mask = None
 
         self.new_orange_mask = None
         self.orange_average = np.zeros((576, 1024), dtype=np.float32)
@@ -65,38 +65,38 @@ class Analyse:
             self.apply_threshold, "white-ball", image, self.bounds_dict["white"]
         )
         self.white_average = (
-                self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         )
         self.white_mask = (
-                                  self.white_average.astype(np.uint8) > self.average_threshold
-                          ).astype(np.uint8) * 255
+            self.white_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.white_average = (
-                self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         )
         self.white_mask = (
-                                  self.white_average.astype(np.uint8) > self.average_threshold
-                          ).astype(np.uint8) * 255
+            self.white_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.new_orange_mask = self.videoDebugger.run_analysis(
             self.apply_threshold, "orange-ball", image, self.bounds_dict["orange"]
         )
         self.orange_average = (
-                self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
+            self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
         )
         self.orange_mask = (
-                                   self.orange_average.astype(np.uint8) > self.average_threshold
-                           ).astype(np.uint8) * 255
+            self.orange_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.new_border_mask = self.videoDebugger.run_analysis(
             self.isolate_borders, "border", image, self.bounds_dict["border"]
         )
         self.border_average = (
-                self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
+            self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
         )
         self.border_mask = (
-                                   self.border_average.astype(np.uint8) > self.average_threshold
-                           ).astype(np.uint8) * 255
+            self.border_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
@@ -105,7 +105,9 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
             self.calculate_goals()
-            self.distance_to_closest_border = self.calculate_distance_to_closest_border(self.robot_pos)
+            self.distance_to_closest_border = self.calculate_distance_to_closest_border(
+                self.robot_pos
+            )
 
         except BorderNotFoundError as e:
             print(e)
@@ -189,8 +191,8 @@ class Analyse:
         bottom_pos = np.array(
             self.convert_perspective(
                 (
-                        self.green_points_not_translated[bottom_points[0]]
-                        + self.green_points_not_translated[bottom_points[1]]
+                    self.green_points_not_translated[bottom_points[0]]
+                    + self.green_points_not_translated[bottom_points[1]]
                 )
                 / 2
             )
@@ -206,29 +208,29 @@ class Analyse:
         # print(f"Bottom pos: {bottom_pos}")
         # print(f"Top pos: {top_pos}")
         self.robot_vector_not_translated = (
-                np.array(self.green_points_not_translated[top_point])
-                - np.array(
-            self.green_points_not_translated[bottom_points[0]]
-            + self.green_points_not_translated[bottom_points[1]]
-        )
-                / 2
+            np.array(self.green_points_not_translated[top_point])
+            - np.array(
+                self.green_points_not_translated[bottom_points[0]]
+                + self.green_points_not_translated[bottom_points[1]]
+            )
+            / 2
         )
         self.robot_pos_not_translated = (
-                                                self.green_points_not_translated[bottom_points[0]]
-                                                + self.green_points_not_translated[bottom_points[1]]
-                                        ) / 2
+            self.green_points_not_translated[bottom_points[0]]
+            + self.green_points_not_translated[bottom_points[1]]
+        ) / 2
         self.robot_vector_not_translated = (
-                np.array(self.green_points_not_translated[top_point])
-                - np.array(
-            self.green_points_not_translated[bottom_points[0]]
-            + self.green_points_not_translated[bottom_points[1]]
-        )
-                / 2
+            np.array(self.green_points_not_translated[top_point])
+            - np.array(
+                self.green_points_not_translated[bottom_points[0]]
+                + self.green_points_not_translated[bottom_points[1]]
+            )
+            / 2
         )
         self.robot_pos_not_translated = (
-                                                self.green_points_not_translated[bottom_points[0]]
-                                                + self.green_points_not_translated[bottom_points[1]]
-                                        ) / 2
+            self.green_points_not_translated[bottom_points[0]]
+            + self.green_points_not_translated[bottom_points[1]]
+        ) / 2
         return bottom_pos, top_pos - bottom_pos
 
     def find_red_green_robot(
@@ -311,7 +313,7 @@ class Analyse:
         if self.course_length_px is None:
             raise ValueError("Course length is not set")
         conversionFactor = self.course_length_cm / (
-                self.course_length_px * 1024 / self.course_length_cm
+            self.course_length_px * 1024 / self.course_length_cm
         )
 
         vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
@@ -319,7 +321,7 @@ class Analyse:
         vector_from_middle *= conversionFactor
 
         projected_vector = (
-                vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
+            vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
         )
 
         # Convert back to pixels
@@ -332,52 +334,27 @@ class Analyse:
         return result
 
     def construct_vector_from_circles(
-            self, green: np.ndarray, red: np.ndarray
+        self, green: np.ndarray, red: np.ndarray
     ) -> np.ndarray:
         return red - green
 
 
 
     def isolate_borders(
-            self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
+        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
     ) -> np.ndarray:
-        res = image
-        # exagregate the difference between red/orange colors
-        # hsv = cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
-        # lower = np.array([0, 80, 140])
-        # upper = np.array([13, 255, 255])
-
         mask = self.apply_threshold(image, bounds_dict_entry, outname)
-        res = cv2.bitwise_and(res, res, mask=mask)
         mask = cv2.bitwise_not(mask)
 
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        # Assuming the largest contour is the square
-        square_contour = max(contours, key=cv2.contourArea)
-
-        # Create an all black mask
-        black_mask = np.zeros_like(mask)
-
-        # Fill the mask with white where the square is
-        cv2.drawContours(black_mask, [square_contour], -1, (255), thickness=cv2.FILLED)
-
-        # Apply the mask to the binary image
-        result = cv2.bitwise_and(mask, black_mask)
-        # flood fill black all white that are touching edge of images
-
-        # h, w = mask.shape[:2]
-        # mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
-        # mask[0, :] = 0  # Set top row to black
-        # mask[:, 0] = 0  # Set left column to black
-        # mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1: h + 1, 1: w + 1]
-        # mask = cv2.bitwise_not(mask)
-
-        # need to find a better denoise method
-        return cv2.bitwise_not(result)
+        h, w = mask.shape[:2]
+        mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
+        mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
+        mask = cv2.bitwise_not(mask)
+        return cv2.bitwise_not(mask)
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
-        image = cv2.bitwise_not(image)
+        # image = cv2.bitwise_not(image)
+        image = self.border_average.astype(np.uint8)
         contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = contours[0] if len(contours) == 2 else contours[1]
         corners = None
@@ -412,13 +389,11 @@ class Analyse:
         #    cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS,
         # )
 
-        # cv2.imwrite(os.path.join("./output/", "keypoints.jpg"), res)
-
         return keypoints
         pass
 
     def distance_point_to_segment(
-            self, p: np.ndarray, v: np.ndarray, w: np.ndarray
+        self, p: np.ndarray, v: np.ndarray, w: np.ndarray
     ) -> float:
         l2 = np.sum((w - v) ** 2)
         if l2 == 0.0:
@@ -438,7 +413,9 @@ class Analyse:
         for i in range(num_corners):
             v = self.corners[i]
             w = self.corners[(i + 1) % num_corners]
-            distance, projection_vector = self.distance_point_to_segment(self.robot_pos, v, w)
+            distance, projection_vector = self.distance_point_to_segment(
+                self.robot_pos, v, w
+            )
             if distance < min_distance:
                 min_distance = distance
                 closest_projection = projection_vector
