@@ -353,10 +353,11 @@ class Analyse:
 
         mask = self.apply_threshold(image, bounds_dict_entry, outname)
         res = cv2.bitwise_and(res, res, mask=mask)
-        mask = cv2.bitwise_not(mask)
+        #mask = cv2.bitwise_not(mask)
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+        print(f"Contours: {contours}")
+        print(f"Contours: {len(contours)}")
         # Assuming the largest contour is the square
         square_contour = max(contours, key=cv2.contourArea)
 
