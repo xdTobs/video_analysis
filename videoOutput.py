@@ -56,6 +56,15 @@ class VideoOutput:
         green_robot_3channel = cv2.cvtColor(
             self.analyser.green_robot_mask, cv2.COLOR_GRAY2BGR
         )
+        cross_rect = Analyse.find_cross(self.analyser.border_mask)
+        for r in cross_rect:
+            cv2.rectangle(
+                green_robot_3channel,
+                (r[0], r[1]),
+                (r[0] + r[2], r[1] + r[3]),
+                (0, 0, 255),
+                2,
+            )
 
         result_binary = cv2.bitwise_or(
             self.analyser.white_mask, self.analyser.orange_mask
@@ -192,8 +201,8 @@ class VideoOutput:
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
         im2 = cv2.resize(result_3channel, (640, 360))
         im3 = cv2.resize(text_overview, (640, 360))
-        #border_mask = cv2.cvtColor(self.analyser.border_mask, cv2.COLOR_GRAY2BGR)
-        #im3 = cv2.resize(border_mask, (640, 360))
+        # border_mask = cv2.cvtColor(self.analyser.border_mask, cv2.COLOR_GRAY2BGR)
+        # im3 = cv2.resize(border_mask, (640, 360))
         im4 = cv2.resize(green_robot_3channel, (640, 360))
 
         hstack1 = np.hstack((im1, im2))

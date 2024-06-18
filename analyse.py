@@ -350,6 +350,7 @@ class Analyse:
     # returns the x, y, width and height of a rectangle that contains the cross
     @staticmethod
     def find_cross(mask: np.ndarray) -> np.ndarray:
+        cv2.imwrite("debug_img/og.jpg", mask)
         if len(mask.shape) != 2 or mask.dtype != np.uint8:
             raise ValueError(
                 "Input mask must be a single-channel binary image of type uint8"
@@ -357,19 +358,32 @@ class Analyse:
 
         h, w = mask.shape[:2]
         flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
-        cv2.floodFill(mask, flood_fill_mask, (0, 0), 0)
+        cv2.floodFill(mask, flood_fill_mask, (0, 0), 255)
+        cv2.imwrite("debug_img/after.jpg", mask)
 
+        mask = cv2.bitwise_not(mask)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # print(contours)
+        print(len(contours))
 
+        # Filter and detect crosses or plus signs
         crosses = []
         for contour in contours:
+            # Approximate the contour to reduce the number of points
             epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
-            if len(approx) >= 4 and cv2.contourArea(contour) > 100:
+
+            # Check if the approximated contour has the characteristics of a cross
+            if (
+                len(approx) >= 4 and cv2.contourArea(contour) > 100
+            ):  # Area threshold to filter noise
                 x, y, w, h = cv2.boundingRect(contour)
                 aspect_ratio = float(w) / h
+
+                # Check if the contour has an aspect ratio close to 1 (square-like shape)
                 if 0.8 < aspect_ratio < 1.2:
                     crosses.append((x, y, w, h))
+        print(crosses)
 
         return crosses
 
@@ -491,3 +505,11 @@ class AnalyseError(Exception):
     def __init__(self, message="Failed to analyse image", *args):
         super().__init__(message, *args)
         self.message = message
+
+
+if __name__ == "__main__":
+    img = cv2.imread("bin.jpg")
+    bounds_dict_entry = np.array([0, 0, 0, 0])
+    img = cv2.bitwise_not(img)
+    binary_img = Analyse.apply_threshold(img, bounds_dict_entry, "test")
+    Analyse.find_cross(binary_img)
