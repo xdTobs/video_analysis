@@ -135,7 +135,7 @@ class Steering:
         self.ball_vector = self.find_ball_vector(keypoints, robot_pos, robot_vector)
         if not self.is_collecting_balls:
             self.deliver_balls_to_target(robot_pos, dropoff_coords)
-        self.ball_vector = self.find_ball_vector(waypoints, robot_pos, robot_vector)
+        self.ball_vector = self.find_ball_vector(keypoints, robot_pos, robot_vector)
         if self.ball_vector is None:
             raise BallNotFoundError("No ball vector to be used for program selection")
     
