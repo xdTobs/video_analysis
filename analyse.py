@@ -134,8 +134,7 @@ class Analyse:
             self.course_height_px = np.linalg.norm(corner2 - corner3)
 
     @staticmethod
-    def apply_threshold(
-        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str
+    def apply_threshold(image: np.ndarray, bounds_dict_entry: np.ndarray, out_name: str
     ) -> np.ndarray:
         bounds = bounds_dict_entry[0:3]
         variance = bounds_dict_entry[3]
@@ -143,7 +142,7 @@ class Analyse:
         lower = np.clip(bounds - variance, 0, 255)
         upper = np.clip(bounds + variance, 0, 255)
 
-        if outname == "white-ball":
+        if out_name == "white-ball":
             lower = np.array([0, 0, 200])
             upper = np.array([179, 55, 255])
 
@@ -371,9 +370,9 @@ class Analyse:
 
     @staticmethod
     def isolate_borders(
-        image: np.ndarray, bounds_dict_entry: np.ndarray, outname
+        image: np.ndarray, bounds_dict_entry: np.ndarray, out_name
     ) -> np.ndarray:
-        mask = Analyse.apply_threshold(image, bounds_dict_entry, outname)
+        mask = Analyse.apply_threshold(image, bounds_dict_entry, out_name)
         mask = cv2.bitwise_not(mask)
 
         h, w = mask.shape[:2]
