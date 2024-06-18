@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import sys
 import cv2
-from analyse import BallNotFoundError, RobotNotFoundError
+from analyse import RobotNotFoundError
 import VideoDebugger
 import analyse
 import steering

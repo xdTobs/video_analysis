@@ -33,16 +33,18 @@ class VideoOutput:
         text_overview = cv2.cvtColor(
             self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR
         )
+        border_mask = cv2.cvtColor(self.analyser.border_mask, cv2.COLOR_GRAY2BGR)
+
         y_offset = 20
         for key, value in self.data_dict.items():
             text = f"{key}: {value}"
             cv2.putText(
-                text_overview,
+                border_mask,
                 text,
                 (10, y_offset),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
-                (255, 255, 255),
+                (0, 127, 255),
                 1,
             )
             y_offset += 20
@@ -147,7 +149,7 @@ class VideoOutput:
         if self.analyser.corners is not None:
             for index, corner in enumerate(self.analyser.corners):
                 color = colors[index % len(colors)]  # This will cycle through the colors
-                print(f"Corner at {corner}")
+                #print(f"Corner at {corner}")
                 cv2.circle(frame, tuple(corner), 5, color, -1)
                 # Add text above the corner
                 text_position = (corner[0], corner[1] - 10)  # Position the text 10 pixels above the corner
@@ -159,8 +161,8 @@ class VideoOutput:
                 self.analyser.small_goal_coords is not None
                 and self.analyser.large_goal_coords is not None
         ):
-            print(f"Small goal at {self.analyser.small_goal_coords}")
-            print(f"Large goal at {self.analyser.large_goal_coords}")
+            #print(f"Small goal at {self.analyser.small_goal_coords}")
+            #print(f"Large goal at {self.analyser.large_goal_coords}")
             cv2.circle(
                 frame,
                 tuple(self.analyser.small_goal_coords.astype(int)),
@@ -188,6 +190,7 @@ class VideoOutput:
             )
 
         if self.analyser.dropoff_coords is not None and self.analyser.robot_pos is not None:
+            cv2.circle(frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1)
             cv2.arrowedLine(frame, self.analyser.robot_pos.astype(int), self.analyser.dropoff_coords.astype(int),
                             (0, 0, 255), 2)
 
@@ -198,8 +201,7 @@ class VideoOutput:
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
         im2 = cv2.resize(result_3channel, (640, 360))
         im3 = cv2.resize(text_overview, (640, 360))
-        # border_mask = cv2.cvtColor(self.analyser.border_mask, cv2.COLOR_GRAY2BGR)
-        # im3 = cv2.resize(border_mask, (640, 360))
+        im3 = cv2.resize(border_mask, (640, 360))
         im4 = cv2.resize(green_robot_3channel, (640, 360))
 
         hstack1 = np.hstack((im1, im2))
