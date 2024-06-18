@@ -30,14 +30,13 @@ class Analyse:
         self.green_points_not_translated = None
         self.dropoff_coords = None
 
-
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
         self.white_mask = np.zeros((576, 1024), dtype=np.float32)
 
-        self.new_border_mask = None
         self.border_average = np.zeros((576, 1024), dtype=np.float32)
         self.border_mask = np.zeros((576, 1024), dtype=np.float32)
+        self.new_border_mask = None
 
         self.new_orange_mask = None
         self.orange_average = np.zeros((576, 1024), dtype=np.float32)
@@ -106,8 +105,14 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
             self.calculate_goals()
+<<<<<<< HEAD
             self.distance_to_closest_border, self.border_vector = self.calculate_distance_to_closest_border(self.robot_pos)
 
+=======
+            self.distance_to_closest_border = self.calculate_distance_to_closest_border(
+                self.robot_pos
+            )
+>>>>>>> 751c565faa43333dd445fb4ca7dadb7e571acf65
 
         except BorderNotFoundError as e:
             print(e)
@@ -131,8 +136,9 @@ class Analyse:
             self.course_length_px = np.linalg.norm(corner1 - corner2)
             self.course_height_px = np.linalg.norm(corner2 - corner3)
 
+    @staticmethod
     def apply_threshold(
-        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str
+        image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str
     ) -> np.ndarray:
         bounds = bounds_dict_entry[0:3]
         variance = bounds_dict_entry[3]
@@ -295,12 +301,13 @@ class Analyse:
                 self.large_goal_coords, self.small_goal_coords
             )
 
-            self.translation_vector = self.goal_vector * 4/5
+            self.translation_vector = self.goal_vector * 4 / 5
 
             print(f"translation vector: {self.translation_vector}")
 
-
-            self.delivery_vector = self.coordinates_to_vector(self.large_goal_coords+self.translation_vector, self.small_goal_coords)
+            self.delivery_vector = self.coordinates_to_vector(
+                self.large_goal_coords + self.translation_vector, self.small_goal_coords
+            )
 
             print(f"delivery vector: {self.delivery_vector}")
 
@@ -338,51 +345,54 @@ class Analyse:
     ) -> np.ndarray:
         return red - green
 
-    def coordinates_to_vector(self, point1: float, point2: float) -> np.ndarray[int, int]:
+    def coordinates_to_vector(
+        self, point1: float, point2: float
+    ) -> np.ndarray[int, int]:
         point1_int = np.array([int(point1[0]), int(point1[1])])
         point2_int = np.array([int(point2[0]), int(point2[1])])
         return point2_int - point1_int
 
-    def isolate_borders(
-        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
-    ) -> np.ndarray:
-        res = image
-        # exagregate the difference between red/orange colors
-        # hsv = cv2.cvtColor(res, cv2.COLOR_BGR2HSV)
-        # lower = np.array([0, 80, 140])
-        # upper = np.array([13, 255, 255])
+    # returns the x, y, width and height of a rectangle that contains the cross
+    @staticmethod
+    def find_cross(mask: np.ndarray) -> np.ndarray:
+        if len(mask.shape) != 2 or mask.dtype != np.uint8:
+            raise ValueError(
+                "Input mask must be a single-channel binary image of type uint8"
+            )
 
-        mask = self.apply_threshold(image, bounds_dict_entry, outname)
-        res = cv2.bitwise_and(res, res, mask=mask)
-        mask = cv2.bitwise_not(mask)
+        h, w = mask.shape[:2]
+        flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
+        cv2.floodFill(mask, flood_fill_mask, (0, 0), 0)
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Assuming the largest contour is the square
-        square_contour = max(contours, key=cv2.contourArea)
+        crosses = []
+        for contour in contours:
+            epsilon = 0.02 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            if len(approx) >= 4 and cv2.contourArea(contour) > 100:
+                x, y, w, h = cv2.boundingRect(contour)
+                aspect_ratio = float(w) / h
+                if 0.8 < aspect_ratio < 1.2:
+                    crosses.append((x, y, w, h))
 
-        # Create an all black mask
-        black_mask = np.zeros_like(mask)
+        return crosses
 
-        # Fill the mask with white where the square is
-        cv2.drawContours(black_mask, [square_contour], -1, (255), thickness=cv2.FILLED)
+    @staticmethod
+    def isolate_borders(
+        image: np.ndarray, bounds_dict_entry: np.ndarray, outname
+    ) -> np.ndarray:
+        mask = Analyse.apply_threshold(image, bounds_dict_entry, outname)
+        mask = cv2.bitwise_not(mask)
 
-        # Apply the mask to the binary image
-        result = cv2.bitwise_and(mask, black_mask)
-        # flood fill black all white that are touching edge of images
-
-        # h, w = mask.shape[:2]
-        # mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
-        # mask[0, :] = 0  # Set top row to black
-        # mask[:, 0] = 0  # Set left column to black
-        # mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1: h + 1, 1: w + 1]
-        # mask = cv2.bitwise_not(mask)
-
-        # need to find a better denoise method
-        return cv2.bitwise_not(result)
+        h, w = mask.shape[:2]
+        mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
+        mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
+        return mask
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
-        image = cv2.bitwise_not(image)
+        # image = cv2.bitwise_not(image)
+        image = self.border_average.astype(np.uint8)
         contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = contours[0] if len(contours) == 2 else contours[1]
         corners = None
@@ -417,8 +427,6 @@ class Analyse:
         #    cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS,
         # )
 
-        # cv2.imwrite(os.path.join("./output/", "keypoints.jpg"), res)
-
         return keypoints
         pass
 
@@ -443,7 +451,9 @@ class Analyse:
         for i in range(num_corners):
             v = self.corners[i]
             w = self.corners[(i + 1) % num_corners]
-            distance, projection_vector = self.distance_point_to_segment(self.robot_pos, v, w)
+            distance, projection_vector = self.distance_point_to_segment(
+                self.robot_pos, v, w
+            )
             if distance < min_distance:
                 min_distance = distance
                 closest_projection = projection_vector
