@@ -8,3 +8,4 @@ setup_env.sh
 *.log
 bounds*.txt
 /.idea
+*avi

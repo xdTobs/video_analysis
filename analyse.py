@@ -133,8 +133,9 @@ class Analyse:
             self.course_length_px = np.linalg.norm(corner1 - corner2)
             self.course_height_px = np.linalg.norm(corner2 - corner3)
 
+    @staticmethod
     def apply_threshold(
-            self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str
+        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str
     ) -> np.ndarray:
         bounds = bounds_dict_entry[0:3]
         variance = bounds_dict_entry[3]
@@ -342,17 +343,43 @@ class Analyse:
 
 
 
+    # returns the x, y, width and height of a rectangle that contains the cross
+    @staticmethod
+    def find_cross(mask: np.ndarray) -> np.ndarray:
+        if len(mask.shape) != 2 or mask.dtype != np.uint8:
+            raise ValueError(
+                "Input mask must be a single-channel binary image of type uint8"
+            )
+
+        h, w = mask.shape[:2]
+        flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
+        cv2.floodFill(mask, flood_fill_mask, (0, 0), 0)
+
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        crosses = []
+        for contour in contours:
+            epsilon = 0.02 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            if len(approx) >= 4 and cv2.contourArea(contour) > 100:
+                x, y, w, h = cv2.boundingRect(contour)
+                aspect_ratio = float(w) / h
+                if 0.8 < aspect_ratio < 1.2:
+                    crosses.append((x, y, w, h))
+
+        return crosses
+
+    @staticmethod
     def isolate_borders(
-        self, image: np.ndarray, bounds_dict_entry: np.ndarray, outname
+        image: np.ndarray, bounds_dict_entry: np.ndarray, outname
     ) -> np.ndarray:
-        mask = self.apply_threshold(image, bounds_dict_entry, outname)
+        mask = Analyse.apply_threshold(image, bounds_dict_entry, outname)
         mask = cv2.bitwise_not(mask)
 
         h, w = mask.shape[:2]
         mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
         mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
-        mask = cv2.bitwise_not(mask)
-        return cv2.bitwise_not(mask)
+        return mask
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
         # image = cv2.bitwise_not(image)
