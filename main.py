@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 from dotenv import load_dotenv
-import analyse
 import sys
 import cv2
 from analyse import BallNotFoundError, RobotNotFoundError
@@ -16,13 +15,10 @@ def run_video(host, webcam_index, online, port=65438):
     # Takes a video path and runs the analysis on each frame
     # darwin is mac
     if platform.system() == "Windows":
-        # test if webcam_index is a number
-        is_number = webcam_index.isdigit()
-        if is_number:
-            video = cv2.VideoCapture(int(webcam_index), cv2.CAP_DSHOW)
-        else:
-            print("Webcam index is not a number, trying to open as a file")
-            video = cv2.VideoCapture(webcam_index)
+
+        video = cv2.VideoCapture(webcam_index, cv2.CAP_DSHOW)
+
+    # video = cv2.VideoCapture(webcam_index)
     elif platform.system() == "Linux" or platform.system() == "Darwin":
         video = cv2.VideoCapture(webcam_index)
     else:
@@ -35,19 +31,19 @@ def run_video(host, webcam_index, online, port=65438):
         "Robot position": analyser.robot_pos,
         "Robot vector": analyser.robot_vector,
         "Ball vector": steering_instance.ball_vector,
+        "Is ball close to border": steering_instance.is_ball_close_to_border,
         "Angle": steering_instance.angle_degrees,
         "Signed angle": steering_instance.signed_angle_degrees,
-        "Close to Ball": steering_instance.close_to_ball,
+        "Robot close to Ball": steering_instance.close_to_ball,
         "Time to switch target": steering_instance.time_to_switch_target,
-        "Distance to closest border": analyser.distance_to_closest_border,
+        "Robot distance to closest border": analyser.distance_to_closest_border,
+        "Collecting balls": steering_instance.is_collecting_balls,
     }
 
     video_output = videoOutput.VideoOutput(
         analyser, steering_instance, videoDebugger, data_dict
     )
     frame_number = 0
-
-    # video = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 576)
     print("Video read")
@@ -66,9 +62,10 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.robot_pos,
                 analyser.robot_vector,
                 analyser.distance_to_closest_border,
+                analyser.border_vector,
+                analyser.corners,
+                analyser.dropoff_coords
             )
-        except BallNotFoundError as e:
-            print(f"Ball not found: {e}")
         except RobotNotFoundError as e:
             print(f"Robot not found: {e}")
         except Exception as e:
@@ -121,10 +118,10 @@ if __name__ == "__main__":
     print("PORT: ", PORT)
     print("WEBCAM_INDEX: ", WEBCAM_INDEX)
     print("is_offline: ", is_offline)
+
     if should_quit:
         print("Exiting... Please provide the missing values in the .env file")
         sys.exit(1)
-
     run_video(
-        host=HOST, webcam_index=(WEBCAM_INDEX), online=not is_offline, port=int(PORT)
+        host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
     )

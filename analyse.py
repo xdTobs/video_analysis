@@ -4,6 +4,7 @@ import numpy as np
 import VideoDebugger
 import BlobDetector
 import traceback
+from utils import coordinates_to_vector
 
 
 class Analyse:
@@ -17,18 +18,18 @@ class Analyse:
         self.robot_vector = None
         self.goal_vector = None
         self.delivery_vector = None
-        self.corners = None
+        self.corners = np.ndarray((4, 2))
         self.border_vector = None
         self.small_goal_coords: np.ndarray = None
         self.large_goal_coords: np.ndarray = None
         self.course_length_px = None
         self.course_height_px = None
-        self.distance_to_goal = 100
         self.goal_vector = None
         self.delivery_vector = None
         self.translation_vector = None
         self.green_points_not_translated = None
         self.dropoff_coords = None
+        self.should_calculate_corners = True
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -91,6 +92,7 @@ class Analyse:
         self.new_border_mask = self.videoDebugger.run_analysis(
             self.isolate_borders, "border", image, self.bounds_dict["border"]
         )
+        print("Bounds border:",self.bounds_dict["border"])
         self.border_average = (
             self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
         )
@@ -103,11 +105,9 @@ class Analyse:
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
         try:
             self.corners = self.find_border_corners(self.border_mask)
-            self.calculate_course_dimensions()
             self.calculate_goals()
-            self.distance_to_closest_border = self.calculate_distance_to_closest_border(
-                self.robot_pos
-            )
+            self.calculate_course_dimensions()
+            self.distance_to_closest_border, self.border_vector = self.calculate_distance_to_closest_border(self.robot_pos)
 
         except BorderNotFoundError as e:
             print(e)
@@ -132,8 +132,7 @@ class Analyse:
             self.course_height_px = np.linalg.norm(corner2 - corner3)
 
     @staticmethod
-    def apply_threshold(
-        image: np.ndarray, bounds_dict_entry: np.ndarray, outname: str
+    def apply_threshold(image: np.ndarray, bounds_dict_entry: np.ndarray, out_name: str
     ) -> np.ndarray:
         bounds = bounds_dict_entry[0:3]
         variance = bounds_dict_entry[3]
@@ -141,7 +140,7 @@ class Analyse:
         lower = np.clip(bounds - variance, 0, 255)
         upper = np.clip(bounds + variance, 0, 255)
 
-        if outname == "white-ball":
+        if out_name == "white-ball":
             lower = np.array([0, 0, 200])
             upper = np.array([179, 55, 255])
 
@@ -235,7 +234,7 @@ class Analyse:
         return bottom_pos, top_pos - bottom_pos
 
     def find_red_green_robot(
-        self, green_mask: np.ndarray, red_mask: np.ndarray
+            self, green_mask: np.ndarray, red_mask: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
@@ -268,31 +267,31 @@ class Analyse:
         )
 
     def calculate_goals(self):
-        print(f"corners: {self.corners}")
         if self.corners is not None:
             # Find the middle of the two corners
             goal_side_right = True
-            print(f"Goal side right: {goal_side_right}")
+
             corner1 = self.corners[0]
             corner2 = self.corners[1]
             corner3 = self.corners[2]
             corner4 = self.corners[3]
 
+
             if goal_side_right:
-                self.small_goal_coords = (corner3 + corner4) / 2
-                self.large_goal_coords = (corner1 + corner2) / 2
+                self.small_goal_coords = (corner1 + corner2) // 2
+                self.large_goal_coords = (corner3 + corner4) // 2
             else:
-                self.small_goal_coords = (corner1 + corner2) / 2
-                self.large_goal_coords = (corner3 + corner4) / 2
+                self.small_goal_coords = (corner3 + corner4) // 2
+                self.large_goal_coords = (corner1 + corner2) // 2
 
             print(f"Small goal coords: {self.small_goal_coords}")
             print(f"Large goal coords: {self.large_goal_coords}")
 
-            self.goal_vector = self.coordinates_to_vector(
+            self.goal_vector = coordinates_to_vector(
                 self.small_goal_coords, self.large_goal_coords
             )
 
-            self.goal_vector = self.coordinates_to_vector(
+            self.goal_vector = coordinates_to_vector(
                 self.large_goal_coords, self.small_goal_coords
             )
 
@@ -300,15 +299,14 @@ class Analyse:
 
             print(f"translation vector: {self.translation_vector}")
 
-            self.delivery_vector = self.coordinates_to_vector(
-                self.large_goal_coords + self.translation_vector, self.small_goal_coords
-            )
+            self.dropoff_coords = self.large_goal_coords + self.translation_vector
+            self.delivery_vector = coordinates_to_vector(self.dropoff_coords, self.small_goal_coords)
 
             print(f"delivery vector: {self.delivery_vector}")
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
-        print(f"course length px {self.course_height_px} {self.course_length_px}")
+        print(f"course height and length px {self.course_height_px} {self.course_length_px}")
 
         # Heights in pixels cm / px
         # TODO fish eye ???
@@ -340,12 +338,7 @@ class Analyse:
     ) -> np.ndarray:
         return red - green
 
-    def coordinates_to_vector(
-        self, point1: float, point2: float
-    ) -> np.ndarray[int, int]:
-        point1_int = np.array([int(point1[0]), int(point1[1])])
-        point2_int = np.array([int(point2[0]), int(point2[1])])
-        return point2_int - point1_int
+
 
     # returns the x, y, width and height of a rectangle that contains the cross
     @staticmethod
@@ -375,9 +368,9 @@ class Analyse:
 
     @staticmethod
     def isolate_borders(
-        image: np.ndarray, bounds_dict_entry: np.ndarray, outname
+        image: np.ndarray, bounds_dict_entry: np.ndarray, out_name
     ) -> np.ndarray:
-        mask = Analyse.apply_threshold(image, bounds_dict_entry, outname)
+        mask = Analyse.apply_threshold(image, bounds_dict_entry, out_name)
         mask = cv2.bitwise_not(mask)
 
         h, w = mask.shape[:2]
@@ -398,6 +391,16 @@ class Analyse:
                 x, y, w, h = cv2.boundingRect(approx)
                 # cv2.rectangle(image, (x, y), (x + w, y + h), (36, 255, 12), 2)
                 corners = approx.squeeze()
+
+        corner1 = max(corners, key=lambda ci: sum(ci))
+        remaining_corners = [c for c in corners if not np.array_equal(c, corner1)]
+
+        corner3 = min(remaining_corners, key=lambda ci: sum(ci))
+        remaining_corners = [c for c in remaining_corners if not np.array_equal(c, corner3)]
+        corner2, corner4 = sorted(remaining_corners, key=lambda ci: ci[1])
+
+        # Replace self.corners with the corners in the correct order
+        corners = np.array([corner1, corner2, corner3, corner4])
         if corners is None:
             raise BorderNotFoundError()
         return corners
@@ -438,7 +441,7 @@ class Analyse:
     def calculate_distance_to_closest_border(self, pos: np.ndarray) -> float:
 
         if pos is None or self.corners is None:
-            raise ValueError("Robot position or border corners are not set.")
+            raise ValueError("Position or border corners are not set.")
 
         num_corners = len(self.corners)
         min_distance = float("inf")
@@ -453,10 +456,22 @@ class Analyse:
                 min_distance = distance
                 closest_projection = projection_vector
 
-        self.border_vector = closest_projection
-
         print(f"Distance to closest border: {min_distance}")
-        return min_distance
+        return min_distance, closest_projection
+    
+    def angle_between_vectors(vec1, vec2):
+        dot_product = np.dot(vec1, vec2)
+        norm_vec1 = np.linalg.norm(vec1)
+        norm_vec2 = np.linalg.norm(vec2)
+        cos_theta = dot_product / (norm_vec1 * norm_vec2)
+        angle_radians = np.arccos(np.clip(cos_theta, -1.0, 1.0))  # Clip to handle numerical issues
+        angle_degrees = np.degrees(angle_radians)
+        return angle_radians, angle_degrees
+    
+    def get_border_corners(self):
+        if self.corners is None:
+            raise BorderNotFoundError("No border corners found")
+        return self.corners
 
 
 def read_bounds():
