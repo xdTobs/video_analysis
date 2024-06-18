@@ -92,7 +92,7 @@ class Analyse:
         self.new_border_mask = self.videoDebugger.run_analysis(
             self.isolate_borders, "border", image, self.bounds_dict["border"]
         )
-        print("Bounds border:",self.bounds_dict["border"])
+        print("Bounds border:", self.bounds_dict["border"])
         self.border_average = (
             self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
         )
@@ -107,7 +107,9 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_goals()
             self.calculate_course_dimensions()
-            self.distance_to_closest_border, self.border_vector = self.calculate_distance_to_closest_border(self.robot_pos)
+            self.distance_to_closest_border, self.border_vector = (
+                self.calculate_distance_to_closest_border(self.robot_pos)
+            )
 
         except BorderNotFoundError as e:
             print(e)
@@ -132,7 +134,8 @@ class Analyse:
             self.course_height_px = np.linalg.norm(corner2 - corner3)
 
     @staticmethod
-    def apply_threshold(image: np.ndarray, bounds_dict_entry: np.ndarray, out_name: str
+    def apply_threshold(
+        image: np.ndarray, bounds_dict_entry: np.ndarray, out_name: str
     ) -> np.ndarray:
         bounds = bounds_dict_entry[0:3]
         variance = bounds_dict_entry[3]
@@ -234,7 +237,7 @@ class Analyse:
         return bottom_pos, top_pos - bottom_pos
 
     def find_red_green_robot(
-            self, green_mask: np.ndarray, red_mask: np.ndarray
+        self, green_mask: np.ndarray, red_mask: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
@@ -276,7 +279,6 @@ class Analyse:
             corner3 = self.corners[2]
             corner4 = self.corners[3]
 
-
             if goal_side_right:
                 self.small_goal_coords = (corner1 + corner2) // 2
                 self.large_goal_coords = (corner3 + corner4) // 2
@@ -300,13 +302,17 @@ class Analyse:
             print(f"translation vector: {self.translation_vector}")
 
             self.dropoff_coords = self.large_goal_coords + self.translation_vector
-            self.delivery_vector = coordinates_to_vector(self.dropoff_coords, self.small_goal_coords)
+            self.delivery_vector = coordinates_to_vector(
+                self.dropoff_coords, self.small_goal_coords
+            )
 
             print(f"delivery vector: {self.delivery_vector}")
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
-        print(f"course height and length px {self.course_height_px} {self.course_length_px}")
+        print(
+            f"course height and length px {self.course_height_px} {self.course_length_px}"
+        )
 
         # Heights in pixels cm / px
         # TODO fish eye ???
@@ -338,8 +344,6 @@ class Analyse:
     ) -> np.ndarray:
         return red - green
 
-
-
     # returns the x, y, width and height of a rectangle that contains the cross
     @staticmethod
     def find_cross(mask: np.ndarray) -> np.ndarray:
@@ -348,6 +352,7 @@ class Analyse:
                 "Input mask must be a single-channel binary image of type uint8"
             )
 
+        mask = cv2.bitwise_not(mask)
         h, w = mask.shape[:2]
         flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
         cv2.floodFill(mask, flood_fill_mask, (0, 0), 0)
@@ -363,6 +368,7 @@ class Analyse:
                 aspect_ratio = float(w) / h
                 if 0.8 < aspect_ratio < 1.2:
                     crosses.append((x, y, w, h))
+        print("m cross", crosses)
 
         return crosses
 
@@ -396,7 +402,9 @@ class Analyse:
         remaining_corners = [c for c in corners if not np.array_equal(c, corner1)]
 
         corner3 = min(remaining_corners, key=lambda ci: sum(ci))
-        remaining_corners = [c for c in remaining_corners if not np.array_equal(c, corner3)]
+        remaining_corners = [
+            c for c in remaining_corners if not np.array_equal(c, corner3)
+        ]
         corner2, corner4 = sorted(remaining_corners, key=lambda ci: ci[1])
 
         # Replace self.corners with the corners in the correct order
@@ -439,7 +447,6 @@ class Analyse:
         return np.linalg.norm(p - projection), projection - p
 
     def calculate_distance_to_closest_border(self, pos: np.ndarray) -> float:
-
         if pos is None or self.corners is None:
             raise ValueError("Position or border corners are not set.")
 
@@ -458,16 +465,18 @@ class Analyse:
 
         print(f"Distance to closest border: {min_distance}")
         return min_distance, closest_projection
-    
+
     def angle_between_vectors(vec1, vec2):
         dot_product = np.dot(vec1, vec2)
         norm_vec1 = np.linalg.norm(vec1)
         norm_vec2 = np.linalg.norm(vec2)
         cos_theta = dot_product / (norm_vec1 * norm_vec2)
-        angle_radians = np.arccos(np.clip(cos_theta, -1.0, 1.0))  # Clip to handle numerical issues
+        angle_radians = np.arccos(
+            np.clip(cos_theta, -1.0, 1.0)
+        )  # Clip to handle numerical issues
         angle_degrees = np.degrees(angle_radians)
         return angle_radians, angle_degrees
-    
+
     def get_border_corners(self):
         if self.corners is None:
             raise BorderNotFoundError("No border corners found")

@@ -32,7 +32,6 @@ class VideoOutput:
         self.data_dict["Is ball close to border"] = (
             self.steering_instance.is_ball_close_to_border
         )
-        print(f"Data dict: {self.data_dict}", file=sys.stderr)
 
     def showFrame(self, frame):
         self.update_data_dict()
@@ -44,6 +43,15 @@ class VideoOutput:
         text_overview = cv2.cvtColor(
             self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR
         )
+        mid_cross_rectangle = self.analyser.find_cross(self.analyser.border_mask)
+        cv2.drawContours(
+            text_overview,
+            [],
+            0,
+            (255, 0, 255),
+            2,
+        )
+
         y_offset = 20
         for key, value in self.data_dict.items():
             text = f"{key}: {value}"
@@ -53,7 +61,7 @@ class VideoOutput:
                 (10, y_offset),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
-                (255, 255, 255),
+                (0, 127, 255),
                 1,
             )
             y_offset += 20
@@ -160,29 +168,24 @@ class VideoOutput:
             (0, 0, 255),
         ]  # Define your colors here
 
-        if self.analyser.corners is not None:
-            for index, corner in enumerate(self.analyser.corners):
-                color = colors[
-                    index % len(colors)
-                ]  # This will cycle through the colors
-                print(f"Corner at {corner}")
-                cv2.circle(frame, tuple(corner), 5, color, -1)
-                # Add text above the corner
-                text_position = (
-                    corner[0],
-                    corner[1] - 10,
-                )  # Position the text 10 pixels above the corner
-                cv2.putText(
-                    frame,
-                    f"Corner {index + 1}",
-                    text_position,
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    color,
-                    2,
-                )
-        else:
-            print("No corners found")
+        for index, corner in enumerate(self.analyser.corners):
+            color = colors[index % len(colors)]  # This will cycle through the colors
+            print(f"Corner at {corner}")
+            cv2.circle(frame, tuple(corner), 5, color, -1)
+            # Add text above the corner
+            text_position = (
+                corner[0],
+                corner[1] - 10,
+            )  # Position the text 10 pixels above the corner
+            cv2.putText(
+                frame,
+                f"Corner {index + 1}",
+                text_position,
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                color,
+                2,
+            )
 
         if (
             self.analyser.small_goal_coords is not None

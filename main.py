@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import sys
 import cv2
-from analyse import BallNotFoundError, RobotNotFoundError
+from analyse import RobotNotFoundError
 import VideoDebugger
 import analyse
 import steering
@@ -64,7 +64,7 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.distance_to_closest_border,
                 analyser.border_vector,
                 analyser.corners,
-                analyser.dropoff_coords
+                analyser.dropoff_coords,
             )
         except RobotNotFoundError as e:
             print(f"Robot not found: {e}")
