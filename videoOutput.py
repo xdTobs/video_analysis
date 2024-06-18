@@ -1,4 +1,3 @@
-import sys
 import cv2
 from typing import Dict
 import numpy as np
@@ -17,22 +16,13 @@ class VideoOutput:
         self.data_dict = data_dict
 
     def update_data_dict(self):
-        self.data_dict["Robot position"] = self.analyser.robot_pos
-        self.data_dict["Robot vector"] = self.analyser.robot_vector
-        self.data_dict["Ball vector"] = self.steering_instance.ball_vector
         self.data_dict["Angle"] = self.steering_instance.angle_degrees
         self.data_dict["Signed angle"] = self.steering_instance.signed_angle_degrees
         self.data_dict["Close to Ball"] = self.steering_instance.close_to_ball
-        self.data_dict["Time to switch target"] = (
-            self.steering_instance.time_to_switch_target
-        )
-        self.data_dict["Robot distance to closest border"] = (
-            self.analyser.distance_to_closest_border
-        )
-        self.data_dict["Is ball close to border"] = (
-            self.steering_instance.is_ball_close_to_border
-        )
-
+        self.data_dict["Time to switch target"] = self.steering_instance.time_to_switch_target
+        self.data_dict["Robot distance to closest border"] = self.analyser.distance_to_closest_border
+        self.data_dict["Is ball close to border"] = self.steering_instance.is_ball_close_to_border
+        self.data_dict["Collecting balls"] = self.steering_instance.is_collecting_balls
     def showFrame(self, frame):
         self.update_data_dict()
 
