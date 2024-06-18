@@ -9,3 +9,5 @@ setup_env.sh
 bounds*.txt
 /.idea
 *avi
+*.jpg
+*.png
