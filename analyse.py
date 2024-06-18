@@ -104,8 +104,8 @@ class Analyse:
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
         try:
             self.corners = self.find_border_corners(self.border_mask)
-            self.calculate_course_dimensions()
             self.calculate_goals()
+            self.calculate_course_dimensions()
             self.distance_to_closest_border = self.calculate_distance_to_closest_border(
                 self.robot_pos
             )
@@ -268,23 +268,28 @@ class Analyse:
         )
 
     def calculate_goals(self):
-        print(f"corners: {self.corners}")
         if self.corners is not None:
             # Find the middle of the two corners
             goal_side_right = True
             print(f"Goal side right: {goal_side_right}")
             corner1 = max(self.corners, key=lambda c: sum(c))
-            remaining_corners = [c for c in self.corners if c != corner1]
+            remaining_corners = [c for c in self.corners if not np.array_equal(c, corner1)]
+
             corner3 = min(remaining_corners, key=lambda c: sum(c))
-            remaining_corners.remove(corner3)
+            remaining_corners = [c for c in remaining_corners if not np.array_equal(c, corner3)]
             corner2, corner4 = sorted(remaining_corners, key=lambda c: c[1])
 
+            # Replace self.corners with the corners in the correct order
+            self.corners = [corner1, corner2, corner3, corner4]
+
+            print(f"corners {self.corners}")
+
             if goal_side_right:
-                self.small_goal_coords = (corner2 + corner3) / 2
-                self.large_goal_coords = (corner1 + corner4) / 2
+                self.small_goal_coords = (corner1 + corner2) // 2
+                self.large_goal_coords = (corner3 + corner4) // 2
             else:
-                self.small_goal_coords = (corner1 + corner4) / 2
-                self.large_goal_coords = (corner2 + corner3) / 2
+                self.small_goal_coords = (corner3 + corner4) // 2
+                self.large_goal_coords = (corner1 + corner2) // 2
 
             print(f"Small goal coords: {self.small_goal_coords}")
             print(f"Large goal coords: {self.large_goal_coords}")
@@ -308,7 +313,7 @@ class Analyse:
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
-        print(f"course length px {self.course_height_px} {self.course_length_px}")
+        print(f"course height and length px {self.course_height_px} {self.course_length_px}")
 
         # Heights in pixels cm / px
         # TODO fish eye ???

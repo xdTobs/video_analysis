@@ -147,12 +147,17 @@ class VideoOutput:
                 2,
             )
 
-        colors = [(0, 255, 255), (255, 0, 0), (0, 255, 0), (255, 255, 0)]  # Define your colors here
+        # yellow, blue, green,red
+        colors = [(0, 255, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255)]  # Define your colors here
 
-        for index, corner in enumerate(self.analyser.corners):
-            color = colors[index % len(colors)]  # This will cycle through the colors
-            print(f"Corner at {corner}")
-            cv2.circle(frame, tuple(corner), 5, color, -1)
+        if self.analyser.corners is not None:
+            for index, corner in enumerate(self.analyser.corners):
+                color = colors[index % len(colors)]  # This will cycle through the colors
+                print(f"Corner at {corner}")
+                cv2.circle(frame, tuple(corner), 5, color, -1)
+                # Add text above the corner
+                text_position = (corner[0], corner[1] - 10)  # Position the text 10 pixels above the corner
+                cv2.putText(frame, f"Corner {index + 1}", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         else:
             print("No corners found")
 
@@ -177,22 +182,22 @@ class VideoOutput:
                 -1,
             )
 
-            print(f"Goal vector: {self.analyser.goal_vector}")
-            if self.analyser.translation_vector is not None:
-                cv2.arrowedLine(
-                    frame,
-                    self.analyser.large_goal_coords.astype(int)
-                    + self.analyser.translation_vector.astype(int),
-                    self.analyser.small_goal_coords.astype(int),
-                    (255, 0, 0),
-                    2,
-                )
+        print(f"Goal vector: {self.analyser.goal_vector}")
+        if self.analyser.translation_vector is not None:
+            cv2.arrowedLine(
+                frame,
+                self.analyser.large_goal_coords.astype(int)
+                + self.analyser.translation_vector.astype(int),
+                self.analyser.small_goal_coords.astype(int),
+                (255, 0, 0),
+                2,
+            )
 
-            if self.analyser.dropoff_coords is not None and self.analyser.robot_pos is not None:
-                cv2.arrowedLine(frame, self.analyser.robot_pos.astype(int), self.analyser.dropoff_coords.astype(int), (0, 0, 255), 2)
+        if self.analyser.dropoff_coords is not None and self.analyser.robot_pos is not None:
+            cv2.arrowedLine(frame, self.analyser.robot_pos.astype(int), self.analyser.dropoff_coords.astype(int), (0, 0, 255), 2)
 
-            if self.analyser.delivery_vector is not None:
-                print(f"Delivery vector: {self.analyser.delivery_vector}")
+        if self.analyser.delivery_vector is not None:
+            print(f"Delivery vector: {self.analyser.delivery_vector}")
 
         self.videoDebugger.write_video("result", result_3channel, True)
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
