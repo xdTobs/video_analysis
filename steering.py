@@ -160,7 +160,6 @@ class Steering:
         print(f"Ball vector: {self.ball_vector}")
         print(f"Ball vector length: {dist_to_ball}")
 
-        print("\n\n\n")
 
         try:
             if (

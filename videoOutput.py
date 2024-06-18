@@ -43,7 +43,6 @@ class VideoOutput:
         text_overview = cv2.cvtColor(
             self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR
         )
-        mid_cross_rectangle = self.analyser.find_cross(self.analyser.border_mask)
         cv2.drawContours(
             text_overview,
             [],
@@ -69,6 +68,7 @@ class VideoOutput:
         green_robot_3channel = cv2.cvtColor(
             self.analyser.green_robot_mask, cv2.COLOR_GRAY2BGR
         )
+        cross_rect = Analyse.find_cross_bounding_rectangle(self.analyser.border_mask)
 
         result_binary = cv2.bitwise_or(
             self.analyser.white_mask, self.analyser.orange_mask
@@ -235,6 +235,15 @@ class VideoOutput:
             print(f"Delivery vector: {self.analyser.delivery_vector}")
 
         self.videoDebugger.write_video("result", result_3channel, True)
+
+        for r in cross_rect:
+            cv2.rectangle(
+                result_3channel,
+                (r[0], r[1]),
+                (r[0] + r[2], r[1] + r[3]),
+                (0, 0, 255),
+                2,
+            )
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
         im2 = cv2.resize(result_3channel, (640, 360))
         im3 = cv2.resize(text_overview, (640, 360))
