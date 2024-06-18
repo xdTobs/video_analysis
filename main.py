@@ -36,6 +36,7 @@ def run_video(host, webcam_index, online, port=65438):
         "Close to Ball": steering_instance.close_to_ball,
         "Time to switch target": steering_instance.time_to_switch_target,
         "Distance to closest border": analyser.distance_to_closest_border,
+        "Collecting balls": steering_instance.is_collecting_balls,
     }
 
     video_output = videoOutput.VideoOutput(
@@ -121,5 +122,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     run_video(
-        host=HOST, webcam_index=int(WEBCAM_INDEX), online=False, port=int(PORT)
+        host=HOST, webcam_index=int(WEBCAM_INDEX), online=not is_offline, port=int(PORT)
     )

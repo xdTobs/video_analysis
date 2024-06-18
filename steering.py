@@ -4,7 +4,7 @@ import math
 import time
 from analyse import BallNotFoundError, RobotNotFoundError, BorderNotFoundError
 import RobotInterface
-from utils import angle_between_vectors, angle_between_vectors_signed, coordinates_to_vector
+from utils import angle_between_vectors, angle_between_vectors_signed
 
 
 class Steering:
@@ -28,7 +28,7 @@ class Steering:
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
         self.distance_to_delivery_point = 5  # The distance where we want to reverse belt and deliver balls
-        self.collecting_balls = True
+        self.is_collecting_balls = False
 
     def find_ball_vector(
             self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray
@@ -43,8 +43,7 @@ class Steering:
             distance_to_target = np.linalg.norm(self.target_position - robot_pos)
             if self.time_to_switch_target < self.update_interval:
                 if (
-                        distance_to_target <= self.distance_threshold_max
-                        and distance_to_target >= self.distance_threshold_min
+                        self.distance_threshold_max >= distance_to_target >= self.distance_threshold_min
                 ):
                     print(
                         f"Using previous target position {self.target_position} as less than {self.update_interval} seconds have passed and within distance threshold."
@@ -54,9 +53,9 @@ class Steering:
                     print(
                         f"Previous target position is too far (distance {distance_to_target}). Resetting timer."
                     )
-        self.collecting_balls = True
+        self.is_collecting_balls = True
         if len(keypoints) == 0:
-            self.collecting_balls = False  #TODO Når "True" skal robotten aflevere bolde.
+            self.is_collecting_balls = False  #TODO Når "True" skal robotten aflevere bolde.
             raise BallNotFoundError("No balls to be used for vector calculation")
         if robot_pos is None:
             raise RobotNotFoundError("No Robot to be used for vector calculation")
@@ -104,7 +103,7 @@ class Steering:
             raise BorderNotFoundError(
                 "No distance to closest border to be used for program selection"
             )
-        if not self.collecting_balls:
+        if not self.is_collecting_balls:
             self.deliver_balls_to_target(robot_pos, dropoff_coords)
         self.ball_vector = self.find_ball_vector(waypoints, robot_pos, robot_vector)
         if self.ball_vector is None:
@@ -196,9 +195,9 @@ class Steering:
         vector_to_position = target_pos - robot_pos
         distance_to_target = np.linalg.norm(vector_to_position)
 
-        if distance_to_target < self.distance_threshold_min:
+        if distance_to_target < float(self.distance_to_delivery_point):
             print("Already at the target position or too close to move")
-            return
+            return False
 
         # Normalize the vector to get direction
         direction_to_target = vector_to_position / distance_to_target
@@ -211,13 +210,14 @@ class Steering:
         if distance_to_target <= self.distance_to_delivery_point and angle_degrees < 1:
             return True
 
-        if distance_to_target < self.collect_ball_distance:
-            self.close_to_ball = True
-            print("Ball is close")
-            self.collect_ball(self.signed_angle_degrees, self.angle_degrees, distance_to_target)
-            return False
-        else:
-            print("Ball is not close")
-            self.close_to_ball = False
-            self.get_near_ball(self.signed_angle_degrees, self.angle_degrees, distance_to_target)
-            return False
+        if self.is_collecting_balls:
+            if distance_to_target < self.collect_ball_distance:
+                self.close_to_ball = True
+                print("Ball is close")
+                self.collect_ball(self.signed_angle_degrees, self.angle_degrees, distance_to_target)
+                return False
+            else:
+                print("Ball is not close")
+                self.close_to_ball = False
+                self.get_near_ball(self.signed_angle_degrees, self.angle_degrees, distance_to_target)
+                return False

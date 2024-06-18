@@ -18,7 +18,7 @@ class Analyse:
         self.robot_vector = None
         self.goal_vector = None
         self.delivery_vector = None
-        self.corners = None
+        self.corners = np.ndarray((4, 2))
         self.border_vector = None
         self.small_goal_coords: np.ndarray = None
         self.large_goal_coords: np.ndarray = None
@@ -29,6 +29,7 @@ class Analyse:
         self.translation_vector = None
         self.green_points_not_translated = None
         self.dropoff_coords = None
+        self.should_calculate_corners = True
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -271,18 +272,12 @@ class Analyse:
         if self.corners is not None:
             # Find the middle of the two corners
             goal_side_right = True
-            print(f"Goal side right: {goal_side_right}")
-            corner1 = max(self.corners, key=lambda c: sum(c))
-            remaining_corners = [c for c in self.corners if not np.array_equal(c, corner1)]
 
-            corner3 = min(remaining_corners, key=lambda c: sum(c))
-            remaining_corners = [c for c in remaining_corners if not np.array_equal(c, corner3)]
-            corner2, corner4 = sorted(remaining_corners, key=lambda c: c[1])
+            corner1 = self.corners[0]
+            corner2 = self.corners[1]
+            corner3 = self.corners[2]
+            corner4 = self.corners[3]
 
-            # Replace self.corners with the corners in the correct order
-            self.corners = [corner1, corner2, corner3, corner4]
-
-            print(f"corners {self.corners}")
 
             if goal_side_right:
                 self.small_goal_coords = (corner1 + corner2) // 2
@@ -372,6 +367,16 @@ class Analyse:
                 x, y, w, h = cv2.boundingRect(approx)
                 # cv2.rectangle(image, (x, y), (x + w, y + h), (36, 255, 12), 2)
                 corners = approx.squeeze()
+
+        corner1 = max(corners, key=lambda ci: sum(ci))
+        remaining_corners = [c for c in corners if not np.array_equal(c, corner1)]
+
+        corner3 = min(remaining_corners, key=lambda ci: sum(ci))
+        remaining_corners = [c for c in remaining_corners if not np.array_equal(c, corner3)]
+        corner2, corner4 = sorted(remaining_corners, key=lambda ci: ci[1])
+
+        # Replace self.corners with the corners in the correct order
+        corners = np.array([corner1, corner2, corner3, corner4])
         if corners is None:
             raise BorderNotFoundError()
         return corners
