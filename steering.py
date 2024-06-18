@@ -4,7 +4,7 @@ import math
 import time
 from analyse import BallNotFoundError, RobotNotFoundError, BorderNotFoundError
 import RobotInterface
-from utils import angle_between_vectors, angle_between_vectors_signed,coordinates_to_vector
+from utils import angle_between_vectors, angle_between_vectors_signed, coordinates_to_vector
 
 
 class Steering:
@@ -56,7 +56,7 @@ class Steering:
                     )
         self.collecting_balls = True
         if len(keypoints) == 0:
-            self.collecting_balls = False #TODO Når "True" skal robotten aflevere bolde.
+            self.collecting_balls = False  #TODO Når "True" skal robotten aflevere bolde.
             raise BallNotFoundError("No balls to be used for vector calculation")
         if robot_pos is None:
             raise RobotNotFoundError("No Robot to be used for vector calculation")
@@ -93,7 +93,7 @@ class Steering:
             robot_pos: np.ndarray,
             robot_vector: np.ndarray,
             distance_to_closest_border: float,
-            dropoff_coords : np.ndarray,
+            dropoff_coords: np.ndarray,
     ):
         # if we have a target and no keypoints we still want to catch last ball
         if robot_pos is None:
@@ -191,8 +191,6 @@ class Steering:
         if self.drive_to_point(robot_pos, dropoff_cords):
             self.stop_belt()
 
-
-
     def drive_to_point(self, robot_pos: np.ndarray, target_pos: np.ndarray):
         # Calculate the vector to the target position
         vector_to_position = target_pos - robot_pos
@@ -204,7 +202,6 @@ class Steering:
 
         # Normalize the vector to get direction
         direction_to_target = vector_to_position / distance_to_target
-
 
         # Calculate the signed angle between the robot's orientation and the target direction
         signed_angle_radians = angle_between_vectors_signed(robot_pos, direction_to_target)
@@ -224,9 +221,3 @@ class Steering:
             self.close_to_ball = False
             self.get_near_ball(self.signed_angle_degrees, self.angle_degrees, distance_to_target)
             return False
-
-
-
-
-
-
