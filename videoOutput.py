@@ -35,7 +35,7 @@ class VideoOutput:
 
         robot_arrows_on_frame = frame
 
-        height, width = 360, 640
+        height, width = 2 * 360, 2 * 640
         text_overview = cv2.cvtColor(
             self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR
         )
@@ -58,7 +58,7 @@ class VideoOutput:
         green_robot_3channel = cv2.cvtColor(
             self.analyser.green_robot_mask, cv2.COLOR_GRAY2BGR
         )
-        cross_rect = Analyse.find_cross_bounding_rectangle(self.analyser.border_mask)
+        cross_rect, _ = Analyse.find_cross_bounding_rectangle(self.analyser.border_mask)
 
         result_binary = cv2.bitwise_or(
             self.analyser.white_mask, self.analyser.orange_mask
@@ -235,11 +235,11 @@ class VideoOutput:
                 (0, 0, 255),
                 2,
             )
-        im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
-        im2 = cv2.resize(result_3channel, (640, 360))
-        im3 = cv2.resize(text_overview, (640, 360))
-        im3 = cv2.resize(border_mask, (640, 360))
-        im4 = cv2.resize(green_robot_3channel, (640, 360))
+        im1 = cv2.resize(robot_arrows_on_frame, (width, height))
+        im2 = cv2.resize(result_3channel, (width, height))
+        im3 = cv2.resize(text_overview, (width, height))
+        im3 = cv2.resize(border_mask, (width, height))
+        im4 = cv2.resize(green_robot_3channel, (width, height))
 
         hstack1 = np.hstack((im1, im2))
         hstack2 = np.hstack((im3, im4))

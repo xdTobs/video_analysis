@@ -141,8 +141,9 @@ class Analyse:
             lower = np.array([0, 0, 200])
             upper = np.array([179, 45, 255])
         elif out_name == "green-mask":
+            # hsl(163, 74%, 73%)
             lower = np.array([31, 30, 200])
-            upper = np.array([80, 255, 255])
+            upper = np.array([120, 255, 255])
         elif out_name == "red-mask":
             lower = np.array([0, 70, 50])
             upper = np.array([10, 255, 255])
@@ -330,7 +331,6 @@ class Analyse:
     # returns the x, y, width and height of a rectangle that contains the cross
     @staticmethod
     def find_cross_bounding_rectangle(mask: np.ndarray) -> np.ndarray:
-        cv2.imwrite("debug_img/og.jpg", mask)
         if len(mask.shape) != 2 or mask.dtype != np.uint8:
             raise ValueError(
                 "Input mask must be a single-channel binary image of type uint8"
@@ -339,16 +339,16 @@ class Analyse:
         h, w = mask.shape[:2]
         flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
         cv2.floodFill(mask, flood_fill_mask, (0, 0), 255)
-        cv2.imwrite("debug_img/after.jpg", mask)
 
         mask = cv2.bitwise_not(mask)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Filter and detect crosses or plus signs
         mid_cross_rect = []
+        approx_contour = None
         for contour in contours:
             # Approximate the contour to reduce the number of points
-            epsilon = 0.02 * cv2.arcLength(contour, True)
+            epsilon = 0.01 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
 
             # Check if the approximated contour has the characteristics of a cross
@@ -361,7 +361,16 @@ class Analyse:
                 # Check if the contour has an aspect ratio close to 1 (square-like shape)
                 if 0.8 < aspect_ratio < 1.2 and w > 30 and h > 30:
                     mid_cross_rect.append((x, y, w, h))
-        return mid_cross_rect
+                    approx_contour = approx
+        # draw the bounding rectangle on mask
+        # mask_bgr = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+        # for x, y, w, h in mid_cross_rect:
+        #     cv2.rectangle(mask_bgr, (x, y), (x + w, y + h), (0, 255, 255), 2)
+        # if approx_contour is not None:
+        #     cv2.drawContours(mask_bgr, [approx_contour], -1, (0, 255, 0), 2)
+        # cv2.imwrite("debug_img/after.jpg", mask_bgr)
+
+        return (mid_cross_rect, approx_contour)
 
     @staticmethod
     def isolate_borders(
@@ -494,6 +503,5 @@ class AnalyseError(Exception):
 if __name__ == "__main__":
     img = cv2.imread("bin.jpg")
     bounds_dict_entry = np.array([0, 0, 0, 0])
-    img = cv2.bitwise_not(img)
-    binary_img = Analyse.apply_threshold(img, bounds_dict_entry, "test")
-    Analyse.find_cross_bounding_rectangle(binary_img)
+    binary_img = Analyse.apply_threshold(img, bounds_dict_entry, "white-ball")
+    bounding_rect, contour = Analyse.find_cross_bounding_rectangle(binary_img)

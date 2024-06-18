@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+import cProfile
+import io
 import os
+import pstats
 from dotenv import load_dotenv
 import sys
 import cv2
@@ -70,6 +73,7 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.border_vector,
                 analyser.corners,
                 analyser.dropoff_coords,
+                border_mask=analyser.border_mask,
             )
         except RobotNotFoundError as e:
             print(f"Robot not found: {e}")
@@ -127,6 +131,17 @@ if __name__ == "__main__":
     if should_quit:
         print("Exiting... Please provide the missing values in the .env file")
         sys.exit(1)
+
+    # pr = cProfile.Profile()
+    # pr.enable()  # Start profiling
     run_video(
         host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
     )
+
+    # pr.disable()  # Stop profiling
+
+    # s = io.StringIO()
+    # ps = pstats.Stats(pr, stream=s).sort_stats("cumulative")
+    # ps.print_stats()  # Print the profiling results
+    # with open("profile_results.txt", "w") as f:
+    #     f.write(s.getvalue())

@@ -17,10 +17,10 @@ class Steering:
         self.is_ball_close_to_border = False
         self.last_target_time = 0
         self.target_position = None
-        self.update_interval = 10  # Time in seconds
+        self.update_interval = 30  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
         self.distance_threshold_min = 100
-        self.collect_ball_distance = 250
+        self.collect_ball_distance = 150
         self.signed_angle_radians = None
         self.signed_angle_degrees = None
         self.angle_radians = None
@@ -33,9 +33,44 @@ class Steering:
             30  # The distance where we want to reverse belt and deliver balls
         )
         self.is_collecting_balls = True
+        # first is if we are turning second is if we are turning right
+        self.turn_start = None
+
+    # checks if we can go to ball without crashing into the mid cross
+    def check_no_obstacles(
+        self, robot_pos: np.ndarray, target_pos: np.ndarray, obstacles: np.ndarray
+    ) -> bool:
+        # if robot_pos is None or target_pos is None or obstacles is None:
+        #     return False
+
+        # # Define the vector from the robot to the target
+        # direction_vector = target_pos - robot_pos
+        # distance_to_target = np.linalg.norm(direction_vector)
+        # direction_unit_vector = direction_vector / distance_to_target
+
+        # # Check each obstacle
+        # for obstacle in obstacles:
+        #     obstacle_vector = obstacle - robot_pos
+        #     obstacle_distance = np.linalg.norm(obstacle_vector)
+        #     obstacle_unit_vector = obstacle_vector / obstacle_distance
+
+        #     # Project the obstacle vector onto the direction vector
+        #     projection_length = np.dot(obstacle_vector, direction_unit_vector)
+        #     if 0 < projection_length < distance_to_target:
+        #         # Find the perpendicular distance from the obstacle to the direction line
+        #         perpendicular_distance = np.linalg.norm(
+        #             obstacle_vector - projection_length * direction_unit_vector
+        #         )
+        #         if perpendicular_distance < self.distance_to_border_threshold:
+        #             return False  # Obstacle detected within the path
+        return True  # No obstacles detected
 
     def find_ball_vector(
-        self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray
+        self,
+        keypoints: np.ndarray,
+        robot_pos: np.ndarray,
+        robot_vector: np.ndarray,
+        border_mask,
     ) -> np.ndarray:
         self.current_time = time.time()
         self.time_to_switch_target = self.current_time - self.last_target_time
@@ -71,6 +106,12 @@ class Steering:
 
         # Sort based on distance
         point_distances = sorted(point_distances, key=lambda x: x[1])
+        is_not_blocked = self.check_no_obstacles(
+            robot_pos=robot_pos,
+            target_pos=ball_pos,
+            obstacles=Analyse.find_cross_bounding_rectangle(border_mask),
+        )
+        print("is blocked: ", is_not_blocked)
 
         for idx, point_distance in enumerate(point_distances):
             if self.has_valid_path(robot_pos, robot_vector, point_distance[0].pt):
@@ -119,6 +160,7 @@ class Steering:
         border_vector: np.ndarray,
         corners: np.ndarray,
         dropoff_coords: np.ndarray,
+        border_mask,
     ):
 
         # if we have a target and no keypoints we still want to catch last ball
@@ -133,7 +175,9 @@ class Steering:
         if corners is None:
             raise TypeError("No corners found in pick_program")
 
-        self.ball_vector = self.find_ball_vector(keypoints, robot_pos, robot_vector)
+        self.ball_vector = self.find_ball_vector(
+            keypoints, robot_pos, robot_vector, border_mask
+        )
         if not self.is_collecting_balls:
             self.deliver_balls_to_target(robot_vector, dropoff_coords, robot_pos)
         if self.ball_vector is None:
@@ -181,29 +225,24 @@ class Steering:
             return
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        if angle_degrees < 8:
-            # move 10cm at full speeed
-            self.robot_interface.send_command("move", 100, 50)
-            print("Moving forward")
+        if -8 < angle_degrees < 8:
+            self.robot_interface.send_command("move", 100, 60)
         else:
             turn = signed_angle_degrees * -1 / 3
-            if angle_degrees < 20:
-                self.robot_interface.send_command("turn", turn, 20)
-            else:
-                self.robot_interface.send_command("turn", turn, 50)
+            self.robot_interface.send_command("turn", turn, 30)
+        # if -8 < angle_degrees < 8:
+        #     self.robot_interface.send_command("move", 100, 20)
+        #     print("Moving forward")
+        # else:
+        #     turn = signed_angle_degrees * -1 / 3
+        #     self.robot_interface.send_command("turn", turn, 20)
 
     def collect_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        if angle_degrees < 2:
-            self.robot_interface.send_command("move", 30, 20)
-            print("Moving forward")
+        if -3 < angle_degrees < 3:
+            self.robot_interface.send_command("move", 100, 15)
         else:
-            # turn 10 degrees to overcorrect so we look slightly to the side of the ball.
             turn = signed_angle_degrees * -1 / 3
-            speed = 2 * (turn if turn > 0 else turn * -1)
-            clamped_speed = sorted((10, speed, 40))[1]
-
-            self.robot_interface.send_command("turn", turn, clamped_speed)
-        pass
+            self.robot_interface.send_command("turn", turn, 20)
 
     def start_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=100)
