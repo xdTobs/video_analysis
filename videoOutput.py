@@ -153,8 +153,6 @@ class VideoOutput:
             color = colors[index % len(colors)]  # This will cycle through the colors
             print(f"Corner at {corner}")
             cv2.circle(frame, tuple(corner), 5, color, -1)
-        else:
-            print("No corners found")
 
         if (
                 self.analyser.small_goal_coords is not None

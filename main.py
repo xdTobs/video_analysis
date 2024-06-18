@@ -76,7 +76,8 @@ def run_video(host, webcam_index, online, port=65438):
 
         frame_number += 1
 
-        if cv2.waitKey(25) & 0xFF == ord("q"):
+        key = cv2.waitKey(25) & 0xFF
+        if key == ord("q"):
             videoDebugger.close_videos()
             video.release()
             cv2.destroyAllWindows()
@@ -84,6 +85,8 @@ def run_video(host, webcam_index, online, port=65438):
                 steering_instance.stop_belt()
                 steering_instance.disconnect()
             break
+        elif key == ord("p"):
+            cv2.waitKey(-1)
 
     video.release()
     cv2.destroyAllWindows()
