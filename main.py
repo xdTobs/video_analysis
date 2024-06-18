@@ -23,6 +23,9 @@ def run_video(host, webcam_index, online, port=65438):
     # video = cv2.VideoCapture(webcam_index)
     elif platform.system() == "Linux" or platform.system() == "Darwin":
         video = cv2.VideoCapture(webcam_index)
+        if webcam_index.isdigit():
+            webcam_index = int(webcam_index)
+        video = cv2.VideoCapture(webcam_index)
     else:
         raise Exception("Unsupported platform. Please use Windows, Linux or Mac.")
     videoDebugger = VideoDebugger.VideoDebugger()
