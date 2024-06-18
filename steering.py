@@ -12,10 +12,12 @@ class Steering:
         self.robot_interface = RobotInterface.RobotInterface(host, port, online)
         if online:
             self.robot_interface.connect()
+        
         self.ball_vector = None
+        self.is_ball_close_to_border = False
         self.last_target_time = 0
         self.target_position = None
-        self.update_interval = 10  # Time in seconds
+        self.update_interval = 0  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
         self.distance_threshold_min = 100
         self.collect_ball_distance = 250
@@ -26,8 +28,7 @@ class Steering:
         self.close_to_ball = False
         self.current_time = 0
         self.time_to_switch_target = 0
-        self.distance_to_border_threshold = 100
-        
+        self.distance_to_border_threshold = 100        
 
     def find_ball_vector(
         self, keypoints: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray    
@@ -85,15 +86,35 @@ class Steering:
 
     def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
         return True
+    
+
+    def calculate_is_ball_close_to_borders(self, ball_pos: np.ndarray, corners: np.ndarray) -> bool:
+        x_min, y_min = np.min(corners, axis=0)
+        x_max, y_max = np.max(corners, axis=0)
+
+        x, y = ball_pos
+        distance_to_left_border = x - x_min
+        distance_to_right_border = x_max - x
+        distance_to_bottom_border = y - y_min
+        distance_to_top_border = y_max - y
+
+        if (distance_to_left_border < self.distance_to_border_threshold or
+            distance_to_right_border < self.distance_to_border_threshold or
+            distance_to_bottom_border < self.distance_to_border_threshold or
+            distance_to_top_border < self.distance_to_border_threshold):
+            return True
+        return False
 
     def pick_program(
         self,
         keypoints: np.ndarray,
         robot_pos: np.ndarray,
         robot_vector: np.ndarray,
-        distance_to_closest_border: float,
-        border_vector: np.ndarray
+        robot_distance_to_closest_border: float,
+        border_vector: np.ndarray,
+        corners: np.ndarray
     ):
+        
         # if we have a target and no keypoints we still want to catch last ball
         if len(keypoints) == 0 and not self.target_position:
             raise BallNotFoundError("No balls to be used for program selection")
@@ -101,13 +122,20 @@ class Steering:
             raise RobotNotFoundError("No Robot to be used for program selection")
         if robot_vector is None:
             raise RobotNotFoundError("No Robot vector to be used for program selection")
-        if distance_to_closest_border is None:
+        if robot_distance_to_closest_border is None:
             raise BorderNotFoundError(
                 "No distance to closest border to be used for program selection"
             )
+        if corners is None:
+            raise TypeError(
+                "No corners found in pick_program"
+            )
+        
         self.ball_vector = self.find_ball_vector(keypoints, robot_pos, robot_vector)
+
         if self.ball_vector is None:
             raise BallNotFoundError("No ball vector to be used for program selection")
+    
 
         self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.ball_vector)  # type: ignore
         self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
@@ -115,8 +143,21 @@ class Steering:
         self.angle_degrees = math.degrees(self.angle_radians)
 
         dist_to_ball = math.sqrt(self.ball_vector[0] ** 2 + self.ball_vector[1] ** 2)
+
+        self.is_ball_close_to_border = self.calculate_is_ball_close_to_borders(self.target_position, corners)
         print(f"Ball vector: {self.ball_vector}")
         print(f"Ball vector length: {dist_to_ball}")
+
+        print("\n\n\n")
+
+        print(f"corners from STEERING: {corners}")   
+        print("IS BALL CLOSE TO BORDER: ", is_ball_close_to_border)
+
+        print("\n\n\n")
+
+    
+     
+
 
         try:
             #if dist_to_ball < self.collect_ball_distance and distance_to_closest_border < self.distance_to_border_threshold:
@@ -134,13 +175,13 @@ class Steering:
 
                # return
 
-            if dist_to_ball < self.collect_ball_distance and distance_to_closest_border > self.distance_to_border_threshold:
+            if dist_to_ball < self.collect_ball_distance and robot_distance_to_closest_border > self.distance_to_border_threshold:
                 self.close_to_ball = True
                 print("Ball is close")
                 self.collect_ball(self.signed_angle_degrees, self.angle_degrees, dist_to_ball)
                 return
             
-            if dist_to_ball > self.collect_ball_distance and distance_to_closest_border > self.distance_to_border_threshold:
+            if dist_to_ball > self.collect_ball_distance and robot_distance_to_closest_border > self.distance_to_border_threshold:
                 print("Ball is not close")
                 self.close_to_ball = False
                 self.get_near_ball(self.signed_angle_degrees, self.angle_degrees, dist_to_ball)

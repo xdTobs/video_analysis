@@ -462,6 +462,11 @@ class Analyse:
         angle_radians = np.arccos(np.clip(cos_theta, -1.0, 1.0))  # Clip to handle numerical issues
         angle_degrees = np.degrees(angle_radians)
         return angle_radians, angle_degrees
+    
+    def get_border_corners(self):
+        if self.corners is None:
+            raise BorderNotFoundError("No border corners found")
+        return self.corners
 
 
 def read_bounds():

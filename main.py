@@ -35,11 +35,13 @@ def run_video(host, webcam_index, online, port=65438):
         "Robot position": analyser.robot_pos,
         "Robot vector": analyser.robot_vector,
         "Ball vector": steering_instance.ball_vector,
+        "Is ball close to border": steering_instance.is_ball_close_to_border,
         "Angle": steering_instance.angle_degrees,
         "Signed angle": steering_instance.signed_angle_degrees,
-        "Close to Ball": steering_instance.close_to_ball,
+        "Robot close to Ball": steering_instance.close_to_ball,
         "Time to switch target": steering_instance.time_to_switch_target,
-        "Distance to closest border": analyser.distance_to_closest_border,
+        "Robot distance to closest border": analyser.distance_to_closest_border,
+        
     }
 
     video_output = videoOutput.VideoOutput(
@@ -67,6 +69,8 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.robot_vector,
                 analyser.distance_to_closest_border,
                 analyser.border_vector,
+                analyser.corners
+                
             )
         except BallNotFoundError as e:
             print(f"Ball not found: {e}")
