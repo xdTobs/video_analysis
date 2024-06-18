@@ -63,13 +63,15 @@ class VideoOutput:
         result_binary = cv2.bitwise_or(
             self.analyser.white_mask, self.analyser.orange_mask
         )
-        result_binary = self.analyser.orange_mask
+        # result_binary = self.analyser.orange_mask
         result_3channel = cv2.cvtColor(result_binary, cv2.COLOR_GRAY2BGR)
-        # result_3channel = cv2.cvtColor(self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR)
-        # for keypoint in self.analyser.keypoints:
-        #     center = (int(keypoint.pt[0]), int(keypoint.pt[1]))
-        #     radius = int(keypoint.size / 2)
-        #     cv2.circle(result_3channel, center, radius, (0, 255, 0), 4)
+        # result_3channel = cv2.cvtColor(
+        # self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR
+        # )
+        for keypoint in self.analyser.keypoints:
+            center = (int(keypoint.pt[0]), int(keypoint.pt[1]))
+            radius = int(keypoint.size / 2)
+            cv2.circle(result_3channel, center, radius, (0, 255, 0), 4)
 
         if self.analyser.robot_pos is not None:
             center = (int(self.analyser.robot_pos[0]), int(self.analyser.robot_pos[1]))
@@ -223,16 +225,16 @@ class VideoOutput:
                 2,
             )
 
-        # self.videoDebugger.write_video("result", result_3channel, True)
+        self.videoDebugger.write_video("result", result_3channel, True)
 
-        # for r in cross_rect:
-        #     cv2.rectangle(
-        #         result_3channel,
-        #         (r[0], r[1]),
-        #         (r[0] + r[2], r[1] + r[3]),
-        #         (0, 0, 255),
-        #         2,
-        #     )
+        for r in cross_rect:
+            cv2.rectangle(
+                result_3channel,
+                (r[0], r[1]),
+                (r[0] + r[2], r[1] + r[3]),
+                (0, 0, 255),
+                2,
+            )
         im1 = cv2.resize(robot_arrows_on_frame, (640, 360))
         im2 = cv2.resize(result_3channel, (640, 360))
         im3 = cv2.resize(text_overview, (640, 360))
