@@ -30,7 +30,7 @@ class Steering:
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
         self.distance_to_delivery_point = (
-            100  # The distance where we want to reverse belt and deliver balls
+            30  # The distance where we want to reverse belt and deliver balls
         )
         self.is_collecting_balls = True
 

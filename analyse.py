@@ -46,7 +46,7 @@ class Analyse:
         self.bounds_dict = read_bounds()
         self.distance_to_closest_border = float("inf")
 
-        self.cam_height = 178
+        self.cam_height = 220
         self.robot_height = 47
         self.course_length_cm = 167
         self.course_width_cm = 121
@@ -136,22 +136,29 @@ class Analyse:
     def apply_threshold(
         image: np.ndarray, bounds_dict_entry: np.ndarray, out_name: str
     ) -> np.ndarray:
-        bounds = bounds_dict_entry[0:3]
-        variance = bounds_dict_entry[3]
-
-        lower = np.clip(bounds - variance, 0, 255)
-        upper = np.clip(bounds + variance, 0, 255)
-
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         if out_name == "white-ball":
-            lower = np.array([0, 0, 180])
-            upper = np.array([179, 65, 255])
+            lower = np.array([0, 0, 200])
+            upper = np.array([179, 45, 255])
+        elif out_name == "green-mask":
+            lower = np.array([31, 30, 200])
+            upper = np.array([80, 255, 255])
+        elif out_name == "red-mask":
+            lower = np.array([0, 70, 50])
+            upper = np.array([10, 255, 255])
+        elif out_name == "orange-ball":
+            lower = np.array([10, 5, 220])
+            upper = np.array([30, 255, 255])
+        elif out_name == "border":
+            lower = np.array([0, 100, 100])
+            upper = np.array([20, 255, 255])
 
+        mask = cv2.inRange(hsv, lower, upper)
+        mask = cv2.bitwise_and(image, image, mask=mask)
+        mask[np.all(mask != [0, 0, 0], axis=-1)] = [255, 255, 255]
         frame_HSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(frame_HSV, lower, upper)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        mask = cv2.dilate(mask, kernel, iterations=2)
-        mask = cv2.erode(mask, kernel, iterations=2)
+        mask = cv2.inRange(frame_HSV, lower, upper)
         return mask
 
     def find_triple_green_robot(self, green_mask: np.ndarray):
@@ -277,7 +284,7 @@ class Analyse:
                 self.large_goal_coords, self.small_goal_coords
             )
 
-            self.translation_vector = self.goal_vector * 4 / 5
+            self.translation_vector = self.goal_vector * 14 / 15
 
             self.dropoff_coords = self.large_goal_coords + self.translation_vector
             self.delivery_vector = coordinates_to_vector(
