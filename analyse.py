@@ -105,14 +105,7 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_course_dimensions()
             self.calculate_goals()
-<<<<<<< HEAD
             self.distance_to_closest_border, self.border_vector = self.calculate_distance_to_closest_border(self.robot_pos)
-
-=======
-            self.distance_to_closest_border = self.calculate_distance_to_closest_border(
-                self.robot_pos
-            )
->>>>>>> 751c565faa43333dd445fb4ca7dadb7e571acf65
 
         except BorderNotFoundError as e:
             print(e)
