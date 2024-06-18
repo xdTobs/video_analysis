@@ -19,27 +19,26 @@ class VideoOutput:
         self.data_dict["Angle"] = self.steering_instance.angle_degrees
         self.data_dict["Signed angle"] = self.steering_instance.signed_angle_degrees
         self.data_dict["Close to Ball"] = self.steering_instance.close_to_ball
-        self.data_dict["Time to switch target"] = self.steering_instance.time_to_switch_target
-        self.data_dict["Robot distance to closest border"] = self.analyser.distance_to_closest_border
-        self.data_dict["Is ball close to border"] = self.steering_instance.is_ball_close_to_border
+        self.data_dict["Time to switch target"] = (
+            self.steering_instance.time_to_switch_target
+        )
+        self.data_dict["Robot distance to closest border"] = (
+            self.analyser.distance_to_closest_border
+        )
+        self.data_dict["Is ball close to border"] = (
+            self.steering_instance.is_ball_close_to_border
+        )
         self.data_dict["Collecting balls"] = self.steering_instance.is_collecting_balls
+
     def showFrame(self, frame):
         self.update_data_dict()
 
         robot_arrows_on_frame = frame
 
         height, width = 360, 640
-        # text_overview = np.zeros((height, width, 3), dtype=np.uint8)
         text_overview = cv2.cvtColor(
             self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR
         )
-        #cv2.drawContours(
-        #    text_overview,
-        #    [],
-        #    0,
-        #    (255, 0, 255),
-        #    2,
-        #)
         border_mask = cv2.cvtColor(self.analyser.border_mask, cv2.COLOR_GRAY2BGR)
 
         y_offset = 20
@@ -74,8 +73,6 @@ class VideoOutput:
         if self.analyser.robot_pos is not None:
             center = (int(self.analyser.robot_pos[0]), int(self.analyser.robot_pos[1]))
             radius = 30
-            print(f"Green robot at {center}")
-
             cv2.circle(green_robot_3channel, center, radius, (255, 0, 0), 4)
 
         if self.analyser.green_points_not_translated is not None:
@@ -123,9 +120,6 @@ class VideoOutput:
                 self.analyser.robot_pos_not_translated
                 + self.analyser.robot_vector_not_translated
             )
-            print(f"Robot vector end: {robot_vector_end}")
-            print(f"Robot pos: {self.analyser.robot_pos_not_translated}")
-            print(f"Robot vector: {self.analyser.robot_vector_not_translated}")
             cv2.arrowedLine(
                 robot_arrows_on_frame,
                 tuple(self.analyser.robot_pos_not_translated.astype(int)),
@@ -161,12 +155,25 @@ class VideoOutput:
 
         if self.analyser.corners is not None:
             for index, corner in enumerate(self.analyser.corners):
-                color = colors[index % len(colors)]  # This will cycle through the colors
-                #print(f"Corner at {corner}")
+                color = colors[
+                    index % len(colors)
+                ]  # This will cycle through the colors
+
                 cv2.circle(frame, tuple(corner), 5, color, -1)
                 # Add text above the corner
-                text_position = (corner[0], corner[1] - 10)  # Position the text 10 pixels above the corner
-                cv2.putText(frame, f"Corner {index + 1}", text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                text_position = (
+                    corner[0],
+                    corner[1] - 10,
+                )  # Position the text 10 pixels above the corner
+                cv2.putText(
+                    frame,
+                    f"Corner {index + 1}",
+                    text_position,
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    color,
+                    2,
+                )
         else:
             print("No corners found")
 
@@ -174,8 +181,7 @@ class VideoOutput:
             self.analyser.small_goal_coords is not None
             and self.analyser.large_goal_coords is not None
         ):
-            #print(f"Small goal at {self.analyser.small_goal_coords}")
-            #print(f"Large goal at {self.analyser.large_goal_coords}")
+
             cv2.circle(
                 frame,
                 tuple(self.analyser.small_goal_coords.astype(int)),
@@ -191,7 +197,6 @@ class VideoOutput:
                 -1,
             )
 
-        print(f"Goal vector: {self.analyser.goal_vector}")
         if self.analyser.translation_vector is not None:
             cv2.arrowedLine(
                 frame,
@@ -202,13 +207,20 @@ class VideoOutput:
                 2,
             )
 
-        if self.analyser.dropoff_coords is not None and self.analyser.robot_pos is not None:
-            cv2.circle(frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1)
-            cv2.arrowedLine(frame, self.analyser.robot_pos.astype(int), self.analyser.dropoff_coords.astype(int),
-                            (0, 0, 255), 2)
-
-        if self.analyser.delivery_vector is not None:
-            print(f"Delivery vector: {self.analyser.delivery_vector}")
+        if (
+            self.analyser.dropoff_coords is not None
+            and self.analyser.robot_pos is not None
+        ):
+            cv2.circle(
+                frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1
+            )
+            cv2.arrowedLine(
+                frame,
+                self.analyser.robot_pos.astype(int),
+                self.analyser.dropoff_coords.astype(int),
+                (0, 0, 255),
+                2,
+            )
 
         self.videoDebugger.write_video("result", result_3channel, True)
 

@@ -66,39 +66,38 @@ class Analyse:
             self.apply_threshold, "white-ball", image, self.bounds_dict["white"]
         )
         self.white_average = (
-                self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         )
         self.white_mask = (
-                                  self.white_average.astype(np.uint8) > self.average_threshold
-                          ).astype(np.uint8) * 255
+            self.white_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.white_average = (
-                self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         )
         self.white_mask = (
-                                  self.white_average.astype(np.uint8) > self.average_threshold
-                          ).astype(np.uint8) * 255
+            self.white_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.new_orange_mask = self.videoDebugger.run_analysis(
             self.apply_threshold, "orange-ball", image, self.bounds_dict["orange"]
         )
         self.orange_average = (
-                self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
+            self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
         )
         self.orange_mask = (
-                                   self.orange_average.astype(np.uint8) > self.average_threshold
-                           ).astype(np.uint8) * 255
+            self.orange_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.new_border_mask = self.videoDebugger.run_analysis(
             self.isolate_borders, "border", image, self.bounds_dict["border"]
         )
-        print("Bounds border:", self.bounds_dict["border"])
         self.border_average = (
-                self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
+            self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
         )
         self.border_mask = (
-                                   self.border_average.astype(np.uint8) > self.average_threshold
-                           ).astype(np.uint8) * 255
+            self.border_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
@@ -107,8 +106,9 @@ class Analyse:
             self.corners = self.find_border_corners(self.border_mask)
             self.calculate_goals()
             self.calculate_course_dimensions()
-            self.distance_to_closest_border, self.border_vector = self.calculate_distance_to_closest_border(
-                self.robot_pos)
+            self.distance_to_closest_border, self.border_vector = (
+                self.calculate_distance_to_closest_border(self.robot_pos)
+            )
 
         except BorderNotFoundError as e:
             print(e)
@@ -129,13 +129,13 @@ class Analyse:
             corner1 = self.corners[0]
             corner2 = self.corners[1]
             corner3 = self.corners[2]
-            print("corners", self.corners)
             self.course_length_px = np.linalg.norm(corner1 - corner2)
             self.course_height_px = np.linalg.norm(corner2 - corner3)
 
     @staticmethod
-    def apply_threshold(image: np.ndarray, bounds_dict_entry: np.ndarray, out_name: str
-                        ) -> np.ndarray:
+    def apply_threshold(
+        image: np.ndarray, bounds_dict_entry: np.ndarray, out_name: str
+    ) -> np.ndarray:
         bounds = bounds_dict_entry[0:3]
         variance = bounds_dict_entry[3]
 
@@ -143,10 +143,9 @@ class Analyse:
         upper = np.clip(bounds + variance, 0, 255)
 
         if out_name == "white-ball":
-            lower = np.array([0, 0, 200])
-            upper = np.array([179, 55, 255])
+            lower = np.array([0, 0, 180])
+            upper = np.array([179, 65, 255])
 
-        # print(lower, upper)
         frame_HSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(frame_HSV, lower, upper)
 
@@ -161,7 +160,6 @@ class Analyse:
         green_mask = cv2.erode(green_mask, kernel, iterations=2)
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
-        # print(f"Green points {[green_keypoint.pt for green_keypoint in green_keypoints]}")
         if len(green_keypoints) != 3:
             raise RobotNotFoundError(
                 f"Cannot find robot: There are {len(green_keypoints)} green points"
@@ -187,15 +185,14 @@ class Analyse:
                     )
                 )
         parings.sort(key=lambda x: x[2])
-        # print(f"Parings: {parings}")
         bottom_points = [parings[0][0], parings[0][1]]
         top_point = 3 - bottom_points[0] - bottom_points[1]
         try:
             bottom_pos = np.array(
                 self.convert_perspective(
                     (
-                            self.green_points_not_translated[bottom_points[0]]
-                            + self.green_points_not_translated[bottom_points[1]]
+                        self.green_points_not_translated[bottom_points[0]]
+                        + self.green_points_not_translated[bottom_points[1]]
                     )
                     / 2
                 )
@@ -210,17 +207,17 @@ class Analyse:
             top_pos = np.array((0, 0))
             print(e)
         self.robot_vector_not_translated = (
-                np.array(self.green_points_not_translated[top_point])
-                - np.array(
-            self.green_points_not_translated[bottom_points[0]]
-            + self.green_points_not_translated[bottom_points[1]]
-        )
-                / 2
+            np.array(self.green_points_not_translated[top_point])
+            - np.array(
+                self.green_points_not_translated[bottom_points[0]]
+                + self.green_points_not_translated[bottom_points[1]]
+            )
+            / 2
         )
         self.robot_pos_not_translated = (
-                                                self.green_points_not_translated[bottom_points[0]]
-                                                + self.green_points_not_translated[bottom_points[1]]
-                                        ) / 2
+            self.green_points_not_translated[bottom_points[0]]
+            + self.green_points_not_translated[bottom_points[1]]
+        ) / 2
         return bottom_pos, top_pos - bottom_pos
 
     def find_red_green_robot(
@@ -229,8 +226,7 @@ class Analyse:
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
         red_mask = detector.detect(red_mask)
-        # print(f"There are {len(green_keypoints)} green points, there should be 1")
-        # print(f"There are {len(red_mask)} red points, there should be 1")
+
         if len(green_keypoints) != 1:
             raise RobotNotFoundError(
                 f"Cannot find robot: There are {len(green_keypoints)} green points. There are {len(red_mask)} red points"
@@ -239,8 +235,6 @@ class Analyse:
             raise RobotNotFoundError(
                 f"Cannot find robot: There are {len(green_keypoints)} green points. There are {len(red_mask)} red points"
             )
-        # print(f"Green found at: {green_keypoints[0].pt}")
-        # print(f"Red found at: {red_mask[0].pt}")
 
         try:
             green_point = self.convert_perspective(green_keypoints[0].pt)
@@ -249,8 +243,6 @@ class Analyse:
             green_point = (0, 0)
             red_point = (0, 0)
             print(e)
-        # print(f"Green converted to: {green_point}")
-        # print(f"Red converted to: {red_point}")
 
         return (
             np.array(green_point),
@@ -277,9 +269,6 @@ class Analyse:
                 self.small_goal_coords = (corner3 + corner4) // 2
                 self.large_goal_coords = (corner1 + corner2) // 2
 
-            print(f"Small goal coords: {self.small_goal_coords}")
-            print(f"Large goal coords: {self.large_goal_coords}")
-
             self.goal_vector = coordinates_to_vector(
                 self.small_goal_coords, self.large_goal_coords
             )
@@ -290,24 +279,23 @@ class Analyse:
 
             self.translation_vector = self.goal_vector * 4 / 5
 
-            # print(f"translation vector: {self.translation_vector}")
-
             self.dropoff_coords = self.large_goal_coords + self.translation_vector
-            self.delivery_vector = coordinates_to_vector(self.dropoff_coords, self.small_goal_coords)
-            print(f"Drop off coords: {self.dropoff_coords}")
-
-            # print(f"delivery vector: {self.delivery_vector}")
+            self.delivery_vector = coordinates_to_vector(
+                self.dropoff_coords, self.small_goal_coords
+            )
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
-        print(f"course height and length px {self.course_height_px} {self.course_length_px}")
+        print(
+            f"course height and length px {self.course_height_px} {self.course_length_px}"
+        )
 
         # Heights in pixels cm / px
         # TODO fish eye ???
         if self.course_length_px is None:
             raise ValueError("Course length is not set")
         conversionFactor = self.course_length_cm / (
-                self.course_length_px * 1024 / self.course_length_cm
+            self.course_length_px * 1024 / self.course_length_cm
         )
 
         vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
@@ -315,7 +303,7 @@ class Analyse:
         vector_from_middle *= conversionFactor
 
         projected_vector = (
-                vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
+            vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
         )
 
         # Convert back to pixels
@@ -328,7 +316,7 @@ class Analyse:
         return result
 
     def construct_vector_from_circles(
-            self, green: np.ndarray, red: np.ndarray
+        self, green: np.ndarray, red: np.ndarray
     ) -> np.ndarray:
         return red - green
 
@@ -348,8 +336,6 @@ class Analyse:
 
         mask = cv2.bitwise_not(mask)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        # print(contours)
-        print(len(contours))
 
         # Filter and detect crosses or plus signs
         mid_cross_rect = []
@@ -368,19 +354,18 @@ class Analyse:
                 # Check if the contour has an aspect ratio close to 1 (square-like shape)
                 if 0.8 < aspect_ratio < 1.2 and w > 30 and h > 30:
                     mid_cross_rect.append((x, y, w, h))
-                    print("x y w h aspect_ratio", x, y, w, h, aspect_ratio)
         return mid_cross_rect
 
     @staticmethod
     def isolate_borders(
-            image: np.ndarray, bounds_dict_entry: np.ndarray, out_name
+        image: np.ndarray, bounds_dict_entry: np.ndarray, out_name
     ) -> np.ndarray:
         mask = Analyse.apply_threshold(image, bounds_dict_entry, out_name)
         mask = cv2.bitwise_not(mask)
 
         h, w = mask.shape[:2]
         mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
-        mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1: h + 1, 1: w + 1]
+        mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
         return mask
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
@@ -395,6 +380,8 @@ class Analyse:
             if len(approx) == 4:
                 x, y, w, h = cv2.boundingRect(approx)
                 corners = approx.squeeze()
+        if corners is None:
+            self.corners
 
         corner1 = max(corners, key=lambda ci: sum(ci))
         remaining_corners = [c for c in corners if not np.array_equal(c, corner1)]
@@ -418,7 +405,7 @@ class Analyse:
         pass
 
     def distance_point_to_segment(
-            self, p: np.ndarray, v: np.ndarray, w: np.ndarray
+        self, p: np.ndarray, v: np.ndarray, w: np.ndarray
     ) -> float:
         l2 = np.sum((w - v) ** 2)
         if l2 == 0.0:
@@ -444,7 +431,6 @@ class Analyse:
                 min_distance = distance
                 closest_projection = projection_vector
 
-        print(f"Distance to closest border: {min_distance}")
         return min_distance, closest_projection
 
     def angle_between_vectors(vec1, vec2):
