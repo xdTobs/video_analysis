@@ -1,4 +1,5 @@
 import platform
+import traceback
 import cv2
 
 
@@ -16,5 +17,6 @@ def open_webcam_video(webcam_index):
             webcam_index = int(webcam_index)
         video = cv2.VideoCapture(webcam_index)
     else:
+        traceback.print_exc()
         raise Exception("Unsupported platform. Please use Windows, Linux or Mac.")
     return video

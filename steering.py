@@ -6,6 +6,7 @@ from analyse import RobotNotFoundError, BorderNotFoundError
 import RobotInterface
 from utils import angle_between_vectors, angle_between_vectors_signed
 from analyse import Analyse
+import traceback
 
 
 class Steering:
@@ -175,52 +176,58 @@ class Steering:
         if corners is None:
             raise TypeError("No corners found in pick_program")
 
-        self.ball_vector = self.find_ball_vector(
-            keypoints, robot_pos, robot_vector, border_mask
-        )
-        if not self.is_collecting_balls:
-            self.deliver_balls_to_target(robot_vector, dropoff_coords, robot_pos)
-        if self.ball_vector is None:
-            self.is_collecting_balls = False
-        else:
-            self.is_collecting_balls = True
-
-        if self.is_collecting_balls:
-            self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.ball_vector)  # type: ignore
-            self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
-            self.angle_radians = angle_between_vectors(robot_vector, self.ball_vector)  # type: ignore
-            self.angle_degrees = math.degrees(self.angle_radians)
-
-        dist_to_ball = math.sqrt(self.ball_vector[0] ** 2 + self.ball_vector[1] ** 2)
-
-        self.is_ball_close_to_border = self.calculate_is_ball_close_to_borders(
-            self.target_position, corners
-        )
-        print(f"Ball vector: {self.ball_vector}")
-        print(f"Ball vector length: {dist_to_ball}")
         try:
-            if dist_to_ball < self.collect_ball_distance:
-                self.close_to_ball = True
-                print("Ball is close")
-                self.collect_ball(
-                    self.signed_angle_degrees, self.angle_degrees, dist_to_ball
-                )
-                return
-
-            if dist_to_ball > self.collect_ball_distance:
-                print("Ball is not close")
-                self.close_to_ball = False
-                self.get_near_ball(
-                    self.signed_angle_degrees, self.angle_degrees, dist_to_ball
-                )
-                return
-            else:
-                print("No program picked")
+            self.sneak_near_wall(
+                robot_pos, robot_vector, robot_distance_to_closest_border, border_vector
+            )
+        #self.ball_vector = self.find_ball_vector(
+        #    keypoints, robot_pos, robot_vector, border_mask
+        #)
+        #if not self.is_collecting_balls:
+        #    self.deliver_balls_to_target(robot_vector, dropoff_coords, robot_pos)
+        #if self.ball_vector is None:
+        #    self.is_collecting_balls = False
+        #else:
+        #    self.is_collecting_balls = True
+#
+        #if self.is_collecting_balls:
+        #    self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.ball_vector)  # type: ignore
+        #    self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
+        #    self.angle_radians = angle_between_vectors(robot_vector, self.ball_vector)  # type: ignore
+        #    self.angle_degrees = math.degrees(self.angle_radians)
+#
+        #dist_to_ball = math.sqrt(self.ball_vector[0] ** 2 + self.ball_vector[1] ** 2)
+#
+        #self.is_ball_close_to_border = self.calculate_is_ball_close_to_borders(
+        #    self.target_position, corners
+        #)
+        #print(f"Ball vector: {self.ball_vector}")
+        #print(f"Ball vector length: {dist_to_ball}")
+        #try:
+        #    if dist_to_ball < self.collect_ball_distance:
+        #        self.close_to_ball = True
+        #        print("Ball is close")
+        #        self.collect_ball(
+        #            self.signed_angle_degrees, self.angle_degrees, dist_to_ball
+        #        )
+        #        return
+#
+        #    if dist_to_ball > self.collect_ball_distance:
+        #        print("Ball is not close")
+        #        self.close_to_ball = False
+        #        self.get_near_ball(
+        #            self.signed_angle_degrees, self.angle_degrees, dist_to_ball
+        #        )
+        #        return
+        #    else:
+        #        print("No program picked")
 
         except ConnectionError as e:
+            traceback.print_exc()
             print(f"Connection error {e}")
             return
         except Exception as e:
+            traceback.print_exc()
             print(f"Error: {e}")
             return
 
@@ -235,6 +242,17 @@ class Steering:
         elif angle_degrees > 8:
             turn = signed_angle_degrees * -1 / 3
             self.robot_interface.send_command("turn", turn, 30)
+
+    def sneak_near_wall(self, robot_pos, robot_vector, border_distance, border_vector):
+        angle_to_move = angle_between_vectors_signed(robot_vector, border_vector)
+        unsigned_angle_to_move = angle_between_vectors(robot_vector, border_vector)
+        if unsigned_angle_to_move > 10:
+            turn = angle_to_move * -1 / 3
+            self.robot_interface.send_command("turn", turn, 30)
+        else:
+            if border_distance is not None and not math.isinf(border_distance):
+                speed = 0.0002040816327*math.pow(border_distance,2) + 0.1357142857 * border_distance -5
+                self.move_corrected(angle_to_move, unsigned_angle_to_move, speed)
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
         self.move_corrected(signed_angle_degrees, angle_degrees, 100)
