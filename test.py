@@ -1,34 +1,73 @@
-import numpy as np
+import os
+from time import sleep
 import cv2
+import numpy as np
+from webcam import open_webcam_video
+import dotenv
 
-# Define BGR values from the input text
-colors = {
-    'white': ([181, 168, 169], [255, 255, 255]),
-    'orange': ([119, 166, 200], [187, 255, 255]),
-    'green': ([162, 168, 101], [246, 255, 152]),
-    'red': ([57, 46, 188], [131, 109, 255]),
-    'border': ([52, 51, 147], [107, 109, 255])
-}
 
-# Create a blank image
-height = 100
-width = 200
-image = np.zeros((height * len(colors), width * 2, 3), dtype="uint8")
+def normalize_image(image):
+    # Normalize the image so that the darkest pixel becomes 0 and the brightest becomes 255
+    norm_image = cv2.normalize(
+        image, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U
+    )
+    return norm_image
 
-# Fill the image with the color swatches
-for index, (color, (lower, upper)) in enumerate(colors.items()):
-    # Calculate the y position for the rectangles
-    y = index * height
-    
-    # Draw rectangles for lower and upper BGR values
-    image[y:y+height, 0:width] = lower
-    image[y:y+height, width:width*2] = upper
 
-    # Put text on the rectangles
-    cv2.putText(image, f'{color} lower', (5, y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-    cv2.putText(image, f'{color} upper', (width + 5, y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+def test_normalize():
+    dotenv.load_dotenv(override=True)
+    WEBCAM_INDEX = os.getenv("WEBCAM_INDEX")
+    cap = open_webcam_video(WEBCAM_INDEX)
 
-# Display the image
-cv2.imshow('Color Swatches', image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    while True:
+        sleep(0.5)
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+
+        # If frame is read correctly, ret is True
+        if not ret:
+            print("Failed to grab frame")
+            break
+
+        # Normalize the frame
+        normalized_frame = normalize_image(frame)
+
+        # Add labels to each frame
+        cv2.putText(
+            frame,
+            "Original",
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (255, 255, 255),
+            2,
+            cv2.LINE_AA,
+        )
+        cv2.putText(
+            normalized_frame,
+            "Normalized",
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (255, 255, 255),
+            2,
+            cv2.LINE_AA,
+        )
+
+        # Stack the original and normalized frames vertically
+        stacked_frames = np.hstack((frame, normalized_frame))
+
+        # Display the stacked frames
+        cv2.imshow("Webcam - Original and Normalized", stacked_frames)
+
+        # Press 'q' to close the video window
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+
+    # When everything done, release the capture
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    test_normalize()
