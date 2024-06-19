@@ -139,10 +139,10 @@ class Analyse:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         if out_name == "white-ball":
             lower = np.array([0, 0, 200])
-            upper = np.array([179, 45, 255])
+            upper = np.array([179, 50, 255])
         elif out_name == "green-mask":
             # hsl(163, 74%, 73%)
-            lower = np.array([31, 30, 200])
+            lower = np.array([31, 20, 180])
             upper = np.array([120, 255, 255])
         elif out_name == "red-mask":
             lower = np.array([0, 70, 50])
@@ -151,8 +151,8 @@ class Analyse:
             lower = np.array([10, 5, 220])
             upper = np.array([30, 255, 255])
         elif out_name == "border":
-            lower = np.array([0, 100, 100])
-            upper = np.array([20, 255, 255])
+            lower = np.array([0, 10, 100])
+            upper = np.array([30, 255, 255])
 
         mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.bitwise_and(image, image, mask=mask)
