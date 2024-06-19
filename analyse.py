@@ -8,7 +8,7 @@ from utils import coordinates_to_vector
 
 
 class Analyse:
-    def __init__(self, corners):
+    def __init__(self):
         self.videoDebugger = VideoDebugger.VideoDebugger()
         self.alpha = 0.1
         self.average_threshold = 100
@@ -18,7 +18,7 @@ class Analyse:
         self.robot_vector = None
         self.goal_vector = None
         self.delivery_vector = None
-        self.corners = corners
+        self.corners = [(0, 0), (1, 0), (0, 1), (1, 1)]
         self.border_vector = None
         self.small_goal_coords: np.ndarray = None
         self.large_goal_coords: np.ndarray = None
@@ -102,7 +102,7 @@ class Analyse:
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
         try:
-            # self.corners = self.find_border_corners(self.border_mask)
+            self.corners = self.find_border_corners(self.border_mask)
             self.calculate_goals()
             self.calculate_course_dimensions()
             self.distance_to_closest_border, self.border_vector = (
@@ -124,14 +124,17 @@ class Analyse:
         return
 
     def calculate_course_dimensions(self):
-        corner1 = self.corners[0]
-        corner2 = self.corners[1]
-        corner3 = self.corners[2]
-        self.course_length_px = np.linalg.norm(corner1 - corner2)
-        self.course_height_px = np.linalg.norm(corner2 - corner3)
+        if self.corners is not None:
+            corner1 = self.corners[0]
+            corner2 = self.corners[1]
+            corner3 = self.corners[2]
+            self.course_length_px = np.linalg.norm(corner1 - corner2)
+            self.course_height_px = np.linalg.norm(corner2 - corner3)
 
     @staticmethod
-    def apply_threshold(image: np.ndarray, out_name: str) -> np.ndarray:
+    def apply_threshold(
+        image: np.ndarray, out_name: str
+    ) -> np.ndarray:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
@@ -371,7 +374,9 @@ class Analyse:
         return (mid_cross_rect, approx_contour)
 
     @staticmethod
-    def isolate_borders(image: np.ndarray, out_name) -> np.ndarray:
+    def isolate_borders(
+        image: np.ndarray, out_name
+    ) -> np.ndarray:
         mask = Analyse.apply_threshold(image, out_name)
         mask = cv2.bitwise_not(mask)
 
@@ -462,6 +467,7 @@ class Analyse:
         return self.corners
 
 
+
 class RobotNotFoundError(Exception):
     def __init__(self, message="Robot not found", *args):
         super().__init__(message, *args)
@@ -486,37 +492,38 @@ class AnalyseError(Exception):
         self.message = message
 
 
-def find_corners(image: np.ndarray):
-    contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours = contours[0] if len(contours) == 2 else contours[1]
-    corners = None
-    print("len", len(contours))
-    for c in contours:
-        peri = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.015 * peri, True)
-        if len(approx) == 4:
-            x, y, w, h = cv2.boundingRect(approx)
-            corners = approx.squeeze()
+def find_corners(self, image: np.ndarray) -> np.ndarray:
+	# image = cv2.bitwise_not(image)
+	image = self.border_average.astype(np.uint8)
+	contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	contours = contours[0] if len(contours) == 2 else contours[1]
+	corners = None
+	for c in contours:
+		peri = cv2.arcLength(c, True)
+		approx = cv2.approxPolyDP(c, 0.015 * peri, True)
+		if len(approx) == 4:
+			x, y, w, h = cv2.boundingRect(approx)
+			corners = approx.squeeze()
+	if corners is None:
+		self.corners
 
-    if corners is None:
-        raise BorderNotFoundError()
-    corner1 = max(corners, key=lambda ci: sum(ci))
-    remaining_corners = [c for c in corners if not np.array_equal(c, corner1)]
+	corner1 = max(corners, key=lambda ci: sum(ci))
+	remaining_corners = [c for c in corners if not np.array_equal(c, corner1)]
 
-    corner3 = min(remaining_corners, key=lambda ci: sum(ci))
-    remaining_corners = [c for c in remaining_corners if not np.array_equal(c, corner3)]
-    corner2, corner4 = sorted(remaining_corners, key=lambda ci: ci[1])
+	corner3 = min(remaining_corners, key=lambda ci: sum(ci))
+	remaining_corners = [
+		c for c in remaining_corners if not np.array_equal(c, corner3)
+	]
+	corner2, corner4 = sorted(remaining_corners, key=lambda ci: ci[1])
 
-    corners = (
-        (corner1[0], corner1[1]),
-        (corner2[0], corner2[1]),
-        (corner3[0], corner3[1]),
-        (corner4[0], corner4[1]),
-    )
-    return corners
-
-
-def isol_borders(image: np.ndarray, out_name) -> np.ndarray:
+	# Replace self.corners with the corners in the correct order
+	corners = np.array([corner1, corner2, corner3, corner4])
+	if corners is None:
+		raise BorderNotFoundError()
+	return corners
+def isol_borders(
+    image: np.ndarray, out_name
+) -> np.ndarray:
     mask = Analyse.apply_threshold(image, out_name)
     mask = cv2.bitwise_not(mask)
 
