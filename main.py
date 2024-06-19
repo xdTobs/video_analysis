@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+import collections
 import os
 from dotenv import load_dotenv
 import sys
 import cv2
 import numpy as np
-from analyse import RobotNotFoundError, isol_borders
+from analyse import BorderNotFoundError, RobotNotFoundError, find_corners, isol_borders
 import VideoDebugger
 import analyse
 import steering
@@ -16,7 +17,43 @@ def run_video(host, webcam_index, online, port=65438):
     # Takes a video path and runs the analysis on each frame
     video = webcam.open_webcam_video(webcam_index)
     videoDebugger = VideoDebugger.VideoDebugger()
-    analyser = analyse.Analyse()
+
+    # find most common corners
+    corners = None
+    corners_list = []
+    i = 0
+    while True:
+        ret, frame = video.read()
+        if not ret:
+            break
+        mask = isol_borders(frame, "border")
+        try:
+            corners = find_corners(mask)
+        except BorderNotFoundError as e:
+            print("could not find border, skipping frame", e)
+        i += 1
+
+        mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+        print(corners)
+        corners_list.append(corners)
+        print(mask)
+
+        # stack = np.vstack((frame, mask))
+
+        # cv2.imshow("frame", stack)
+        if cv2.waitKey(25) & 0xFF == ord("q") or i > 30:
+            # video.release()
+            # cv2.destroyAllWindows()
+            break
+
+    corners_counter = collections.Counter(corners_list).most_common()[0]
+    print(corners_counter)  # This prints the most common group and its count
+
+    # Convert the most common group back to a numpy array
+    corners = np.array(corners_counter[0], dtype=np.int32)
+
+    analyser = analyse.Analyse(corners)
+    print("corners", analyser.corners)
     steering_instance = steering.Steering(online, host, port)
 
     data_dict = {
@@ -41,18 +78,6 @@ def run_video(host, webcam_index, online, port=65438):
     print("Video read")
 
     steering_instance.start_belt()
-    corners_found = False
-    corners = None
-
-    # while True:
-    #     ret, frame = video.read()
-    #     if not ret:
-    #         break
-    #     # mask = isol_borders(frame, "border")
-
-    #     cv2.imshow("aaa", frame)
-
-    # return
     while True:
         ret, frame = video.read()
         if not ret:
