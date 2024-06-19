@@ -132,11 +132,11 @@ class VideoOutput:
             )
 
         if (
-            self.steering_instance.ball_vector is not None
+            self.steering_instance.steering_vector is not None
             and self.analyser.robot_pos is not None
         ):
             ball_vector_end = (
-                self.analyser.robot_pos + self.steering_instance.ball_vector
+                self.analyser.robot_pos + self.steering_instance.steering_vector
             )
             robot_pos = self.analyser.robot_pos.astype(int)
             ball_vector_end = ball_vector_end.astype(int)

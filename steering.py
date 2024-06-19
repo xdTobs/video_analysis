@@ -13,11 +13,11 @@ class Steering:
         self.robot_interface = RobotInterface.RobotInterface(host, port, online)
         if online:
             self.robot_interface.connect()
-        self.ball_vector = None
+        self.steering_vector = None
         self.is_ball_close_to_border = False
         self.last_target_time = 0
-        self.target_position = None
-        self.update_interval = 30  # Time in seconds
+        self.target_ball = None
+        self.update_interval = 1  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
         self.distance_threshold_min = 100
         self.collect_ball_distance = 150
@@ -29,43 +29,24 @@ class Steering:
         self.current_time = 0
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
+        self.robot_pos = None
+        self.robot_vector = None
         self.distance_to_delivery_point = (
             30  # The distance where we want to reverse belt and deliver balls
         )
         self.is_collecting_balls = True
         # first is if we are turning second is if we are turning right
         self.turn_start = None
+        self.target_safepoint = None
+        self.steering_vector = None
 
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
         self, robot_pos: np.ndarray, target_pos: np.ndarray, obstacles: np.ndarray
     ) -> bool:
-        # if robot_pos is None or target_pos is None or obstacles is None:
-        #     return False
+        return True
 
-        # # Define the vector from the robot to the target
-        # direction_vector = target_pos - robot_pos
-        # distance_to_target = np.linalg.norm(direction_vector)
-        # direction_unit_vector = direction_vector / distance_to_target
-
-        # # Check each obstacle
-        # for obstacle in obstacles:
-        #     obstacle_vector = obstacle - robot_pos
-        #     obstacle_distance = np.linalg.norm(obstacle_vector)
-        #     obstacle_unit_vector = obstacle_vector / obstacle_distance
-
-        #     # Project the obstacle vector onto the direction vector
-        #     projection_length = np.dot(obstacle_vector, direction_unit_vector)
-        #     if 0 < projection_length < distance_to_target:
-        #         # Find the perpendicular distance from the obstacle to the direction line
-        #         perpendicular_distance = np.linalg.norm(
-        #             obstacle_vector - projection_length * direction_unit_vector
-        #         )
-        #         if perpendicular_distance < self.distance_to_border_threshold:
-        #             return False  # Obstacle detected within the path
-        return True  # No obstacles detected
-
-    def find_ball_vector(
+    def find_steering_vector(
         self,
         keypoints: np.ndarray,
         robot_pos: np.ndarray,
@@ -73,66 +54,44 @@ class Steering:
         border_mask,
         safepoint_list: np.ndarray
     ) -> np.ndarray:
-        print("safepoints", safepoint_list)
+    
+        if self.is_target_expired() or self.steering_vector is None:
+            self.last_target_time = time.time()
+            self.target_ball = self.find_closest_ball(keypoints, robot_pos)
+            self.target_safepoint = self.find_closest_safe_point_to_ball(self.target_ball, safepoint_list)
+            if self.are_coordinates_close(robot_pos, self.target_safepoint):
+                return self.target_ball - robot_pos
+            else:
+                return self.target_safepoint - robot_pos
+            
+        
+        return self.steering_vector
+    
+    def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
+        return True
+    
+    def is_target_expired(self):
         self.current_time = time.time()
         self.time_to_switch_target = self.current_time - self.last_target_time
-
-        if self.target_position is not None:
-            distance_to_target = np.linalg.norm(self.target_position - robot_pos)
-            if self.time_to_switch_target < self.update_interval:
-                if (
-                    self.distance_threshold_max
-                    >= distance_to_target
-                    >= self.distance_threshold_min
-                ):
-                    return self.target_position - robot_pos
-                else:
-                    print(
-                        f"Previous target position is too far (distance {distance_to_target}). Resetting timer."
-                    )
-        # self.is_collecting_balls = True
+        if self.time_to_switch_target > self.update_interval:
+            self.target_ball = None
+            return True
+        return False
+    
+    def find_closest_ball(self, keypoints: np.ndarray, robot_pos: np.ndarray) -> np.ndarray:
         if len(keypoints) == 0:
             return None
-
-            # self.is_collecting_balls = False  #TODO Når "True" skal robotten aflevere bolde.
-            # return
         if robot_pos is None:
-            raise RobotNotFoundError("No Robot to be used for vector calculation")
-
-        point_distances = []
-
+            return None
+        closest_distance = sys.maxsize
+        closest_point = None
         for keypoint in keypoints:
             ball_pos = np.array(keypoint.pt)
             distance = np.linalg.norm(ball_pos - robot_pos)
-            point_distances.append((keypoint, distance))
-
-        # Sort based on distance
-        point_distances = sorted(point_distances, key=lambda x: x[1])
-        is_not_blocked = self.check_no_obstacles(
-            robot_pos=robot_pos,
-            target_pos=ball_pos,
-            obstacles=Analyse.find_cross_bounding_rectangle(border_mask),
-        )
-        print("is blocked: ", is_not_blocked)
-
-        for idx, point_distance in enumerate(point_distances):
-            if self.has_valid_path(robot_pos, robot_vector, point_distance[0].pt):
-                self.target_position = point_distance[0].pt
-                self.last_target_time = self.current_time
-                self.closest_safe_point_to_ball = self.find_closest_safe_point_to_ball(self.target_position, safepoint_list)
-                print(
-                    f"Closest valid ball is at {self.target_position}, distance {point_distance[1]}, index {idx}"
-                )
-                print("Closest safe point: ", self.closest_safe_point_to_ball, "\n")
-
-                return self.target_position - robot_pos
-
-        print("No valid path to any ball")
-        self.ball_vector = point_distances[0][0].pt - robot_pos
-        return point_distances[0][0].pt - robot_pos
-
-    def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
-        return True
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_point = ball_pos
+        return closest_point
     
     def find_closest_safe_point_to_ball(self, ball_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
         closest_distance = sys.maxsize
@@ -144,6 +103,15 @@ class Steering:
                 closest_point = point
         return closest_point
 
+    def are_coordinates_close(self, coord1: np.ndarray, coord2: np.ndarray) -> bool:
+        print(f"Coord1: {coord1}, Coord2: {coord2}")
+        if not isinstance(coord1, np.ndarray) or not isinstance(coord2, np.ndarray):
+            raise ValueError("Coordinates must be numpy arrays")
+        if coord1.shape != coord2.shape or coord1.shape != (2,):
+            raise ValueError("Coordinates must be 1D numpy arrays of shape (2,)")
+
+        return np.all(np.abs(coord1 - coord2) <= 10)
+    
     def calculate_is_ball_close_to_borders(
         self, ball_pos: np.ndarray, corners: np.ndarray
     ) -> bool:
@@ -165,7 +133,7 @@ class Steering:
             return True
         return False
 
-    def pick_program(
+    def pick_program_pipeline (
         self,
         keypoints: np.ndarray,
         robot_pos: np.ndarray,
@@ -177,6 +145,9 @@ class Steering:
         safepoint_list: np.ndarray,
         border_mask,
     ):
+        
+        self.robot_pos = robot_pos
+        self.robot_vector = robot_vector
 
         # if we have a target and no keypoints we still want to catch last ball
         if robot_pos is None:
@@ -190,29 +161,30 @@ class Steering:
         if corners is None:
             raise TypeError("No corners found in pick_program")
 
-        self.ball_vector = self.find_ball_vector(
+        self.steering_vector = self.find_steering_vector(
             keypoints, robot_pos, robot_vector, border_mask, safepoint_list
         )
         if not self.is_collecting_balls:
             self.deliver_balls_to_target(robot_vector, dropoff_coords, robot_pos)
-        if self.ball_vector is None:
+        if self.steering_vector is None:
             self.is_collecting_balls = False
         else:
             self.is_collecting_balls = True
 
         if self.is_collecting_balls:
-            self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.ball_vector)  # type: ignore
+            self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.steering_vector)  # type: ignore
             self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
-            self.angle_radians = angle_between_vectors(robot_vector, self.ball_vector)  # type: ignore
+            self.angle_radians = angle_between_vectors(robot_vector, self.steering_vector)  # type: ignore
             self.angle_degrees = math.degrees(self.angle_radians)
 
-        dist_to_ball = math.sqrt(self.ball_vector[0] ** 2 + self.ball_vector[1] ** 2)
+        dist_to_ball = math.sqrt(self.steering_vector[0] ** 2 + self.steering_vector[1] ** 2)
 
         self.is_ball_close_to_border = self.calculate_is_ball_close_to_borders(
-            self.target_position, corners
+            self.target_ball, corners
         )
-        print(f"Ball vector: {self.ball_vector}")
-        print(f"Ball vector length: {dist_to_ball}")
+        print("Steering vector: ", self.steering_vector)
+        print(f"Steering vector length: {dist_to_ball}")
+        
         try:
             if dist_to_ball < self.collect_ball_distance:
                 self.close_to_ball = True
