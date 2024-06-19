@@ -1,6 +1,7 @@
 import json
 import time
 import socket
+import traceback
 
 
 class RobotInterface:
@@ -64,6 +65,7 @@ class RobotInterface:
                 self.sock.sendall(serialized_data)
                 print("Data sent", data)
             except socket.error as e:
+                traceback.print_exc()
                 raise DataSendError("Failed to send data")
         else:
             print("Robot is not ready to receive data. Please wait for the robot to finish processing the previous "
