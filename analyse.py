@@ -138,8 +138,10 @@ class Analyse:
     ) -> np.ndarray:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         if out_name == "white-ball":
-            lower = np.array([0, 0, 200])
-            upper = np.array([179, 50, 255])
+            # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
+            sensitivity = 45
+            lower = np.array([0,0,255-sensitivity])
+            upper = np.array([255,sensitivity,255])
         elif out_name == "green-mask":
             # hsl(163, 74%, 73%)
             lower = np.array([31, 20, 180])
@@ -151,8 +153,8 @@ class Analyse:
             lower = np.array([10, 5, 220])
             upper = np.array([30, 255, 255])
         elif out_name == "border":
-            lower = np.array([0, 10, 100])
-            upper = np.array([30, 255, 255])
+            lower = np.array([0, 150, 100])
+            upper = np.array([30, 245, 245])
 
         mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.bitwise_and(image, image, mask=mask)
