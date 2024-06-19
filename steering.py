@@ -120,7 +120,6 @@ class Steering:
                 self.target_position = point_distance[0].pt
                 self.last_target_time = self.current_time
                 self.closest_safe_point_to_ball = self.find_closest_safe_point_to_ball(self.target_position, safepoint_list)
-                print("I AM HERE!!!!")
                 print(
                     f"Closest valid ball is at {self.target_position}, distance {point_distance[1]}, index {idx}"
                 )
@@ -143,7 +142,6 @@ class Steering:
             if distance < closest_distance:
                 closest_distance = distance
                 closest_point = point
-        print(f"Closest safe point to ball: {closest_point}")
         return closest_point
 
     def calculate_is_ball_close_to_borders(

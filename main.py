@@ -69,6 +69,7 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.border_vector,
                 analyser.corners,
                 analyser.dropoff_coords,
+                analyser.safepoint_list,
                 border_mask=analyser.border_mask,
             )
         except RobotNotFoundError as e:
@@ -134,7 +135,7 @@ if __name__ == "__main__":
     # pr = cProfile.Profile()
     # pr.enable()  # Start profiling
     run_video(
-        host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
+        host=HOST, webcam_index=WEBCAM_INDEX, online=False, port=int(PORT)
     )
 
     # pr.disable()  # Stop profiling

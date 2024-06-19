@@ -141,7 +141,7 @@ class Analyse:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
-            sensitivity = 45
+            sensitivity = 55
             lower = np.array([0, 0, 255 - sensitivity])
             upper = np.array([255, sensitivity, 255])
         elif out_name == "green-mask":
