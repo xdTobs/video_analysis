@@ -12,6 +12,7 @@ class RobotInterface:
         self.port = port
         self.retry_attempts: int = 3
         self.retry_delay: int = 2
+        self.is_ready_to_receive = True
 
     def connect(self):
         if self.online == False:
@@ -48,24 +49,28 @@ class RobotInterface:
             raise ConnectionError("Failed to disconnect from the robot")
 
     def send_command(self, command: str, value: float, speedPercentage: int):
-        if self.online == False:
+        if not self.online:
             return
         if not self.connected:
             raise ConnectionError("Not connected to the robot")
-        try:
-            data = {
-                "command": command,
-                "value": value,
-                "speedPercentage": speedPercentage,
-            }
-            serialized_data = json.dumps(data).encode()
-            self.sock.sendall(serialized_data)
-            print("Data sent", data)
-        except:
-            raise DataSendError("Failed to send data")
+        if self.is_ready_to_receive:
+            try:
+                data = {
+                    "command": command,
+                    "value": value,
+                    "speedPercentage": speedPercentage,
+                }
+                serialized_data = json.dumps(data).encode()
+                self.sock.sendall(serialized_data)
+                print("Data sent", data)
+            except socket.error as e:
+                raise DataSendError("Failed to send data")
+        else:
+            print("Robot is not ready to receive data. Please wait for the robot to finish processing the previous "
+                  "command")
 
     def receive_command(self) -> str:
-        if self.online == False:
+        if not self.online:
             return ""
         if not self.connected:
             raise ConnectionError("Not connected to the robot")
@@ -76,6 +81,7 @@ class RobotInterface:
                 raise DataReceiveError("No data received; the connection may be broken")
             data = data.decode()
             print("Data received", data)
+            self.is_ready_to_receive = True
             return data
         except socket.error as e:
             print("Socket error:", e)
