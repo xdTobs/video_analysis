@@ -30,6 +30,7 @@ class Analyse:
         self.green_points_not_translated = None
         self.dropoff_coords = None
         self.should_calculate_corners = True
+        self.safepoint_list: np.ndarray = None
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -108,6 +109,8 @@ class Analyse:
             self.distance_to_closest_border, self.border_vector = (
                 self.calculate_distance_to_closest_border(self.robot_pos)
             )
+            self.calculate_safepoints()
+
 
         except BorderNotFoundError as e:
             print(e)
@@ -292,6 +295,61 @@ class Analyse:
             self.delivery_vector = coordinates_to_vector(
                 self.dropoff_coords, self.small_goal_coords
             )
+
+    def calculate_safepoints(self):
+        if self.corners is not None:
+            corner1 = self.corners[0]
+            corner2 = self.corners[1]
+            corner3 = self.corners[2]
+            corner4 = self.corners[3]
+
+            small_goal_coords = self.small_goal_coords
+            large_goal_coords = self.large_goal_coords
+
+            right_lower_coords = (corner1 + small_goal_coords) // 2
+            right_upper_coords = (small_goal_coords + corner2) // 2
+            left_lower_coords = (corner4 + large_goal_coords) // 2
+            left_upper_coords = (large_goal_coords + corner3) // 2
+
+            lower_vector = coordinates_to_vector(right_lower_coords, left_lower_coords)
+            upper_vector = coordinates_to_vector(right_upper_coords, left_upper_coords)
+            
+            small_translation_vector = lower_vector * 1 / 8
+            large_translation_vector = lower_vector * 1 / 3
+
+            safe_point_1 = right_lower_coords + small_translation_vector
+            safe_point_2 = right_lower_coords + large_translation_vector
+            safe_point_3 = left_lower_coords - large_translation_vector
+            safe_point_4 = left_lower_coords - small_translation_vector
+            safe_point_5 = large_goal_coords - small_translation_vector
+            safe_point_6 = left_upper_coords - small_translation_vector
+            safe_point_7 = left_upper_coords - large_translation_vector
+            safe_point_8 = right_upper_coords + large_translation_vector
+            safe_point_9 = right_upper_coords + small_translation_vector
+            safe_point_10 = small_goal_coords + small_translation_vector
+
+            self.safepoint_list = np.array([
+                safe_point_1,
+                safe_point_2,
+                safe_point_3,
+                safe_point_4,
+                safe_point_5,
+                safe_point_6,
+                safe_point_7,
+                safe_point_8,
+                safe_point_9,
+                safe_point_10
+            ])
+            print("safe_points",self.safepoint_list)
+
+            return
+
+
+
+
+            
+
+
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
