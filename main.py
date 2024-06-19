@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-import cProfile
-import io
 import os
-import pstats
 from dotenv import load_dotenv
 import sys
 import cv2
-from analyse import RobotNotFoundError
+import numpy as np
+from analyse import RobotNotFoundError, isol_borders
 import VideoDebugger
 import analyse
 import steering
 import videoOutput
-import platform
 import webcam
 
 
@@ -44,6 +41,18 @@ def run_video(host, webcam_index, online, port=65438):
     print("Video read")
 
     steering_instance.start_belt()
+    corners_found = False
+    corners = None
+
+    # while True:
+    #     ret, frame = video.read()
+    #     if not ret:
+    #         break
+    #     # mask = isol_borders(frame, "border")
+
+    #     cv2.imshow("aaa", frame)
+
+    # return
     while True:
         ret, frame = video.read()
         if not ret:

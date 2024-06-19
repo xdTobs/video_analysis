@@ -43,11 +43,10 @@ class Analyse:
         self.orange_average = np.zeros((576, 1024), dtype=np.float32)
         self.orange_mask = np.zeros((576, 1024), dtype=np.float32)
 
-        self.bounds_dict = read_bounds()
         self.distance_to_closest_border = float("inf")
 
         self.cam_height = 220
-        self.robot_height = 47
+        self.robot_height = 1
         self.course_length_cm = 167
         self.course_width_cm = 121
         pass
@@ -56,14 +55,14 @@ class Analyse:
 
         self.videoDebugger.write_video("original", image, True)
         self.green_robot_mask = self.videoDebugger.run_analysis(
-            self.apply_threshold, "green-mask", image, self.bounds_dict["green"]
+            self.apply_threshold, "green-mask", image
         )
         self.red_robot_mask = self.videoDebugger.run_analysis(
-            self.apply_threshold, "red-mask", image, self.bounds_dict["red"]
+            self.apply_threshold, "red-mask", image
         )
 
         self.new_white_mask = self.videoDebugger.run_analysis(
-            self.apply_threshold, "white-ball", image, self.bounds_dict["white"]
+            self.apply_threshold, "white-ball", image
         )
         self.white_average = (
             self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
@@ -80,7 +79,7 @@ class Analyse:
         ).astype(np.uint8) * 255
 
         self.new_orange_mask = self.videoDebugger.run_analysis(
-            self.apply_threshold, "orange-ball", image, self.bounds_dict["orange"]
+            self.apply_threshold, "orange-ball", image
         )
         self.orange_average = (
             self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
@@ -90,7 +89,7 @@ class Analyse:
         ).astype(np.uint8) * 255
 
         self.new_border_mask = self.videoDebugger.run_analysis(
-            self.isolate_borders, "border", image, self.bounds_dict["border"]
+            self.isolate_borders, "border", image
         )
         self.border_average = (
             self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
@@ -134,14 +133,14 @@ class Analyse:
 
     @staticmethod
     def apply_threshold(
-        image: np.ndarray, bounds_dict_entry: np.ndarray, out_name: str
+        image: np.ndarray, out_name: str
     ) -> np.ndarray:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
             sensitivity = 45
-            lower = np.array([0,0,255-sensitivity])
-            upper = np.array([255,sensitivity,255])
+            lower = np.array([0, 0, 255 - sensitivity])
+            upper = np.array([255, sensitivity, 255])
         elif out_name == "green-mask":
             # hsl(163, 74%, 73%)
             lower = np.array([31, 20, 180])
@@ -376,9 +375,9 @@ class Analyse:
 
     @staticmethod
     def isolate_borders(
-        image: np.ndarray, bounds_dict_entry: np.ndarray, out_name
+        image: np.ndarray, out_name
     ) -> np.ndarray:
-        mask = Analyse.apply_threshold(image, bounds_dict_entry, out_name)
+        mask = Analyse.apply_threshold(image, out_name)
         mask = cv2.bitwise_not(mask)
 
         h, w = mask.shape[:2]
@@ -468,15 +467,6 @@ class Analyse:
         return self.corners
 
 
-def read_bounds():
-    bounds_dict = {}
-    with open("bounds.txt") as f:
-        for line in f:
-            key, value = line.split(";")
-            bounds = value.split(",")
-            bounds_dict[key] = np.array([int(x) for x in bounds])
-    return bounds_dict
-
 
 class RobotNotFoundError(Exception):
     def __init__(self, message="Robot not found", *args):
@@ -502,8 +492,48 @@ class AnalyseError(Exception):
         self.message = message
 
 
+def find_corners(self, image: np.ndarray) -> np.ndarray:
+	# image = cv2.bitwise_not(image)
+	image = self.border_average.astype(np.uint8)
+	contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	contours = contours[0] if len(contours) == 2 else contours[1]
+	corners = None
+	for c in contours:
+		peri = cv2.arcLength(c, True)
+		approx = cv2.approxPolyDP(c, 0.015 * peri, True)
+		if len(approx) == 4:
+			x, y, w, h = cv2.boundingRect(approx)
+			corners = approx.squeeze()
+	if corners is None:
+		self.corners
+
+	corner1 = max(corners, key=lambda ci: sum(ci))
+	remaining_corners = [c for c in corners if not np.array_equal(c, corner1)]
+
+	corner3 = min(remaining_corners, key=lambda ci: sum(ci))
+	remaining_corners = [
+		c for c in remaining_corners if not np.array_equal(c, corner3)
+	]
+	corner2, corner4 = sorted(remaining_corners, key=lambda ci: ci[1])
+
+	# Replace self.corners with the corners in the correct order
+	corners = np.array([corner1, corner2, corner3, corner4])
+	if corners is None:
+		raise BorderNotFoundError()
+	return corners
+def isol_borders(
+    image: np.ndarray, out_name
+) -> np.ndarray:
+    mask = Analyse.apply_threshold(image, out_name)
+    mask = cv2.bitwise_not(mask)
+
+    h, w = mask.shape[:2]
+    mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
+    mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
+    return mask
+
+
 if __name__ == "__main__":
     img = cv2.imread("bin.jpg")
-    bounds_dict_entry = np.array([0, 0, 0, 0])
-    binary_img = Analyse.apply_threshold(img, bounds_dict_entry, "white-ball")
+    binary_img = Analyse.apply_threshold(img, "white-ball")
     bounding_rect, contour = Analyse.find_cross_bounding_rectangle(binary_img)
