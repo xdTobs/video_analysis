@@ -340,8 +340,7 @@ class Analyse:
                 safe_point_9,
                 safe_point_10
             ])
-            print("safe_points",self.safepoint_list)
-
+            print("Safepoints: ",self.safepoint_list)
             return
 
 

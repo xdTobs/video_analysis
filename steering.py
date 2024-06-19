@@ -71,7 +71,9 @@ class Steering:
         robot_pos: np.ndarray,
         robot_vector: np.ndarray,
         border_mask,
+        safepoint_list: np.ndarray
     ) -> np.ndarray:
+        print("safepoints", safepoint_list)
         self.current_time = time.time()
         self.time_to_switch_target = self.current_time - self.last_target_time
 
@@ -117,9 +119,12 @@ class Steering:
             if self.has_valid_path(robot_pos, robot_vector, point_distance[0].pt):
                 self.target_position = point_distance[0].pt
                 self.last_target_time = self.current_time
+                self.closest_safe_point_to_ball = self.find_closest_safe_point_to_ball(self.target_position, safepoint_list)
+                print("I AM HERE!!!!")
                 print(
                     f"Closest valid ball is at {self.target_position}, distance {point_distance[1]}, index {idx}"
                 )
+                print("Closest safe point: ", self.closest_safe_point_to_ball, "\n")
 
                 return self.target_position - robot_pos
 
@@ -129,6 +134,17 @@ class Steering:
 
     def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
         return True
+    
+    def find_closest_safe_point_to_ball(self, ball_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
+        closest_distance = sys.maxsize
+        closest_point = None
+        for point in safepoint_list:
+            distance = np.linalg.norm(ball_pos - point)
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_point = point
+        print(f"Closest safe point to ball: {closest_point}")
+        return closest_point
 
     def calculate_is_ball_close_to_borders(
         self, ball_pos: np.ndarray, corners: np.ndarray
@@ -160,6 +176,7 @@ class Steering:
         border_vector: np.ndarray,
         corners: np.ndarray,
         dropoff_coords: np.ndarray,
+        safepoint_list: np.ndarray,
         border_mask,
     ):
 
@@ -176,7 +193,7 @@ class Steering:
             raise TypeError("No corners found in pick_program")
 
         self.ball_vector = self.find_ball_vector(
-            keypoints, robot_pos, robot_vector, border_mask
+            keypoints, robot_pos, robot_vector, border_mask, safepoint_list
         )
         if not self.is_collecting_balls:
             self.deliver_balls_to_target(robot_vector, dropoff_coords, robot_pos)
@@ -258,10 +275,10 @@ class Steering:
     def deliver_balls_to_target(
         self, robot_vector: np.ndarray, dropoff_cords: np.ndarray, robot_pos: np.ndarray
     ):
-        if self.drive_to_point(robot_vector, dropoff_cords, robot_pos):
+        if self.drive_to_delivery_point(robot_vector, dropoff_cords, robot_pos):
             self.stop_belt()
 
-    def drive_to_point(
+    def drive_to_delivery_point(
         self, robot_vector: np.ndarray, target_pos: np.ndarray, robot_pos: np.ndarray
     ):
         # Calculate the vector to the target position
