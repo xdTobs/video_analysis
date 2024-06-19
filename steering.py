@@ -17,7 +17,7 @@ class Steering:
         self.is_ball_close_to_border = False
         self.last_target_time = 0
         self.target_ball = None
-        self.update_interval = 1  # Time in seconds
+        self.update_interval = 10  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
         self.distance_threshold_min = 100
         self.collect_ball_distance = 150
@@ -39,6 +39,8 @@ class Steering:
         self.turn_start = None
         self.target_safepoint = None
         self.steering_vector = None
+        self.is_targeting_ball = False
+        self.is_targeting_safepoint = False
 
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
@@ -60,12 +62,18 @@ class Steering:
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
             self.target_safepoint = self.find_closest_safe_point_to_ball(self.target_ball, safepoint_list)
             if self.are_coordinates_close(robot_pos, self.target_safepoint):
+                self.is_targeting_safepoint = False
+                self.is_targeting_ball = True
                 return self.target_ball - robot_pos
             else:
+                self.is_targeting_safepoint = True
+                self.is_targeting_ball = False
                 return self.target_safepoint - robot_pos
             
-        
-        return self.steering_vector
+        if self.is_targeting_ball:
+            return self.target_ball - robot_pos
+        else:
+            return self.target_safepoint - robot_pos
     
     def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
         return True
