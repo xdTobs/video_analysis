@@ -73,7 +73,7 @@ def run_video(host, webcam_index, online, port=65438):
     data_dict = {
         "Robot position": analyser.robot_pos,
         "Robot vector": analyser.robot_vector,
-        "Ball vector": steering_instance.ball_vector,
+        "Ball vector": steering_instance.steering_vector,
         "Is ball close to border": steering_instance.is_ball_close_to_border,
         "Angle": steering_instance.angle_degrees,
         "Signed angle": steering_instance.signed_angle_degrees,
@@ -101,7 +101,7 @@ def run_video(host, webcam_index, online, port=65438):
         analyser.analysis_pipeline(frame)
 
         try:
-            steering_instance.pick_program(
+            steering_instance.pick_program_pipeline(
                 analyser.keypoints,
                 analyser.robot_pos,
                 analyser.robot_vector,
@@ -109,6 +109,7 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.border_vector,
                 analyser.corners,
                 analyser.dropoff_coords,
+                analyser.safepoint_list,
                 border_mask=analyser.border_mask,
             )
         except RobotNotFoundError as e:
@@ -173,7 +174,7 @@ if __name__ == "__main__":
     # pr = cProfile.Profile()
     # pr.enable()  # Start profiling
     run_video(
-        host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
+        host=HOST, webcam_index=WEBCAM_INDEX, online=True, port=int(PORT)
     )
 
     # pr.disable()  # Stop profiling

@@ -132,19 +132,21 @@ class VideoOutput:
             )
 
         if (
-            self.steering_instance.ball_vector is not None
+            self.steering_instance.steering_vector is not None
             and self.analyser.robot_pos is not None
         ):
             ball_vector_end = (
-                self.analyser.robot_pos + self.steering_instance.ball_vector
+                self.analyser.robot_pos + self.steering_instance.steering_vector
             )
             robot_pos = self.analyser.robot_pos.astype(int)
             ball_vector_end = ball_vector_end.astype(int)
+
+            print(f"ball_vector_end: {ball_vector_end}")
             cv2.arrowedLine(
                 robot_arrows_on_frame,
                 tuple(robot_pos),
                 tuple(ball_vector_end),
-                (255, 0, 0),
+                (255, 0, 255),
                 2,
             )
 
@@ -213,7 +215,7 @@ class VideoOutput:
                     )  # Position the text 10 pixels above the corner
                     cv2.putText(
                         frame,
-                        f"Safe  {index + 1}",
+                        f"Safe  {index}",
                         text_position,
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.5,
