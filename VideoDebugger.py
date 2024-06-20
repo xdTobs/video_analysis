@@ -11,7 +11,6 @@ class VideoDebugger:
         self.videos = {}
 
     def write_video(self, out_name: str, frame: np.ndarray, three_channel=False):
-        return
         if out_name not in self.videos:
             os.makedirs(f"output/{out_name}", exist_ok=True)
             video = cv2.VideoWriter(
