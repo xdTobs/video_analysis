@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+import cProfile
+import io
 import os
+import pstats
 import time
 from dotenv import load_dotenv
 import sys
@@ -40,6 +43,8 @@ def run_video(host, webcam_index, online, port=65438):
     frame_number = 0
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 576)
+
+    # https://stackoverflow.com/questions/43665208/how-to-get-the-latest-frame-from-capture-device-camera-in-opencv
     video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     print("Video read")
     steering_instance.start_belt()
@@ -49,20 +54,22 @@ def run_video(host, webcam_index, online, port=65438):
     corners_list = []
     has_found_corners = False
     while True:
-        # start_time = time.time()
+        start_time = time.time()
+        init_time = start_time
         ret, frame = video.read()
+
         if not ret:
             break
 
-        # prev_time = time.time()
-        # print(f"FTAN1: {prev_time - start_time} seconds")
-        # start_time = time.time()
+        prev_time = time.time()
+        print(f"FTAN1: {prev_time - start_time} seconds")
+        start_time = time.time()
 
         analyser.analysis_pipeline(image=frame, has_found_corners=has_found_corners)
 
-        # prev_time = time.time()
-        # print(f"FTAN2: {prev_time - start_time} seconds")
-        # start_time = time.time()
+        prev_time = time.time()
+        print(f"FTAN2: {prev_time - start_time} seconds")
+        start_time = time.time()
         print(found_corners)
         if not has_found_corners:
             corners_list.append(analyser.corners)
@@ -71,19 +78,12 @@ def run_video(host, webcam_index, online, port=65438):
                 corners = np.median(corners_list, axis=0)
                 corners = corners.astype(int)
                 has_found_corners = True
-                # for corner in found_corners:
-                #     corner = tuple(
-                #         map(int, corner)
-                #     )  # Convert each corner to a tuple of integers
-                #     cv2.circle(frame, corner, 5, (255, 255, 0), -1)
-                #     cv2.imwrite("corners.png", frame)
-                # analyser.corners = corners
             else:
                 continue
 
-        # prev_time = time.time()
-        # print(f"FTAN3: {prev_time - start_time} seconds")
-        # start_time = time.time()
+        prev_time = time.time()
+        print(f"FTAN3: {prev_time - start_time} seconds")
+        start_time = time.time()
 
         try:
             steering_instance.pick_program_pipeline(
@@ -101,9 +101,9 @@ def run_video(host, webcam_index, online, port=65438):
             print(f"Robot not found: {e}")
         except Exception as e:
             print(f"Error: {e}")
-        # prev_time = time.time()
-        # print(f"FTAN4: {prev_time - start_time} seconds")
-        # start_time = time.time()
+        prev_time = time.time()
+        print(f"FTAN4: {prev_time - start_time} seconds")
+        start_time = time.time()
 
         video_output.showFrame(frame)
 
@@ -120,9 +120,11 @@ def run_video(host, webcam_index, online, port=65438):
             break
         elif key == ord("p"):
             cv2.waitKey(0)
-        # prev_time = time.time()
-        # print(f"FTAN5: {prev_time - start_time} seconds")
-        # start_time = time.time()
+        prev_time = time.time()
+        print(f"FTAN5: {prev_time - start_time} seconds")
+        start_time = time.time()
+        print(f"FTANX: {prev_time - init_time} seconds")
+        sys.stdout.flush()
 
     video.release()
     cv2.destroyAllWindows()
@@ -163,16 +165,16 @@ if __name__ == "__main__":
         print("Exiting... Please provide the missing values in the .env file")
         sys.exit(1)
 
-    # pr = cProfile.Profile()
-    # pr.enable()  # Start profiling
+    pr = cProfile.Profile()
+    pr.enable()  # Start profiling
     run_video(
         host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
     )
 
-    # pr.disable()  # Stop profiling
+    pr.disable()  # Stop profiling
 
-    # s = io.StringIO()
-    # ps = pstats.Stats(pr, stream=s).sort_stats("cumulative")
-    # ps.print_stats()  # Print the profiling results
-    # with open("profile_results.txt", "w") as f:
-    #     f.write(s.getvalue())
+    s = io.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats("cumulative")
+    ps.print_stats()  # Print the profiling results
+    with open("profile_results.txt", "w") as f:
+        f.write(s.getvalue())

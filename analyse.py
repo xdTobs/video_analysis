@@ -137,13 +137,13 @@ class Analyse:
     @staticmethod
     def apply_threshold(image: np.ndarray, out_name: str) -> np.ndarray:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
             sensitivity = 35
             lower = np.array([0, 0, 255 - sensitivity])
             upper = np.array([180, sensitivity, 255])
         elif out_name == "green-mask":
-            # hsl(163, 74%, 73%)
             lower = np.array([31, 20, 180])
             upper = np.array([120, 255, 255])
         elif out_name == "red-mask":
@@ -157,11 +157,7 @@ class Analyse:
             upper = np.array([30, 245, 245])
 
         mask = cv2.inRange(hsv, lower, upper)
-        mask = cv2.bitwise_and(image, image, mask=mask)
-        mask[np.all(mask != [0, 0, 0], axis=-1)] = [255, 255, 255]
-        frame_HSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-        mask = cv2.inRange(frame_HSV, lower, upper)
         return mask
 
     def find_triple_green_robot(self, green_mask: np.ndarray):
