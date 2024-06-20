@@ -52,7 +52,7 @@ class Analyse:
         self.course_width_cm = 121
         pass
 
-    def analysis_pipeline(self, image: np.ndarray):
+    def analysis_pipeline(self, image: np.ndarray, has_found_corners):
 
         self.videoDebugger.write_video("original", image, True)
         self.green_robot_mask = self.videoDebugger.run_analysis(
@@ -103,14 +103,14 @@ class Analyse:
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
         try:
-            self.corners = self.find_border_corners(self.border_mask)
+            if not has_found_corners:
+                self.corners = self.find_border_corners(self.border_mask)
             self.calculate_goals()
             self.calculate_course_dimensions()
             self.distance_to_closest_border, self.border_vector = (
                 self.calculate_distance_to_closest_border(self.robot_pos)
             )
             self.calculate_safepoints()
-
 
         except BorderNotFoundError as e:
             traceback.print_exc()
@@ -137,15 +137,13 @@ class Analyse:
             self.course_height_px = np.linalg.norm(corner2 - corner3)
 
     @staticmethod
-    def apply_threshold(
-        image: np.ndarray, out_name: str
-    ) -> np.ndarray:
+    def apply_threshold(image: np.ndarray, out_name: str) -> np.ndarray:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
-            sensitivity = 55
+            sensitivity = 35
             lower = np.array([0, 0, 255 - sensitivity])
-            upper = np.array([255, sensitivity, 255])
+            upper = np.array([180, sensitivity, 255])
         elif out_name == "green-mask":
             # hsl(163, 74%, 73%)
             lower = np.array([31, 20, 180])
@@ -317,7 +315,7 @@ class Analyse:
 
             lower_vector = coordinates_to_vector(right_lower_coords, left_lower_coords)
             upper_vector = coordinates_to_vector(right_upper_coords, left_upper_coords)
-            
+
             small_translation_vector = lower_vector * 1 / 8
             large_translation_vector = lower_vector * 1 / 3
 
@@ -332,27 +330,22 @@ class Analyse:
             safe_point_9 = right_upper_coords + small_translation_vector
             safe_point_10 = small_goal_coords + small_translation_vector
 
-            self.safepoint_list = np.array([
-                safe_point_1,
-                safe_point_2,
-                safe_point_3,
-                safe_point_4,
-                safe_point_5,
-                safe_point_6,
-                safe_point_7,
-                safe_point_8,
-                safe_point_9,
-                safe_point_10
-            ])
-            print("Safepoints: ",self.safepoint_list)
+            self.safepoint_list = np.array(
+                [
+                    safe_point_1,
+                    safe_point_2,
+                    safe_point_3,
+                    safe_point_4,
+                    safe_point_5,
+                    safe_point_6,
+                    safe_point_7,
+                    safe_point_8,
+                    safe_point_9,
+                    safe_point_10,
+                ]
+            )
+            print("Safepoints: ", self.safepoint_list)
             return
-
-
-
-
-            
-
-
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
@@ -435,9 +428,7 @@ class Analyse:
         return (mid_cross_rect, approx_contour)
 
     @staticmethod
-    def isolate_borders(
-        image: np.ndarray, out_name
-    ) -> np.ndarray:
+    def isolate_borders(image: np.ndarray, out_name) -> np.ndarray:
         mask = Analyse.apply_threshold(image, out_name)
         mask = cv2.bitwise_not(mask)
 
@@ -447,7 +438,6 @@ class Analyse:
         return mask
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
-        # image = cv2.bitwise_not(image)
         image = self.border_average.astype(np.uint8)
         contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = contours[0] if len(contours) == 2 else contours[1]
@@ -528,7 +518,6 @@ class Analyse:
         return self.corners
 
 
-
 class RobotNotFoundError(Exception):
     def __init__(self, message="Robot not found", *args):
         super().__init__(message, *args)
@@ -551,47 +540,6 @@ class AnalyseError(Exception):
     def __init__(self, message="Failed to analyse image", *args):
         super().__init__(message, *args)
         self.message = message
-
-
-def find_corners(self, image: np.ndarray) -> np.ndarray:
-	# image = cv2.bitwise_not(image)
-	image = self.border_average.astype(np.uint8)
-	contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	contours = contours[0] if len(contours) == 2 else contours[1]
-	corners = None
-	for c in contours:
-		peri = cv2.arcLength(c, True)
-		approx = cv2.approxPolyDP(c, 0.015 * peri, True)
-		if len(approx) == 4:
-			x, y, w, h = cv2.boundingRect(approx)
-			corners = approx.squeeze()
-	if corners is None:
-		self.corners
-
-	corner1 = max(corners, key=lambda ci: sum(ci))
-	remaining_corners = [c for c in corners if not np.array_equal(c, corner1)]
-
-	corner3 = min(remaining_corners, key=lambda ci: sum(ci))
-	remaining_corners = [
-		c for c in remaining_corners if not np.array_equal(c, corner3)
-	]
-	corner2, corner4 = sorted(remaining_corners, key=lambda ci: ci[1])
-
-	# Replace self.corners with the corners in the correct order
-	corners = np.array([corner1, corner2, corner3, corner4])
-	if corners is None:
-		raise BorderNotFoundError()
-	return corners
-def isol_borders(
-    image: np.ndarray, out_name
-) -> np.ndarray:
-    mask = Analyse.apply_threshold(image, out_name)
-    mask = cv2.bitwise_not(mask)
-
-    h, w = mask.shape[:2]
-    mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
-    mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
-    return mask
 
 
 if __name__ == "__main__":

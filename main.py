@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import os
+import time
 import traceback
 from dotenv import load_dotenv
 import sys
 import cv2
 import numpy as np
-from analyse import RobotNotFoundError, isol_borders
+from analyse import RobotNotFoundError
 import VideoDebugger
 import analyse
 import steering
@@ -17,13 +18,14 @@ def run_video(host, webcam_index, online, port=65438):
     # Takes a video path and runs the analysis on each frame
     video = webcam.open_webcam_video(webcam_index)
     videoDebugger = VideoDebugger.VideoDebugger()
+
     analyser = analyse.Analyse()
     steering_instance = steering.Steering(online, host, port)
 
     data_dict = {
         "Robot position": analyser.robot_pos,
         "Robot vector": analyser.robot_vector,
-        "Ball vector": steering_instance.steering_vector,
+        # "Ball vector": steering_instance.ball_vector,
         "Is ball close to border": steering_instance.is_ball_close_to_border,
         "Angle": steering_instance.angle_degrees,
         "Signed angle": steering_instance.signed_angle_degrees,
@@ -39,27 +41,50 @@ def run_video(host, webcam_index, online, port=65438):
     frame_number = 0
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 576)
+    video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     print("Video read")
-
     steering_instance.start_belt()
-    corners_found = False
-    corners = None
 
-    # while True:
-    #     ret, frame = video.read()
-    #     if not ret:
-    #         break
-    #     # mask = isol_borders(frame, "border")
-
-    #     cv2.imshow("aaa", frame)
-
-    # return
+    # find most common corners
+    found_corners = None
+    corners_list = []
+    has_found_corners = False
     while True:
+        # start_time = time.time()
         ret, frame = video.read()
         if not ret:
             break
 
-        analyser.analysis_pipeline(frame)
+        # prev_time = time.time()
+        # print(f"FTAN1: {prev_time - start_time} seconds")
+        # start_time = time.time()
+
+        analyser.analysis_pipeline(image=frame, has_found_corners=has_found_corners)
+
+        # prev_time = time.time()
+        # print(f"FTAN2: {prev_time - start_time} seconds")
+        # start_time = time.time()
+        print(found_corners)
+        if not has_found_corners:
+            corners_list.append(analyser.corners)
+            if len(corners_list) == 10:
+                corners_list = np.array(corners_list)
+                corners = np.median(corners_list, axis=0)
+                corners = corners.astype(int)
+                has_found_corners = True
+                # for corner in found_corners:
+                #     corner = tuple(
+                #         map(int, corner)
+                #     )  # Convert each corner to a tuple of integers
+                #     cv2.circle(frame, corner, 5, (255, 255, 0), -1)
+                #     cv2.imwrite("corners.png", frame)
+                # analyser.corners = corners
+            else:
+                continue
+
+        # prev_time = time.time()
+        # print(f"FTAN3: {prev_time - start_time} seconds")
+        # start_time = time.time()
 
         try:
             steering_instance.pick_program_pipeline(
@@ -79,6 +104,9 @@ def run_video(host, webcam_index, online, port=65438):
         except Exception as e:
             traceback.print_exc()
             print(f"Error: {e}")
+        # prev_time = time.time()
+        # print(f"FTAN4: {prev_time - start_time} seconds")
+        # start_time = time.time()
 
         video_output.showFrame(frame)
 
@@ -95,6 +123,9 @@ def run_video(host, webcam_index, online, port=65438):
             break
         elif key == ord("p"):
             cv2.waitKey(0)
+        # prev_time = time.time()
+        # print(f"FTAN5: {prev_time - start_time} seconds")
+        # start_time = time.time()
 
     video.release()
     cv2.destroyAllWindows()
