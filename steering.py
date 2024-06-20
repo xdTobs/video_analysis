@@ -97,13 +97,13 @@ class Steering:
             self.last_target_time = time.time()
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
-        if self.path is None:
-            return None
-        if self.are_coordinates_close(self.path[0]):
+        if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
         self.steering_vector = self.path[0]
 
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
+        if ball_pos is None:
+            return True
         distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
         if self.is_target_expired() or self.target_ball is None or distance_to_ball < self.distance_threshold_min:
             return True
