@@ -29,9 +29,7 @@ class Steering:
         self.current_time = 0
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
-        self.distance_to_delivery_point = (
-            30  # The distance where we want to reverse belt and deliver balls
-        )
+        self.distance_to_delivery_point = 30  # The distance where we want to reverse belt and deliver balls
         self.is_collecting_balls = True
         # first is if we are turning second is if we are turning right
         self.turn_start = None
@@ -227,20 +225,20 @@ class Steering:
 
     def move_corrected(self, signed_angle_degrees, angle_degrees, speed):
         print(f"angle to target {angle_degrees}")
-        if angle_degrees < 2:
+        if angle_degrees < 1.5:
             self.robot_interface.send_command("move", 100, speed)
-        elif 2 <= angle_degrees <= 8:
-            self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, speed)
+        elif 1.5 <= angle_degrees <= 8:
+            self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 80)
             print(f"Signed angle degrees {signed_angle_degrees}")
         elif angle_degrees > 8:
             turn = signed_angle_degrees * -1 / 3
             self.robot_interface.send_command("turn", turn, 30)
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees, 100)
+        self.move_corrected(signed_angle_degrees, angle_degrees, 30)
 
     def collect_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees, 100)
+        self.move_corrected(signed_angle_degrees, angle_degrees, 30)
 
     def start_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=100)
