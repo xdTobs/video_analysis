@@ -18,7 +18,7 @@ class Steering:
         self.is_ball_close_to_border = False
         self.last_target_time = 0
         self.target_ball = None
-        self.update_interval = 10  # Time in seconds
+        self.update_interval = 20  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
         self.distance_threshold_min = 100
         self.collect_ball_distance = 150
@@ -93,7 +93,7 @@ class Steering:
         return path
 
     def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
-        if self.is_target_expired() or self.target_ball is None:
+        if self.should_switch_target(robot_pos, self.target_ball):
             self.last_target_time = time.time()
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
@@ -103,6 +103,11 @@ class Steering:
             self.path.pop(0)
         self.steering_vector = self.path[0]
 
+    def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
+        distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
+        if self.is_target_expired() or self.target_ball is None or distance_to_ball < self.distance_threshold_min:
+            return True
+        return False
 
     def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
         return True
