@@ -113,6 +113,7 @@ class Analyse:
 
 
         except BorderNotFoundError as e:
+            traceback.print_exc()
             print(e)
 
         except Exception as e:
@@ -123,6 +124,7 @@ class Analyse:
                 self.green_robot_mask
             )
         except RobotNotFoundError as e:
+            traceback.print_exc()
             print(e)
         return
 
@@ -215,6 +217,7 @@ class Analyse:
             )
 
         except ValueError as e:
+            traceback.print_exc()
             bottom_pos = np.array((0, 0))
             top_pos = np.array((0, 0))
             print(e)
@@ -252,6 +255,7 @@ class Analyse:
             green_point = self.convert_perspective(green_keypoints[0].pt)
             red_point = self.convert_perspective(red_mask[0].pt)
         except ValueError as e:
+            traceback.print_exc()
             green_point = (0, 0)
             red_point = (0, 0)
             print(e)

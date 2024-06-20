@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import traceback
 from dotenv import load_dotenv
 import sys
 import cv2
@@ -73,8 +74,10 @@ def run_video(host, webcam_index, online, port=65438):
                 border_mask=analyser.border_mask,
             )
         except RobotNotFoundError as e:
+            traceback.print_exc()
             print(f"Robot not found: {e}")
         except Exception as e:
+            traceback.print_exc()
             print(f"Error: {e}")
 
         video_output.showFrame(frame)
