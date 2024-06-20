@@ -140,11 +140,13 @@ class VideoOutput:
             )
             robot_pos = self.analyser.robot_pos.astype(int)
             ball_vector_end = ball_vector_end.astype(int)
+
+            print(f"ball_vector_end: {ball_vector_end}")
             cv2.arrowedLine(
                 robot_arrows_on_frame,
                 tuple(robot_pos),
                 tuple(ball_vector_end),
-                (255, 0, 0),
+                (255, 0, 255),
                 2,
             )
 
@@ -213,7 +215,7 @@ class VideoOutput:
                     )  # Position the text 10 pixels above the corner
                     cv2.putText(
                         frame,
-                        f"Safe  {index + 1}",
+                        f"Safe  {index}",
                         text_position,
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.5,
