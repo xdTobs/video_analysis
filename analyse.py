@@ -47,7 +47,7 @@ class Analyse:
         self.distance_to_closest_border = float("inf")
 
         self.cam_height = 220
-        self.robot_height = 1
+        self.robot_height = 47
         self.course_length_cm = 167
         self.course_width_cm = 121
         pass

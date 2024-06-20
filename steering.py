@@ -30,12 +30,10 @@ class Steering:
         self.current_time = 0
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
+        self.distance_to_delivery_point = 30  # The distance where we want to reverse belt and deliver balls
         self.robot_pos = None
         self.robot_vector = None
         self.path = []
-        self.distance_to_delivery_point = (
-            30  # The distance where we want to reverse belt and deliver balls
-        )
         self.is_collecting_balls = True
         # first is if we are turning second is if we are turning right
         self.turn_start = None
@@ -56,31 +54,31 @@ class Steering:
     ) -> np.ndarray:
 
         return target_position - robot_pos
-    
+
     def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
         closest_safepoint_index_to_ball = self.find_closest_safepoint_index(ball_position, safepoint_list)
         closest_safepoint_index_to_robot = self.find_closest_safepoint_index(robot_pos, safepoint_list)
-        
+
         if closest_safepoint_index_to_robot == closest_safepoint_index_to_ball:
             return [closest_safepoint_index_to_robot]
-        
+
         queue = deque([(closest_safepoint_index_to_robot, [closest_safepoint_index_to_robot])])
         visited = set()
         visited.add(closest_safepoint_index_to_robot)
         safepoint_count = len(safepoint_list)
-        
+
         while queue:
             current_index, path = queue.popleft()
-            
+
             for neighbor in [(current_index - 1) % safepoint_count, (current_index + 1) % safepoint_count]:
                 if neighbor not in visited:
                     if neighbor == closest_safepoint_index_to_ball:
                         return path + [neighbor]
                     queue.append((neighbor, path + [neighbor]))
                     visited.add(neighbor)
-                    
+
         return []
-        
+
     def create_path(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray):
         path_indexes = self.find_path_to_target(ball_position, robot_pos, safepoint_list)
         if len(path_indexes) == 0:
@@ -91,7 +89,7 @@ class Steering:
             print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector)
         return path
-    
+
     def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
         if self.is_target_expired() or self.target_ball is None:
             self.last_target_time = time.time()
@@ -100,8 +98,8 @@ class Steering:
         if self.path is None:
             return None
         if len(self.path) == 0:
-            self.steering_vector = self.target_ball - robot_pos 
-            return 
+            self.steering_vector = self.target_ball - robot_pos
+            return
         if self.are_coordinates_close(self.path[0]):
             self.path.pop(0)
         self.steering_vector = self.path[0]
@@ -119,15 +117,15 @@ class Steering:
             #    self.is_targeting_safepoint = True
             #    self.is_targeting_ball = False
             #    return self.target_safepoint_index - robot_pos
-            
+
             #if self.is_targeting_ball:
             #    return self.target_ball - robot_pos
             #else:
             #    return self.target_safepoint_index - robot_pos
-    
+
     def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
         return True
-    
+
     def is_target_expired(self):
         self.current_time = time.time()
         self.time_to_switch_target = self.current_time - self.last_target_time
@@ -135,7 +133,7 @@ class Steering:
             self.target_ball = None
             return True
         return False
-    
+
     def find_closest_ball(self, keypoints: np.ndarray, robot_pos: np.ndarray) -> np.ndarray:
         if len(keypoints) == 0:
             return None
@@ -150,7 +148,7 @@ class Steering:
                 closest_distance = distance
                 closest_point = ball_pos
         return closest_point
-    
+
     def find_closest_safepoint_index(self, position: np.ndarray, safepoint_list: np.ndarray) -> int:
         if len(safepoint_list) == 0:
             return None
@@ -167,8 +165,8 @@ class Steering:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         print(f"Length: {length}")
         return length < 40
-         
-    
+
+
     def calculate_is_ball_close_to_borders(
         self, ball_pos: np.ndarray, corners: np.ndarray
     ) -> bool:
@@ -202,7 +200,7 @@ class Steering:
         safepoint_list: np.ndarray,
         border_mask,
     ):
-        
+
         self.robot_pos = robot_pos
         self.robot_vector = robot_vector
 
@@ -239,7 +237,7 @@ class Steering:
         )
         print("Steering vector: ", self.steering_vector)
         print(f"Steering vector length: {dist_to_ball}")
-        
+
         try:
             if dist_to_ball < self.collect_ball_distance:
                 self.close_to_ball = True
@@ -269,20 +267,20 @@ class Steering:
 
     def move_corrected(self, signed_angle_degrees, angle_degrees, speed):
         print(f"angle to target {angle_degrees}")
-        if angle_degrees < 2:
+        if angle_degrees < 1.5:
             self.robot_interface.send_command("move", 100, speed)
-        elif 2 <= angle_degrees <= 8:
-            self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, speed)
+        elif 1.5 <= angle_degrees <= 8:
+            self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 80)
             print(f"Signed angle degrees {signed_angle_degrees}")
         elif angle_degrees > 8:
             turn = signed_angle_degrees * -1 / 3
             self.robot_interface.send_command("turn", turn, 30)
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees, 100)
+        self.move_corrected(signed_angle_degrees, angle_degrees, 30)
 
     def collect_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees, 100)
+        self.move_corrected(signed_angle_degrees, angle_degrees, 30)
 
     def start_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=100)
