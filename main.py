@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # pr = cProfile.Profile()
     # pr.enable()  # Start profiling
     run_video(
-        host=HOST, webcam_index=WEBCAM_INDEX, online=True, port=int(PORT)
+        host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
     )
 
     # pr.disable()  # Stop profiling

@@ -56,12 +56,13 @@ class Steering:
 
         return target_position - robot_pos
 
-    def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
+    def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray,
+                            safepoint_list: np.ndarray) -> np.ndarray:
         closest_safepoint_index_to_ball = self.find_closest_safepoint_index(ball_position, safepoint_list)
         closest_safepoint_index_to_robot = self.find_closest_safepoint_index(robot_pos, safepoint_list)
 
         if closest_safepoint_index_to_robot == closest_safepoint_index_to_ball:
-            return [closest_safepoint_index_to_robot]
+            return np.array([closest_safepoint_index_to_robot])
 
         queue = deque([(closest_safepoint_index_to_robot, [closest_safepoint_index_to_robot])])
         visited = set()
@@ -74,11 +75,11 @@ class Steering:
             for neighbor in [(current_index - 1) % safepoint_count, (current_index + 1) % safepoint_count]:
                 if neighbor not in visited:
                     if neighbor == closest_safepoint_index_to_ball:
-                        return path + [neighbor]
+                        return np.array(path + [neighbor])
                     queue.append((neighbor, path + [neighbor]))
                     visited.add(neighbor)
 
-        return []
+        return np.array([])
 
     def create_path(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray):
         path_indexes = self.find_path_to_target(ball_position, robot_pos, safepoint_list)
