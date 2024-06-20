@@ -105,6 +105,8 @@ class Steering:
         self.steering_vector = self.path[0]
 
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
+        if ball_pos is None:
+            return True
         distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
         if self.is_target_expired() or self.target_ball is None or distance_to_ball < self.distance_threshold_min:
             return True
