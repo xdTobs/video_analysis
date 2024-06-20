@@ -20,52 +20,46 @@ def run_video(host, webcam_index, online, port=65438):
     video = webcam.open_webcam_video(webcam_index)
     videoDebugger = VideoDebugger.VideoDebugger()
 
-    # find most common corners
-    corners = None
-    corners_list = []
-    i = 0
-    img = None
-    while True:
-        start_time = time.time()
-        ret, frame = video.read()
-        if not ret:
-            print("could not read frame when finding corners. Exiting...")
-            sys.exit(1)
-        mask = isol_borders(frame, "border")
-        try:
-            corners = find_corners(mask)
-            for corner in corners:
-                cv2.circle(frame, corner, 5, (0, 0, 255), -1)
-            i += 1
-        except BorderNotFoundError as e:
-            print("could not find border, skipping frame", e)
+    # # find most common corners
+    # corners = None
+    # corners_list = []
+    # i = 0
+    # img = None
+    # while True:
+    #     start_time = time.time()
+    #     ret, frame = video.read()
+    #     if not ret:
+    #         print("could not read frame when finding corners. Exiting...")
+    #         sys.exit(1)
+    #     mask = isol_borders(frame, "border")
+    #     try:
+    #         corners = find_corners(mask)
+    #         for corner in corners:
+    #             cv2.circle(frame, corner, 5, (0, 0, 255), -1)
+    #         i += 1
+    #     except BorderNotFoundError as e:
+    #         print("could not find border, skipping frame", e)
 
-        mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-        print(corners)
-        corners_list.append(corners)
+    #     corners_list.append(corners)
+    #     print(f"corners_list: {corners_list}")
 
-        # stack = np.vstack((frame, mask))
+    #     # mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    #     # stack = np.vstack((frame, mask))
+    #     # cv2.imshow("frame", stack)
+    #     # if cv2.waitKey(25) & 0xFF == ord("q") or i > 10:
+    #     if len(corners_list) > 20:
+    #         # img = frame
+    #         # cv2.destroyAllWindows()
+    #         break
+    #     end_time = time.time()
+    #     print(f"Frame time borders: {end_time - start_time} seconds")
 
-        # cv2.imshow("frame", stack)
-        if cv2.waitKey(25) & 0xFF == ord("q") or i > 10:
-            img = frame
-            # cv2.destroyAllWindows()
-            break
-        end_time = time.time()
-        print(f"Frame time borders: {end_time - start_time} seconds")
+    # corners_tuple_list = []
+    # for arr in corners_list:
+    #     corners_tuple_list.append(tuple(map(tuple, arr)))
+    # corners = collections.Counter(corners_tuple_list).most_common()[0][0]
 
-    corners_tuple_list = []
-    for arr in corners_list:
-        corners_tuple_list.append(tuple(map(tuple, arr)))
-    corners = collections.Counter(corners_tuple_list).most_common()[0][0]
-    # draw corners on image
-
-    for corner in corners:
-        cv2.circle(img, corner, 5, (0, 0, 255), -1)
-
-    cv2.imwrite("corners.jpg", img)
-    # Convert the most common group back to a numpy array
-    # corners = np.array(corners_counter[0], dtype=np.int32)
+    # np_corners = np.array([np.array(coord) for coord in corners])
 
     analyser = analyse.Analyse()
     steering_instance = steering.Steering(online, host, port)
@@ -73,7 +67,7 @@ def run_video(host, webcam_index, online, port=65438):
     data_dict = {
         "Robot position": analyser.robot_pos,
         "Robot vector": analyser.robot_vector,
-        "Ball vector": steering_instance.steering_vector,
+        # "Ball vector": steering_instance.ball_vector,
         "Is ball close to border": steering_instance.is_ball_close_to_border,
         "Angle": steering_instance.angle_degrees,
         "Signed angle": steering_instance.signed_angle_degrees,
@@ -92,11 +86,17 @@ def run_video(host, webcam_index, online, port=65438):
     print("Video read")
 
     steering_instance.start_belt()
+
+    # find most common corners
+    corners_list = []
+    has_found_corners = False
     while True:
         start_time = time.time()
         ret, frame = video.read()
         if not ret:
             break
+        if not has_found_corners:
+
 
         analyser.analysis_pipeline(frame)
 
@@ -121,7 +121,8 @@ def run_video(host, webcam_index, online, port=65438):
 
         frame_number += 1
 
-        if cv2.waitKey(25) & 0xFF == ord("q"):
+        key = cv2.waitKey(25) & 0xFF
+        if key == ord("q"):
             videoDebugger.close_videos()
             video.release()
             cv2.destroyAllWindows()
@@ -129,9 +130,16 @@ def run_video(host, webcam_index, online, port=65438):
                 steering_instance.stop_belt()
                 steering_instance.disconnect()
             break
+        elif key == ord("p"):
+            cv2.waitKey(0)
         end_time = time.time()
         print(f"Frame time main analysis: {end_time - start_time} seconds")
 
+        print("corners")
+        print(np_corners)
+        print("analyser")
+        print(analyser.corners)
+        exit(0)
     video.release()
     cv2.destroyAllWindows()
 
@@ -174,7 +182,7 @@ if __name__ == "__main__":
     # pr = cProfile.Profile()
     # pr.enable()  # Start profiling
     run_video(
-        host=HOST, webcam_index=WEBCAM_INDEX, online=True, port=int(PORT)
+        host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
     )
 
     # pr.disable()  # Stop profiling
