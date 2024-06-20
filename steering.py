@@ -99,7 +99,17 @@ class Steering:
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
         if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
+        elif self.can_target_ball_directly(robot_pos, self.target_ball):
+            while len(self.path) > 1:
+                self.path.pop(0)
         self.steering_vector = self.path[0]
+
+    def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
+        distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
+        if distance_to_ball < 250:
+            return True
+        return False
+
 
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         if ball_pos is None:
