@@ -88,6 +88,8 @@ class Steering:
             steering_vector = self.find_steering_vector(robot_pos, safepoint_list[path_indexes[i]])
             print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector)
+        steering_vector = self.find_steering_vector(robot_pos, ball_position)
+        path.append(steering_vector)
         return path
 
     def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
@@ -97,31 +99,10 @@ class Steering:
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
         if self.path is None:
             return None
-        if len(self.path) == 0:
-            self.steering_vector = self.target_ball - robot_pos
-            return
         if self.are_coordinates_close(self.path[0]):
             self.path.pop(0)
         self.steering_vector = self.path[0]
 
-
-
-            #self.last_target_time = time.time()
-            #self.target_ball = self.find_closest_ball(keypoints, robot_pos)
-            #self.target_safepoint_index = self.find_closest_safepoint_index(self.target_ball, safepoint_list)
-            #if self.are_coordinates_close(robot_pos, self.target_safepoint_index):
-            #    self.is_targeting_safepoint = False
-            #    self.is_targeting_ball = True
-            #    return self.target_ball - robot_pos
-            #else:
-            #    self.is_targeting_safepoint = True
-            #    self.is_targeting_ball = False
-            #    return self.target_safepoint_index - robot_pos
-
-            #if self.is_targeting_ball:
-            #    return self.target_ball - robot_pos
-            #else:
-            #    return self.target_safepoint_index - robot_pos
 
     def has_valid_path(self, robot_pos, robot_vector, ball_pos) -> bool:
         return True
@@ -164,7 +145,7 @@ class Steering:
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         print(f"Length: {length}")
-        return length < 40
+        return length < 100
 
 
     def calculate_is_ball_close_to_borders(
@@ -230,13 +211,14 @@ class Steering:
             self.angle_radians = angle_between_vectors(robot_vector, self.steering_vector)  # type: ignore
             self.angle_degrees = math.degrees(self.angle_radians)
 
-        dist_to_ball = math.sqrt(self.steering_vector[0] ** 2 + self.steering_vector[1] ** 2)
+        dist_to_target = math.sqrt(self.steering_vector[0] ** 2 + self.steering_vector[1] ** 2)
+        dist_to_ball = np.linalg.norm(self.target_ball - robot_pos)
 
         self.is_ball_close_to_border = self.calculate_is_ball_close_to_borders(
             self.target_ball, corners
         )
         print("Steering vector: ", self.steering_vector)
-        print(f"Steering vector length: {dist_to_ball}")
+        print(f"Steering vector length: {dist_to_target}")
 
         try:
             if dist_to_ball < self.collect_ball_distance:
@@ -251,7 +233,7 @@ class Steering:
                 print("Ball is not close")
                 self.close_to_ball = False
                 self.get_near_ball(
-                    self.signed_angle_degrees, self.angle_degrees, dist_to_ball
+                    self.signed_angle_degrees, self.angle_degrees, dist_to_target
                 )
                 return
             else:
@@ -270,7 +252,7 @@ class Steering:
         if angle_degrees < 1.5:
             self.robot_interface.send_command("move", 100, speed)
         elif 1.5 <= angle_degrees <= 8:
-            self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 80)
+            self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 40)
             print(f"Signed angle degrees {signed_angle_degrees}")
         elif angle_degrees > 8:
             turn = signed_angle_degrees * -1 / 3
