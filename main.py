@@ -40,8 +40,8 @@ def run_video(host, webcam_index, online, port=65438):
     frame_number = 0
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 576)
+    video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     print("Video read")
-
     steering_instance.start_belt()
 
     # find most common corners
