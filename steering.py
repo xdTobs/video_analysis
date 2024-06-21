@@ -43,6 +43,7 @@ class Steering:
         self.is_targeting_safepoint = False
         self.is_reversing = False
         self.speed = 100
+        self.is_finished_turning = False
 
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
@@ -100,16 +101,20 @@ class Steering:
             self.last_target_time = time.time()
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
+
         if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
 
             if self.is_reversing and len(self.path) > 1 and math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
+                self.robot_interface.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])), 30)
 
-                while math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
-                    self.robot_interface.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
+                if math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
+                    self.is_finished_turning = False
 
-                self.robot_interface.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
-                self.path.pop(0)
-                self.is_reversing = False
+                else:
+                    self.is_finished_turning = True
+                    self.path.pop(0)
+                    self.is_reversing = False
+
             else:
                 self.path.pop(0)
 
@@ -294,6 +299,9 @@ class Steering:
 
     def move_corrected(self, signed_angle_degrees, angle_degrees):
         print(f"angle to target {angle_degrees}")
+
+        if not self.is_finished_turning:
+            return
 
         if angle_degrees > 90:
             if signed_angle_degrees < 0:
