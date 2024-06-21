@@ -41,6 +41,7 @@ class Steering:
         self.target_safepoint_index = None
         self.is_targeting_ball = False
         self.is_targeting_safepoint = False
+        self.is_reversing = False
 
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
@@ -94,15 +95,26 @@ class Steering:
         return path
 
     def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
+
         if self.should_switch_target(robot_pos, self.target_ball):
             self.last_target_time = time.time()
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
+
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
+
         if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
-            self.path.pop(0)
+
+            if self.is_reversing and len(self.path) > 1 and math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
+                self.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
+                self.path.pop(0)
+                self.is_reversing = False
+            else:
+                self.path.pop(0)
+
         elif self.can_target_ball_directly(robot_pos, self.target_ball):
             while len(self.path) > 1:
                 self.path.pop(0)
+                
         self.steering_vector = self.path[0]
 
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
@@ -271,6 +283,8 @@ class Steering:
                 reverse_signed_angle_degrees = signed_angle_degrees + 180
             else:
                 reverse_signed_angle_degrees = signed_angle_degrees - 180
+
+            self.is_reversing = True
             self.robot_interface.send_command("move-corrected", reverse_signed_angle_degrees, -30)
             print(f"Signed angle degrees: {signed_angle_degrees}")
 
