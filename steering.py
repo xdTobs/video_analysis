@@ -265,6 +265,12 @@ class Steering:
 
     def move_corrected(self, signed_angle_degrees, angle_degrees, speed):
         print(f"angle to target {angle_degrees}")
+
+        if angle_degrees > 90:
+            speed = -speed
+            angle_degrees = 180 - angle_degrees
+
+
         if angle_degrees < 1.5:
             self.robot_interface.send_command("move", 100, speed)
         elif 1.5 <= angle_degrees <= 8:
