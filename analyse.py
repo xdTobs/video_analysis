@@ -300,16 +300,20 @@ class Analyse:
             small_goal_coords = self.small_goal_coords
             large_goal_coords = self.large_goal_coords
 
-            right_lower_coords = (corner1 + small_goal_coords) // 2
-            right_upper_coords = (small_goal_coords + corner2) // 2
-            left_lower_coords = (corner4 + large_goal_coords) // 2
-            left_upper_coords = (large_goal_coords + corner3) // 2
+            right_lower_coords = ((corner1 + small_goal_coords) // 2)-[0, 20]
+            right_upper_coords = ((small_goal_coords + corner2) // 2)+[0, 20]
+            left_lower_coords = ((corner4 + large_goal_coords) // 2 )-[0, 20]
+            left_upper_coords = ((large_goal_coords + corner3) // 2)+[0, 20]
+            print("Right lower: ", right_lower_coords)
+            print("Right upper: ", right_upper_coords)
+            print("Left lower: ", left_lower_coords)
+            print("Left upper: ", left_upper_coords)
 
             lower_vector = coordinates_to_vector(right_lower_coords, left_lower_coords)
             upper_vector = coordinates_to_vector(right_upper_coords, left_upper_coords)
 
-            small_translation_vector = lower_vector * 1 / 8
-            large_translation_vector = lower_vector * 1 / 3
+            small_translation_vector = lower_vector * 1 / 6
+            large_translation_vector = lower_vector * 0.4
 
             safe_point_1 = right_lower_coords + small_translation_vector
             safe_point_2 = right_lower_coords + large_translation_vector
