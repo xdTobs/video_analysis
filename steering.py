@@ -170,9 +170,9 @@ class Steering:
         return closest_index
 
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
+        length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         if self.is_collecting_balls:
             return length < 40
-        length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         print(f"Length: {length}")
         return length < 100
 
@@ -236,7 +236,7 @@ class Steering:
                 self.ejaculate()
 
 
-        
+
         self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.steering_vector)  # type: ignore
         self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
         self.angle_radians = angle_between_vectors(robot_vector, self.steering_vector)  # type: ignore
