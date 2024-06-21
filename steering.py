@@ -18,7 +18,7 @@ class Steering:
         self.is_ball_close_to_border = False
         self.last_target_time = 0
         self.target_ball = None
-        self.update_interval = 20  # Time in seconds
+        self.update_interval = 25  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
         self.distance_threshold_min = 100
         self.collect_ball_distance = 150
@@ -42,6 +42,7 @@ class Steering:
         self.is_targeting_ball = False
         self.is_targeting_safepoint = False
         self.is_reversing = False
+        self.speed = 100
 
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
@@ -114,7 +115,7 @@ class Steering:
         elif self.can_target_ball_directly(robot_pos, self.target_ball):
             while len(self.path) > 1:
                 self.path.pop(0)
-                
+
         self.steering_vector = self.path[0]
 
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
@@ -123,6 +124,11 @@ class Steering:
             return True
         return False
 
+    def set_speed(self, distance: int, angle_signed_radians: float):
+        angle_radians = abs(angle_signed_radians)
+        self.speed = (0.01100000000*math.pow(distance,2) - 0.1200000000 * distance + 0.1)/5
+
+        return self.speed
 
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         if ball_pos is None:
@@ -275,7 +281,7 @@ class Steering:
             return
 
 
-    def move_corrected(self, signed_angle_degrees, angle_degrees, speed):
+    def move_corrected(self, signed_angle_degrees, angle_degrees):
         print(f"angle to target {angle_degrees}")
 
         if angle_degrees > 90:
@@ -289,7 +295,7 @@ class Steering:
             print(f"Signed angle degrees: {signed_angle_degrees}")
 
         elif angle_degrees < 1.5:
-            self.robot_interface.send_command("move", 100, speed)
+            self.robot_interface.send_command("move", 100, self.speed)
         elif 1.5 <= angle_degrees <= 20:
             self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 40)
             print(f"Signed angle degrees {signed_angle_degrees}")
@@ -298,10 +304,10 @@ class Steering:
             self.robot_interface.send_command("turn", turn, 30)
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees, 30)
+        self.move_corrected(signed_angle_degrees, angle_degrees)
 
     def collect_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees, 30)
+        self.move_corrected(signed_angle_degrees, angle_degrees)
 
     def start_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=100)
