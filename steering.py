@@ -83,6 +83,13 @@ class Steering:
 
     def create_path(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray):
         self.path_indexes = self.find_path_to_target(ball_position, robot_pos, safepoint_list)
+        if not self.is_collecting_balls:
+            for i in range(0, len(self.path_indexes)):
+                if self.path_indexes[i] == 0 or self.path_indexes[i] == 8:
+                    self.path_indexes.pop(i)
+                    break
+        print(f"Path indexes: {self.path_indexes}")
+
         if len(self.path_indexes) == 0:
             return None
         path = []
@@ -99,9 +106,6 @@ class Steering:
             self.last_target_time = time.time()
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
-        # Popping either safepoint 0 or 8 to get a better angle on safepoint 9 and ultimatelt the goal
-        if not self.is_targeting_ball and  len(self.path)==2:
-            self.path.pop(0)
         if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
         elif self.can_target_ball_directly(robot_pos, self.target_ball):
