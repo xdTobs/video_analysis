@@ -105,16 +105,20 @@ class Steering:
         if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
 
             if self.is_reversing and len(self.path) > 1 and math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
-                self.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
+
+                while math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
+                    self.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
+
                 self.path.pop(0)
                 self.is_reversing = False
+                
             else:
                 self.path.pop(0)
 
         elif self.can_target_ball_directly(robot_pos, self.target_ball):
             while len(self.path) > 1:
                 self.path.pop(0)
-                
+
         self.steering_vector = self.path[0]
 
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
