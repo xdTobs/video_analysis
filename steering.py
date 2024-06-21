@@ -198,12 +198,15 @@ class Steering:
         corners: np.ndarray,
         dropoff_coords: np.ndarray,
         safepoint_list: np.ndarray,
+        small_goal_coords: np.ndarray,
         border_mask,
+       
     ):
 
         self.robot_pos = robot_pos
         self.robot_vector = robot_vector
         self.dropoff_coords = dropoff_coords
+        self.small_goal_coords = small_goal_coords
 
         # if we have a target and no keypoints we still want to catch last ball
         if robot_pos is None:
@@ -310,8 +313,9 @@ class Steering:
 
 
         # Calculate the signed angle between the robot's orientation and the target direction
+        vector_to_goal = self.small_goal_coords - self.dropoff_coords
         signed_angle_radians = angle_between_vectors_signed(
-            self.robot_vector, self.steering_instance.small_goal_coords
+            self.robot_vector, vector_to_goal
         )
         self.signed_angle_degrees = math.degrees(signed_angle_radians)
         self.angle_degrees = self.signed_angle_degrees

@@ -95,6 +95,7 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.corners,
                 analyser.dropoff_coords,
                 analyser.safepoint_list,
+                analyser.small_goal_coords,
                 border_mask=analyser.border_mask,
             )
         except RobotNotFoundError as e:
