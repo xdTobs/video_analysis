@@ -18,7 +18,7 @@ class VideoOutput:
     def update_data_dict(self):
         self.data_dict["Angle"] = self.steering_instance.angle_degrees
         self.data_dict["Signed angle"] = self.steering_instance.signed_angle_degrees
-        self.data_dict["Close to Ball"] = self.steering_instance.close_to_ball
+        self.data_dict["Close to Target"] = self.steering_instance.close_to_target
         self.data_dict["Time to switch target"] = (
             self.steering_instance.time_to_switch_target
         )

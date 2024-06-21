@@ -26,7 +26,7 @@ class Steering:
         self.signed_angle_degrees = None
         self.angle_radians = None
         self.angle_degrees = None
-        self.close_to_ball = False
+        self.close_to_target = False
         self.current_time = 0
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
@@ -256,16 +256,16 @@ class Steering:
 
         try:
             if dist_to_ball < self.collect_ball_distance:
-                self.close_to_ball = True
-                print("Ball is close")
+                self.close_to_target = True
+                print("Target is close")
                 self.collect_ball(
                     self.signed_angle_degrees, self.angle_degrees, dist_to_ball
                 )
                 return
 
             if dist_to_ball > self.collect_ball_distance:
-                print("Ball is not close")
-                self.close_to_ball = False
+                print("Target is not close")
+                self.close_to_target = False
                 self.get_near_ball(
                     self.signed_angle_degrees, self.angle_degrees, dist_to_target
                 )
