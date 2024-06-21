@@ -273,23 +273,26 @@ class Steering:
         else:
             self.should_drive_backwards = True
 
-        if angle_degrees > 90 and self.should_drive_backwards:
+        if self.should_drive_backwards:
 
-            if signed_angle_degrees < 0:
-                reverse_signed_angle_degrees = signed_angle_degrees + 180
-            else:
-                reverse_signed_angle_degrees = signed_angle_degrees - 180
-            self.robot_interface.send_command("move-corrected", reverse_signed_angle_degrees, -30)
-            print(f"Signed angle degrees: {signed_angle_degrees}")
+            if angle_degrees > 90:
 
-        elif angle_degrees < 1.5:
-            self.robot_interface.send_command("move", 100, speed)
-        elif 1.5 <= angle_degrees <= 8:
-            self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 40)
-            print(f"Signed angle degrees {signed_angle_degrees}")
+                if signed_angle_degrees < 0:
+                    reverse_signed_angle_degrees = signed_angle_degrees + 180
+                else:
+                    reverse_signed_angle_degrees = signed_angle_degrees - 180
+                self.robot_interface.send_command("move-corrected", reverse_signed_angle_degrees, -30)
+                print(f"Signed angle degrees: {signed_angle_degrees}")
         else:
-            turn = signed_angle_degrees * -1 / 3
-            self.robot_interface.send_command("turn", turn, 30)
+
+            if angle_degrees < 1.5:
+                self.robot_interface.send_command("move", 100, speed)
+            elif 1.5 <= angle_degrees <= 8:
+                self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 40)
+                print(f"Signed angle degrees {signed_angle_degrees}")
+            else:
+                turn = signed_angle_degrees * -1 / 3
+                self.robot_interface.send_command("turn", turn, 30)
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
         self.move_corrected(signed_angle_degrees, angle_degrees, 30)
