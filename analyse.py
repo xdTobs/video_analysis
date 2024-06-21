@@ -324,7 +324,7 @@ class Analyse:
             safe_point_7 = left_upper_coords - large_translation_vector
             safe_point_8 = right_upper_coords + large_translation_vector
             safe_point_9 = right_upper_coords + small_translation_vector
-            safe_point_10 = small_goal_coords + small_translation_vector
+            safe_point_10 = small_goal_coords + small_translation_vector - [20,0]
 
             self.safepoint_list = np.array(
                 [
