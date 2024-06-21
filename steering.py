@@ -30,7 +30,7 @@ class Steering:
         self.current_time = 0
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
-        self.distance_to_delivery_point = 30  # The distance where we want to reverse belt and deliver balls
+        self.distance_to_delivery_point = 100  # The distance where we want to reverse belt and deliver balls
         self.robot_pos = None
         self.robot_vector = None
         self.path = []
@@ -121,9 +121,10 @@ class Steering:
         self.steering_vector = self.path[0]
 
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
-        distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
-        if distance_to_ball < 250:
-            return True
+        if self.is_collecting_balls:
+            distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
+            if distance_to_ball < 250:
+                return True
         return False
 
     def set_speed(self, distance: int, angle_signed_radians: float):
@@ -152,8 +153,12 @@ class Steering:
         return False
 
     def find_closest_ball(self, keypoints: np.ndarray, robot_pos: np.ndarray) -> np.ndarray:
+        print(f"Keypoints: {keypoints}")
         if len(keypoints) == 0:
-            return None
+            self.is_collecting_balls = False
+            return self.dropoff_coords
+        else:
+            self.is_collecting_balls = True
         if robot_pos is None:
             return None
         closest_distance = sys.maxsize
@@ -180,6 +185,8 @@ class Steering:
 
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
+        if self.is_collecting_balls:
+            return length < 40
         print(f"Length: {length}")
         return length < 100
 
@@ -215,11 +222,15 @@ class Steering:
         corners: np.ndarray,
         dropoff_coords: np.ndarray,
         safepoint_list: np.ndarray,
+        small_goal_coords: np.ndarray,
         border_mask,
+
     ):
 
         self.robot_pos = robot_pos
         self.robot_vector = robot_vector
+        self.dropoff_coords = dropoff_coords
+        self.small_goal_coords = small_goal_coords
 
         # if we have a target and no keypoints we still want to catch last ball
         if robot_pos is None:
@@ -235,17 +246,15 @@ class Steering:
 
         self.follow_path(keypoints, robot_pos, safepoint_list)
         if not self.is_collecting_balls:
-            self.deliver_balls_to_target(robot_vector, dropoff_coords, robot_pos)
-        if self.steering_vector is None:
-            self.is_collecting_balls = False
-        else:
-            self.is_collecting_balls = True
+            if self.is_ready_to_ejaculate():
+                self.ejaculate()
 
-        if self.is_collecting_balls:
-            self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.steering_vector)  # type: ignore
-            self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
-            self.angle_radians = angle_between_vectors(robot_vector, self.steering_vector)  # type: ignore
-            self.angle_degrees = math.degrees(self.angle_radians)
+
+
+        self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.steering_vector)  # type: ignore
+        self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
+        self.angle_radians = angle_between_vectors(robot_vector, self.steering_vector)  # type: ignore
+        self.angle_degrees = math.degrees(self.angle_radians)
 
         dist_to_target = math.sqrt(self.steering_vector[0] ** 2 + self.steering_vector[1] ** 2)
         dist_to_ball = np.linalg.norm(self.target_ball - robot_pos)
@@ -303,7 +312,7 @@ class Steering:
             print(f"Signed angle degrees {signed_angle_degrees}")
         else:
             turn = signed_angle_degrees * -1 / 3
-            self.robot_interface.send_command("turn", turn, 30)
+            self.robot_interface.send_command("turn", turn, 15)
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
         self.move_corrected(signed_angle_degrees, angle_degrees)
@@ -314,7 +323,7 @@ class Steering:
     def start_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=100)
 
-    def stop_belt(self):
+    def ejaculate(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=-100)
         time.sleep(5)
         self.robot_interface.send_command("belt", 0, speedPercentage=0)
@@ -324,46 +333,27 @@ class Steering:
         self.robot_interface.disconnect()
         return
 
-    def deliver_balls_to_target(
-        self, robot_vector: np.ndarray, dropoff_cords: np.ndarray, robot_pos: np.ndarray
-    ):
-        if self.drive_to_delivery_point(robot_vector, dropoff_cords, robot_pos):
-            self.stop_belt()
-
-    def drive_to_delivery_point(
-        self, robot_vector: np.ndarray, target_pos: np.ndarray, robot_pos: np.ndarray
+    def is_ready_to_ejaculate(
+        self
     ):
         # Calculate the vector to the target position
-        print(f"Robot pos: {robot_pos}, target pos: {target_pos}\n")
-        vector_to_position = target_pos - robot_pos
-        distance_to_target = np.linalg.norm(vector_to_position)
+        print(f"Robot pos: {self.robot_pos}, target pos: {self.dropoff_coords}\n")
+        vector_to_dropoff_coords = self.dropoff_coords - self.robot_pos
+        distance_to_dropoff_coords = np.linalg.norm(vector_to_dropoff_coords)
 
-        # Normalize the vector to get direction
-        direction_to_target = vector_to_position / distance_to_target
 
         # Calculate the signed angle between the robot's orientation and the target direction
+        vector_to_goal = self.small_goal_coords - self.dropoff_coords
         signed_angle_radians = angle_between_vectors_signed(
-            robot_vector, direction_to_target
+            self.robot_vector, vector_to_goal
         )
         self.signed_angle_degrees = math.degrees(signed_angle_radians)
         self.angle_degrees = self.signed_angle_degrees
         print(f"angle to target {self.angle_degrees}")
 
         if (
-            distance_to_target <= self.distance_to_delivery_point
+            distance_to_dropoff_coords <= self.distance_to_delivery_point
             and self.angle_degrees < 5
         ):
             return True
-
-        if distance_to_target < self.collect_ball_distance:
-            print("Delivery point is close")
-            self.collect_ball(
-                self.signed_angle_degrees, self.angle_degrees, distance_to_target
-            )
-            return False
-        else:
-            print("Delivery Point is not close")
-            self.get_near_ball(
-                self.signed_angle_degrees, self.angle_degrees, distance_to_target
-            )
-            return False
+        return False
