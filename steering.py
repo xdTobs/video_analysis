@@ -301,11 +301,11 @@ class Steering:
             self.ejaculate()
 
     def is_ready_to_ejaculate(
-        self, robot_pos: np.ndarray
+        self
     ):
         # Calculate the vector to the target position
-        print(f"Robot pos: {robot_pos}, target pos: {self.dropoff_coords}\n")
-        vector_to_dropoff_coords = self.dropoff_coords - robot_pos
+        print(f"Robot pos: {self.robot_pos}, target pos: {self.dropoff_coords}\n")
+        vector_to_dropoff_coords = self.dropoff_coords - self.robot_pos
         distance_to_dropoff_coords = np.linalg.norm(vector_to_dropoff_coords)
 
 
