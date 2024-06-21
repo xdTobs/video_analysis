@@ -14,6 +14,8 @@ import analyse
 import steering
 import videoOutput
 import webcam
+import traceback
+from utils import angle_between_vectors_signed, coordinates_to_vector
 
 
 def run_video(host, webcam_index, online, port=65438):
@@ -67,6 +69,14 @@ def run_video(host, webcam_index, online, port=65438):
 
         analyser.analysis_pipeline(image=frame, has_found_corners=has_found_corners)
 
+        if analyser.robot_pos is not None and steering_instance.target_ball is not None:
+            ball_vector = coordinates_to_vector(
+                analyser.robot_pos, steering_instance.target_ball
+            )
+            ball_distance = np.linalg.norm(ball_vector)
+
+            steering_instance.set_speed(ball_distance, angle_between_vectors_signed(analyser.robot_vector,ball_vector) )
+        
         prev_time = time.time()
         print(f"FTAN2: {prev_time - start_time} seconds")
         start_time = time.time()
@@ -98,8 +108,10 @@ def run_video(host, webcam_index, online, port=65438):
                 border_mask=analyser.border_mask,
             )
         except RobotNotFoundError as e:
+            traceback.print_exc()
             print(f"Robot not found: {e}")
         except Exception as e:
+            traceback.print_exc()
             print(f"Error: {e}")
         prev_time = time.time()
         print(f"FTAN4: {prev_time - start_time} seconds")

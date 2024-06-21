@@ -53,6 +53,10 @@ class RobotInterface:
         if not self.connected:
             raise ConnectionError("Not connected to the robot")
         try:
+            #Clamp speedPercentage to -100 to 100
+            speedPercentage = max(-100, min(speedPercentage, 100))
+            
+            
             data = {
                 "command": command,
                 "value": value,
