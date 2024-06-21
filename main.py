@@ -14,6 +14,7 @@ import analyse
 import steering
 import videoOutput
 import webcam
+from utils import angle_between_vectors_signed, coordinates_to_vector
 
 
 def run_video(host, webcam_index, online, port=65438):
@@ -66,6 +67,15 @@ def run_video(host, webcam_index, online, port=65438):
         start_time = time.time()
 
         analyser.analysis_pipeline(image=frame, has_found_corners=has_found_corners)
+
+        if analyser.robot_pos is not None and steering_instance.target_ball is not None:
+            ball_vector = coordinates_to_vector(
+                analyser.robot_pos, steering_instance.target_ball
+            )
+            ball_distance = np.linalg.norm(ball_vector)
+
+            steering_instance.set_speed(ball_distance, angle_between_vectors_signed(analyser.robot_vector,ball_vector) )
+        
 
         prev_time = time.time()
         print(f"FTAN2: {prev_time - start_time} seconds")
