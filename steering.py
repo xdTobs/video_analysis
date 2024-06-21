@@ -105,7 +105,7 @@ class Steering:
             if self.is_reversing and len(self.path) > 1 and math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
 
                 while math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
-                    self.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
+                    self.robot_interface.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
 
                 self.robot_interface.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
                 self.path.pop(0)
