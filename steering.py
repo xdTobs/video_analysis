@@ -96,33 +96,27 @@ class Steering:
         return path
 
     def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
-
         if self.should_switch_target(robot_pos, self.target_ball):
             self.last_target_time = time.time()
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
-
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
-
         if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
 
             if self.is_reversing and len(self.path) > 1 and math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
-<<<<<<< HEAD
 
                 while math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
                     self.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
 
-=======
                 self.robot_interface.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) * -1 / 3, 30)
->>>>>>> 9b461ed3516c864cc40a71940af3121022a1e20a
                 self.path.pop(0)
                 self.is_reversing = False
-                
             else:
                 self.path.pop(0)
 
         elif self.can_target_ball_directly(robot_pos, self.target_ball):
             while len(self.path) > 1:
                 self.path.pop(0)
+
 
         self.steering_vector = self.path[0]
 
