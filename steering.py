@@ -287,7 +287,7 @@ class Steering:
 
             if angle_degrees < 1.5:
                 self.robot_interface.send_command("move", 100, speed)
-            elif 1.5 <= angle_degrees <= 8:
+            elif 1.5 <= angle_degrees <= 20:
                 self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 40)
                 print(f"Signed angle degrees {signed_angle_degrees}")
             else:
