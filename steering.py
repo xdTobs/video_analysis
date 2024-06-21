@@ -34,6 +34,7 @@ class Steering:
         self.robot_pos = None
         self.robot_vector = None
         self.path = []
+        self.path_indexes = []
         self.is_collecting_balls = True
         # first is if we are turning second is if we are turning right
         self.turn_start = None
@@ -80,7 +81,7 @@ class Steering:
         return []
 
     def create_path(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray):
-        path_indexes = self.find_path_to_target(ball_position, robot_pos, safepoint_list)
+        self.path_indexes = self.find_path_to_target(ball_position, robot_pos, safepoint_list)
         if len(path_indexes) == 0:
             return None
         path = []

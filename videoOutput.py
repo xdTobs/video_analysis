@@ -222,8 +222,8 @@ class VideoOutput:
                         color,
                         2,
                     )
-            
-            
+
+
         if self.analyser.translation_vector is not None:
             cv2.arrowedLine(
                 frame,
@@ -241,16 +241,19 @@ class VideoOutput:
             cv2.circle(
                 frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1
             )
-            cv2.arrowedLine(
-                frame,
-                self.analyser.robot_pos.astype(int),
-                self.analyser.dropoff_coords.astype(int),
-                (0, 0, 255),
-                2,
-            )
+        if self.steering_instance.path_indexes is not None and self.analyser.safepoint_list is not None:
+            for index in self.steering_instance.path_indexes:
+                # Draw arrows between safepoints
+                cv2.arrowedLine(
+                    frame,
+                    self.analyser.safepoint_list[index].astype(int),
+                    self.analyser.safepoint_list[index + 1].astype(int),
+                    (255, 0, 0),
+                    2,
+                )
 
-        
-                
+
+
 
         self.videoDebugger.write_video("result", result_3channel, True)
 
