@@ -170,6 +170,8 @@ class Steering:
         return closest_index
 
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
+        if self.is_collecting_balls:
+            return length < 40
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         print(f"Length: {length}")
         return length < 100
