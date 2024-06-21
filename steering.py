@@ -30,7 +30,7 @@ class Steering:
         self.current_time = 0
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
-        self.distance_to_delivery_point = 30  # The distance where we want to reverse belt and deliver balls
+        self.distance_to_delivery_point = 100  # The distance where we want to reverse belt and deliver balls
         self.robot_pos = None
         self.robot_vector = None
         self.path = []
@@ -107,9 +107,10 @@ class Steering:
         self.steering_vector = self.path[0]
 
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
-        distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
-        if distance_to_ball < 250:
-            return True
+        if self.is_collecting_balls:
+            distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
+            if distance_to_ball < 250:
+                return True
         return False
 
     def set_speed(self, distance: int, angle_signed_radians: float):
@@ -138,6 +139,7 @@ class Steering:
         return False
 
     def find_closest_ball(self, keypoints: np.ndarray, robot_pos: np.ndarray) -> np.ndarray:
+        print(f"Keypoints: {keypoints}")
         if len(keypoints) == 0:
             self.is_collecting_balls = False
             return self.dropoff_coords
@@ -228,14 +230,15 @@ class Steering:
 
         self.follow_path(keypoints, robot_pos, safepoint_list)
         if not self.is_collecting_balls:
-            self.deliver_balls_to_target()
+            if self.is_ready_to_ejaculate():
+                self.ejaculate()
 
 
-        if self.is_collecting_balls:
-            self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.steering_vector)  # type: ignore
-            self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
-            self.angle_radians = angle_between_vectors(robot_vector, self.steering_vector)  # type: ignore
-            self.angle_degrees = math.degrees(self.angle_radians)
+        
+        self.signed_angle_radians = angle_between_vectors_signed(robot_vector, self.steering_vector)  # type: ignore
+        self.signed_angle_degrees = math.degrees(self.signed_angle_radians)
+        self.angle_radians = angle_between_vectors(robot_vector, self.steering_vector)  # type: ignore
+        self.angle_degrees = math.degrees(self.angle_radians)
 
         dist_to_target = math.sqrt(self.steering_vector[0] ** 2 + self.steering_vector[1] ** 2)
         dist_to_ball = np.linalg.norm(self.target_ball - robot_pos)
@@ -302,12 +305,6 @@ class Steering:
         print("Disconnecting from robot")
         self.robot_interface.disconnect()
         return
-
-    def deliver_balls_to_target(
-        self
-    ):
-        if self.is_ready_to_ejaculate():
-            self.ejaculate()
 
     def is_ready_to_ejaculate(
         self
