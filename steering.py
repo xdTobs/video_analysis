@@ -28,7 +28,7 @@ class Steering:
         self.angle_degrees = None
         self.close_to_ball = False
         self.current_time = 0
-        self.time_to_switch_target = 0
+        self.time_to_switch_target = 20
         self.distance_to_border_threshold = 100
         self.distance_to_delivery_point = 100  # The distance where we want to reverse belt and deliver balls
         self.robot_pos = None
