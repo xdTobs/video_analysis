@@ -18,7 +18,7 @@ class Steering:
         self.is_ball_close_to_border = False
         self.last_target_time = 0
         self.target_ball = None
-        self.update_interval = 20  # Time in seconds
+        self.update_interval = 25  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
         self.distance_threshold_min = 100
         self.collect_ball_distance = 150
