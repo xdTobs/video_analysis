@@ -1,297 +1,555 @@
-         33858 function calls (33038 primitive calls) in 10.436 seconds
+         426046 function calls (416002 primitive calls) in 33.457 seconds
 
    Ordered by: cumulative time
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        1    0.062    0.062   10.436   10.436 C:\Users\louin\Documents\GitHub\video_analysis\main.py:19(run_video)
-       22    7.499    0.341    7.499    0.341 {waitKey}
-       30    0.544    0.018    2.384    0.079 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:55(analysis_pipeline)
-       90    1.039    0.012    1.039    0.012 {method 'detect' of 'cv2.Feature2D' objects}
-       60    0.000    0.000    0.669    0.011 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:461(find_ball_keypoints)
-      150    0.033    0.000    0.576    0.004 C:\Users\louin\Documents\GitHub\video_analysis\VideoDebugger.py:32(run_analysis)
-      222    0.007    0.000    0.457    0.002 C:\Users\louin\Documents\GitHub\video_analysis\VideoDebugger.py:13(write_video)
-      222    0.396    0.002    0.396    0.002 {method 'write' of 'cv2.VideoWriter' objects}
-       30    0.003    0.000    0.391    0.013 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:163(find_triple_green_robot)
-       21    0.014    0.001    0.380    0.018 C:\Users\louin\Documents\GitHub\video_analysis\videoOutput.py:33(showFrame)
-      150    0.001    0.000    0.169    0.001 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:137(apply_threshold)
-      384    0.165    0.000    0.165    0.000 {cvtColor}
-      918    0.110    0.000    0.110    0.000 {method 'astype' of 'numpy.ndarray' objects}
-      150    0.085    0.001    0.085    0.001 {inRange}
-      105    0.068    0.001    0.068    0.001 {resize}
-       30    0.004    0.000    0.067    0.002 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:422(isolate_borders)
-       42    0.063    0.002    0.064    0.002 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:292(hstack)
-       30    0.051    0.002    0.051    0.002 {method 'read' of 'cv2.VideoCapture' objects}
-       21    0.041    0.002    0.041    0.002 {imshow}
-       21    0.037    0.002    0.037    0.002 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:219(vstack)
-        1    0.003    0.003    0.033    0.033 C:\Users\louin\Documents\GitHub\video_analysis\webcam.py:5(open_webcam_video)
-        1    0.000    0.000    0.030    0.030 C:\Python312\Lib\platform.py:978(system)
-        1    0.000    0.000    0.030    0.030 C:\Python312\Lib\platform.py:889(uname)
-        2    0.000    0.000    0.030    0.015 C:\Python312\Lib\platform.py:321(_wmi_query)
-        2    0.030    0.015    0.030    0.015 {built-in method _wmi.exec_query}
-       51    0.029    0.001    0.029    0.001 {floodFill}
-       21    0.001    0.000    0.026    0.001 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:379(find_cross_bounding_rectangle)
-       21    0.024    0.001    0.024    0.001 {namedWindow}
-        1    0.000    0.000    0.021    0.021 C:\Python312\Lib\platform.py:445(win32_ver)
-        1    0.000    0.000    0.021    0.021 C:\Python312\Lib\platform.py:383(_win32_ver)
-      293    0.004    0.000    0.015    0.000 {built-in method builtins.print}
-       31    0.014    0.000    0.014    0.000 {findContours}
-       10    0.001    0.000    0.014    0.001 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:432(find_border_corners)
-       27    0.001    0.000    0.014    0.001 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:293(calculate_safepoints)
-        2    0.012    0.006    0.012    0.006 {destroyAllWindows}
-       27    0.000    0.000    0.011    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:1595(_array_str_implementation)
-       27    0.000    0.000    0.011    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:561(array2string)
-       27    0.000    0.000    0.011    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:506(wrapper)
-      504    0.010    0.000    0.010    0.000 {putText}
-       27    0.000    0.000    0.010    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:523(_array2string)
-       30    0.010    0.000    0.010    0.000 {erode}
-        1    0.000    0.000    0.009    0.009 C:\Python312\Lib\platform.py:766(_get_machine_win32)
-       30    0.006    0.000    0.006    0.000 {copyMakeBorder}
-      776    0.003    0.000    0.006    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\linalg\linalg.py:2383(norm)
-        2    0.006    0.003    0.006    0.003 {method 'release' of 'cv2.VideoCapture' objects}
-       27    0.000    0.000    0.005    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:780(_formatArray)
-   837/27    0.002    0.000    0.005    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:789(recurser)
-       51    0.005    0.000    0.005    0.000 {bitwise_not}
-       21    0.000    0.000    0.005    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:188(pick_program_pipeline)
-       21    0.000    0.000    0.005    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:96(follow_path)
-       27    0.000    0.000    0.005    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:477(calculate_distance_to_closest_border)
-      525    0.005    0.000    0.005    0.000 {circle}
-       27    0.000    0.000    0.005    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:452(_get_format_function)
-       27    0.005    0.000    0.005    0.000 {built-in method numpy.zeros}
-      108    0.002    0.000    0.005    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:467(distance_point_to_segment)
-       27    0.000    0.000    0.004    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:411(<lambda>)
-       27    0.000    0.000    0.004    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:907(__init__)
-       27    0.001    0.000    0.004    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:934(fillFormat)
-       21    0.000    0.000    0.004    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:83(create_path)
-       21    0.000    0.000    0.004    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:59(find_path_to_target)
-       21    0.003    0.000    0.003    0.000 {bitwise_or}
-       42    0.001    0.000    0.003    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:149(find_closest_safepoint_index)
-     1043    0.003    0.000    0.003    0.000 {built-in method numpy.array}
-       57    0.002    0.000    0.003    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:342(convert_perspective)
-       27    0.002    0.000    0.003    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:261(calculate_goals)
-        3    0.000    0.000    0.002    0.001 C:\Python312\Lib\traceback.py:178(print_exc)
-        3    0.000    0.000    0.002    0.001 C:\Python312\Lib\traceback.py:111(print_exception)
-       60    0.001    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\BlobDetector.py:4(get_ball_detector)
-      540    0.000    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:753(_extendLine_pretty)
-        8    0.000    0.000    0.001    0.000 <frozen os>:200(makedirs)
-       27    0.000    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:129(calculate_course_dimensions)
-      776    0.001    0.000    0.001    0.000 {method 'dot' of 'numpy.ndarray' objects}
-        3    0.000    0.000    0.001    0.000 C:\Python312\Lib\traceback.py:718(__init__)
-      162    0.000    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:71(_wrapreduction)
-      641    0.001    0.000    0.001    0.000 {approxPolyDP}
-      540    0.001    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:1018(__call__)
-      108    0.000    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2177(sum)
-      567    0.000    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:989(<genexpr>)
-        3    0.000    0.000    0.001    0.000 C:\Python312\Lib\traceback.py:399(_extract_from_extended_frame_gen)
-      135    0.001    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\utils.py:26(coordinates_to_vector)
-        1    0.000    0.000    0.001    0.001 C:\Users\louin\Documents\GitHub\video_analysis\VideoDebugger.py:37(close_videos)
-        2    0.001    0.001    0.001    0.001 {method 'release' of 'cv2.VideoWriter' objects}
-     6897    0.001    0.000    0.001    0.000 {built-in method builtins.len}
-       21    0.000    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:134(find_closest_ball)
-      212    0.001    0.000    0.001    0.000 {method 'reduce' of 'numpy.ufunc' objects}
-      442    0.000    0.000    0.001    0.000 {built-in method builtins.max}
-      147    0.001    0.000    0.001    0.000 {arrowedLine}
-        3    0.000    0.000    0.001    0.000 C:\Python312\Lib\traceback.py:1041(print)
-     1080    0.001    0.000    0.001    0.000 {built-in method numpy.core._multiarray_umath.dragon4_positional}
-       15    0.000    0.000    0.001    0.000 C:\Python312\Lib\traceback.py:940(format)
-      567    0.000    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:984(<genexpr>)
-      641    0.001    0.000    0.001    0.000 {arcLength}
-      540    0.000    0.000    0.001    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:739(_extendLine)
-        8    0.001    0.000    0.001    0.000 {built-in method nt._path_exists}
-        3    0.000    0.000    0.001    0.000 C:\Python312\Lib\traceback.py:525(format)
-        6    0.000    0.000    0.001    0.000 C:\Python312\Lib\traceback.py:460(format_frame_summary)
-      420    0.001    0.000    0.001    0.000 {method 'astype' of 'numpy.generic' objects}
-       90    0.000    0.000    0.000    0.000 {SimpleBlobDetector_create}
-      776    0.000    0.000    0.000    0.000 {method 'ravel' of 'numpy.ndarray' objects}
-       49    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\numeric.py:2378(array_equal)
-      776    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\linalg\linalg.py:140(isComplexType)
-       36    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:318(line)
-       54    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:33(seterr)
-        3    0.000    0.000    0.000    0.000 {built-in method nt.stat}
-       63    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:215(_vhstack_dispatcher)
-       30    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\BlobDetector.py:21(get_robot_circle_detector)
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\linecache.py:26(getline)
-     1676    0.000    0.000    0.000    0.000 {built-in method builtins.issubclass}
-       42    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:23(atleast_1d)
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\linecache.py:36(getlines)
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:430(__enter__)
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\linecache.py:80(updatecache)
-       21    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:115(should_switch_target)
-        9    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:351(_walk_tb_with_full_positions)
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:64(_make_options_dict)
-        9    0.000    0.000    0.000    0.000 {built-in method builtins.next}
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:365(_get_code_position)
-       30    0.000    0.000    0.000    0.000 {getStructuringElement}
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2692(max)
-        3    0.000    0.000    0.000    0.000 C:\Python312\Lib\linecache.py:52(checkcache)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\lib\function_base.py:3845(median)
-        8    0.000    0.000    0.000    0.000 {built-in method nt.mkdir}
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\lib\function_base.py:3763(_ureduce)
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:589(_extract_caret_anchors_from_line_segment)
-       63    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:207(_arrays_for_stack_dispatcher)
-       49    0.000    0.000    0.000    0.000 {method 'all' of 'numpy.ndarray' objects}
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\ast.py:34(parse)
-        6    0.000    0.000    0.000    0.000 {built-in method builtins.compile}
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\lib\function_base.py:3931(_median)
-      543    0.000    0.000    0.000    0.000 {method 'split' of 'str' objects}
-       49    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_methods.py:61(_all)
-      950    0.000    0.000    0.000    0.000 {built-in method numpy.asarray}
-       27    0.000    0.000    0.000    0.000 {built-in method builtins.locals}
-      567    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:993(<genexpr>)
-        8    0.000    0.000    0.000    0.000 {built-in method nt._path_isdir}
-      315    0.000    0.000    0.000    0.000 {built-in method time.time}
-      567    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:994(<genexpr>)
-       30    0.000    0.000    0.000    0.000 {method 'sort' of 'list' objects}
-       21    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:665(emit)
-      776    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\linalg\linalg.py:2379(_norm_dispatcher)
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2836(min)
-      234    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
-      552    0.000    0.000    0.000    0.000 {method 'splitlines' of 'str' objects}
-        8    0.000    0.000    0.000    0.000 <frozen ntpath>:236(split)
-      115    0.000    0.000    0.000    0.000 {built-in method builtins.min}
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:435(__exit__)
-      277    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:403(_get_formatdict)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:3385(mean)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_methods.py:101(_mean)
-      305    0.000    0.000    0.000    0.000 {method 'rstrip' of 'str' objects}
-       54    0.000    0.000    0.000    0.000 {built-in method numpy.seterrobj}
-       63    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\tokenize.py:406(open)
-       49    0.000    0.000    0.000    0.000 {built-in method builtins.sum}
-       54    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:132(geterr)
-       21    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:81(atleast_2d)
-       28    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:446(<lambda>)
-       85    0.000    0.000    0.000    0.000 {contourArea}
+        1    0.629    0.629   33.457   33.457 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\main.py:19(run_video)
+      212    3.696    0.017   16.199    0.076 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:55(analysis_pipeline)
+      636    5.301    0.008    5.301    0.008 {method 'detect' of 'cv2.Feature2D' objects}
+      203    5.287    0.026    5.287    0.026 {waitKey}
+        1    0.000    0.000    5.002    5.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:287(ejaculate)
+        1    5.000    5.000    5.000    5.000 {built-in method time.sleep}
+     1060    0.304    0.000    4.687    0.004 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\VideoDebugger.py:32(run_analysis)
+      203    0.166    0.001    3.895    0.019 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\videoOutput.py:33(showFrame)
+     1678    0.028    0.000    3.749    0.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\VideoDebugger.py:13(write_video)
+      424    0.004    0.000    3.520    0.008 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:465(find_ball_keypoints)
+     1678    3.374    0.002    3.374    0.002 {method 'write' of 'cv2.VideoWriter' objects}
+      212    0.026    0.000    2.064    0.010 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:163(find_triple_green_robot)
+     1060    0.016    0.000    1.438    0.001 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:137(apply_threshold)
+     4578    1.040    0.000    1.262    0.000 {built-in method builtins.print}
+     2932    1.221    0.000    1.221    0.000 {cvtColor}
+     8616    0.950    0.000    0.950    0.000 {method 'astype' of 'numpy.ndarray' objects}
+     1060    0.822    0.001    0.822    0.001 {inRange}
+     1015    0.762    0.001    0.762    0.001 {resize}
+      406    0.674    0.002    0.680    0.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:292(hstack)
+      211    0.019    0.000    0.640    0.003 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:293(calculate_safepoints)
+        3    0.593    0.198    0.593    0.198 {method 'set' of 'cv2.VideoCapture' objects}
+      212    0.033    0.000    0.543    0.003 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:426(isolate_borders)
+      203    0.005    0.000    0.454    0.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:191(pick_program_pipeline)
+      203    0.404    0.002    0.404    0.002 {imshow}
+     2038    0.008    0.000    0.401    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:1595(_array_str_implementation)
+     2038    0.016    0.000    0.392    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:561(array2string)
+        1    0.361    0.361    0.388    0.388 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\webcam.py:5(open_webcam_video)
+      203    0.372    0.002    0.374    0.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:219(vstack)
+      203    0.003    0.000    0.350    0.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:96(follow_path)
+     2038    0.012    0.000    0.348    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:506(wrapper)
+     2038    0.017    0.000    0.332    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:523(_array2string)
+      212    0.330    0.002    0.330    0.002 {method 'read' of 'cv2.VideoCapture' objects}
+      203    0.012    0.000    0.307    0.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:83(create_path)
+        2    0.295    0.147    0.295    0.147 {method 'release' of 'cv2.VideoCapture' objects}
+      415    0.288    0.001    0.288    0.001 {floodFill}
+      203    0.009    0.000    0.268    0.001 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:383(find_cross_bounding_rectangle)
+     2038    0.017    0.000    0.204    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:452(_get_format_function)
+     4872    0.155    0.000    0.155    0.000 {putText}
+      991    0.003    0.000    0.129    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:411(<lambda>)
+      991    0.006    0.000    0.126    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:907(__init__)
+      424    0.024    0.000    0.120    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:346(convert_perspective)
+      991    0.044    0.000    0.119    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:934(fillFormat)
+     2038    0.004    0.000    0.109    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:780(_formatArray)
+12022/2038    0.050    0.000    0.105    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:789(recurser)
+      212    0.091    0.000    0.091    0.000 {erode}
+      213    0.076    0.000    0.076    0.000 {findContours}
+     4727    0.071    0.000    0.071    0.000 {circle}
+        1    0.000    0.000    0.065    0.065 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:13(__init__)
+        1    0.000    0.000    0.065    0.065 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\RobotInterface.py:16(connect)
+      212    0.006    0.000    0.065    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:481(calculate_distance_to_closest_border)
+        1    0.063    0.063    0.063    0.063 {method 'connect' of '_socket.socket' objects}
+     5070    0.018    0.000    0.063    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:71(_wrapreduction)
+     6436    0.037    0.000    0.061    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\linalg\linalg.py:2383(norm)
+      844    0.030    0.000    0.059    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:471(distance_point_to_segment)
+      203    0.051    0.000    0.051    0.000 {namedWindow}
+     1047    0.003    0.000    0.049    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:410(<lambda>)
+     1047    0.012    0.000    0.047    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:1223(__init__)
+      203    0.004    0.000    0.044    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:59(find_path_to_target)
+       75    0.001    0.000    0.044    0.001 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:267(move_corrected)
+      212    0.042    0.000    0.042    0.000 {copyMakeBorder}
+      406    0.016    0.000    0.040    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:152(find_closest_safepoint_index)
+     2113    0.006    0.000    0.039    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2692(max)
+      209    0.038    0.000    0.038    0.000 {built-in method numpy.zeros}
+     5141    0.038    0.000    0.038    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+       78    0.001    0.000    0.032    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\RobotInterface.py:50(send_command)
+      203    0.031    0.000    0.031    0.000 {bitwise_or}
+      415    0.031    0.000    0.031    0.000 {bitwise_not}
+      203    0.002    0.000    0.030    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:164(are_coordinates_close)
+     7047    0.028    0.000    0.028    0.000 {built-in method numpy.array}
+        1    0.000    0.000    0.028    0.028 C:\Program Files\Python311\Lib\platform.py:914(system)
+        1    0.000    0.000    0.028    0.028 C:\Program Files\Python311\Lib\platform.py:825(uname)
+        1    0.000    0.000    0.028    0.028 C:\Program Files\Python311\Lib\platform.py:363(win32_ver)
+      212    0.019    0.000    0.027    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:261(calculate_goals)
+        1    0.000    0.000    0.027    0.027 C:\Program Files\Python311\Lib\platform.py:263(_syscmd_ver)
+     7874    0.010    0.000    0.026    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:753(_extendLine_pretty)
+     2038    0.013    0.000    0.026    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:64(_make_options_dict)
+       39    0.000    0.000    0.023    0.001 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:281(collect_ball)
+     6771    0.005    0.000    0.021    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:989(<genexpr>)
+        2    0.021    0.011    0.021    0.011 {destroyAllWindows}
+       36    0.000    0.000    0.020    0.001 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:278(get_near_ball)
+     5780    0.015    0.000    0.020    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:1018(__call__)
+     2113    0.003    0.000    0.019    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2836(min)
+       10    0.001    0.000    0.019    0.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:436(find_border_corners)
+        1    0.000    0.000    0.018    0.018 C:\Program Files\Python311\Lib\subprocess.py:417(check_output)
+        1    0.000    0.000    0.018    0.018 C:\Program Files\Python311\Lib\subprocess.py:506(run)
+      844    0.004    0.000    0.018    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2177(sum)
+     1982    0.007    0.000    0.015    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:33(seterr)
+      212    0.004    0.000    0.015    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:129(calculate_course_dimensions)
+     1720    0.015    0.000    0.015    0.000 {arrowedLine}
+     6771    0.007    0.000    0.014    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:984(<genexpr>)
+     1058    0.009    0.000    0.013    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\utils.py:26(coordinates_to_vector)
+     7874    0.011    0.000    0.013    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:739(_extendLine)
+      991    0.002    0.000    0.013    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:430(__enter__)
+     6436    0.012    0.000    0.012    0.000 {method 'dot' of 'numpy.ndarray' objects}
+     7826    0.007    0.000    0.012    0.000 {built-in method builtins.max}
+    11560    0.012    0.000    0.012    0.000 {built-in method numpy.core._multiarray_umath.dragon4_positional}
+92889/92882    0.012    0.000    0.012    0.000 {built-in method builtins.len}
+      424    0.008    0.000    0.010    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\BlobDetector.py:4(get_ball_detector)
+        1    0.000    0.000    0.010    0.010 C:\Program Files\Python311\Lib\subprocess.py:807(__init__)
+        1    0.000    0.000    0.009    0.009 C:\Program Files\Python311\Lib\subprocess.py:1436(_execute_child)
+        1    0.009    0.009    0.009    0.009 {built-in method _winapi.CreateProcess}
+      6/1    0.000    0.000    0.009    0.009 <frozen importlib._bootstrap>:1165(_find_and_load)
+      6/1    0.000    0.000    0.009    0.009 <frozen importlib._bootstrap>:1120(_find_and_load_unlocked)
+      203    0.003    0.000    0.009    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:115(should_switch_target)
+        1    0.000    0.000    0.008    0.008 C:\Program Files\Python311\Lib\subprocess.py:1165(communicate)
+      5/1    0.000    0.000    0.008    0.008 <frozen importlib._bootstrap>:666(_load_unlocked)
+      3/1    0.000    0.000    0.008    0.008 <frozen importlib._bootstrap_external>:934(exec_module)
+        1    0.008    0.008    0.008    0.008 {method 'read' of '_io.TextIOWrapper' objects}
+     2038    0.008    0.000    0.008    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:403(_get_formatdict)
+     2044    0.008    0.000    0.008    0.000 {built-in method builtins.locals}
+     11/2    0.000    0.000    0.007    0.004 <frozen importlib._bootstrap>:233(_call_with_frames_removed)
+      3/1    0.000    0.000    0.007    0.007 {built-in method builtins.exec}
+        1    0.000    0.000    0.007    0.007 C:\Program Files\Python311\Lib\subprocess.py:1(<module>)
+     5070    0.006    0.000    0.006    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:72(<dictcomp>)
+       78    0.006    0.000    0.006    0.000 {method 'sendall' of '_socket.socket' objects}
+      609    0.002    0.000    0.006    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:215(_vhstack_dispatcher)
+      212    0.002    0.000    0.006    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:174(<listcomp>)
+     4060    0.006    0.000    0.006    0.000 {method 'astype' of 'numpy.generic' objects}
+      991    0.002    0.000    0.006    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:435(__exit__)
+      406    0.004    0.000    0.005    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:23(atleast_1d)
+     1982    0.005    0.000    0.005    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:132(geterr)
+     1250    0.005    0.000    0.005    0.000 {approxPolyDP}
+     2038    0.005    0.000    0.005    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:72(<dictcomp>)
+    19987    0.004    0.000    0.004    0.000 {built-in method builtins.issubclass}
+      609    0.003    0.000    0.004    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:207(_arrays_for_stack_dispatcher)
+     6436    0.003    0.000    0.004    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\linalg\linalg.py:140(isComplexType)
+        8    0.000    0.000    0.004    0.001 <frozen os>:200(makedirs)
+      212    0.003    0.000    0.004    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\BlobDetector.py:21(get_robot_circle_detector)
+      212    0.004    0.000    0.004    0.000 {getStructuringElement}
+     6436    0.004    0.000    0.004    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+      908    0.004    0.000    0.004    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:51(find_steering_vector)
+       75    0.001    0.000    0.004    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:170(calculate_is_ball_close_to_borders)
+       41    0.003    0.000    0.003    0.000 {built-in method nt.stat}
+      636    0.003    0.000    0.003    0.000 {SimpleBlobDetector_create}
+        3    0.000    0.000    0.003    0.001 <frozen importlib._bootstrap_external>:1007(get_code)
+     2094    0.003    0.000    0.003    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:1231(__call__)
+     6771    0.002    0.000    0.003    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:993(<genexpr>)
+      203    0.003    0.000    0.003    0.000 {rectangle}
+        6    0.000    0.000    0.003    0.000 <frozen importlib._bootstrap>:1054(_find_spec)
+     6771    0.002    0.000    0.002    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:994(<genexpr>)
+     1250    0.002    0.000    0.002    0.000 {arcLength}
+     8684    0.002    0.000    0.002    0.000 {built-in method numpy.asarray}
+       78    0.000    0.000    0.002    0.000 C:\Program Files\Python311\Lib\json\__init__.py:183(dumps)
+        4    0.000    0.000    0.002    0.001 <frozen importlib._bootstrap_external>:1496(find_spec)
+        4    0.000    0.000    0.002    0.001 <frozen importlib._bootstrap_external>:1464(_get_spec)
+        1    0.000    0.000    0.002    0.002 C:\Program Files\Python311\Lib\traceback.py:178(print_exc)
+        1    0.000    0.000    0.002    0.002 C:\Program Files\Python311\Lib\traceback.py:111(print_exception)
+     7878    0.002    0.000    0.002    0.000 {method 'splitlines' of 'str' objects}
+       75    0.001    0.000    0.002    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\utils.py:4(angle_between_vectors)
+       18    0.000    0.000    0.002    0.000 <frozen importlib._bootstrap_external>:1604(find_spec)
+       78    0.000    0.000    0.002    0.000 C:\Program Files\Python311\Lib\json\encoder.py:183(encode)
+     5782    0.002    0.000    0.002    0.000 {method 'split' of 'str' objects}
+     4432    0.002    0.000    0.002    0.000 {method 'rstrip' of 'str' objects}
+        1    0.000    0.000    0.002    0.002 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\VideoDebugger.py:37(close_videos)
+        2    0.002    0.001    0.002    0.001 {method 'release' of 'cv2.VideoWriter' objects}
+        1    0.000    0.000    0.002    0.002 C:\Program Files\Python311\Lib\locale.py:1(<module>)
+     1982    0.002    0.000    0.002    0.000 {built-in method numpy.seterrobj}
+     2728    0.002    0.000    0.002    0.000 {built-in method builtins.isinstance}
+     2500    0.002    0.000    0.002    0.000 {built-in method time.time}
+      203    0.001    0.000    0.002    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:81(atleast_2d)
+     7317    0.002    0.000    0.002    0.000 {method 'items' of 'dict' objects}
+     6436    0.002    0.000    0.002    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\linalg\linalg.py:2379(_norm_dispatcher)
+      214    0.001    0.000    0.002    0.000 {method 'sort' of 'list' objects}
+       75    0.002    0.000    0.002    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\utils.py:14(angle_between_vectors_signed)
+       78    0.002    0.000    0.002    0.000 C:\Program Files\Python311\Lib\json\encoder.py:205(iterencode)
+      203    0.002    0.000    0.002    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\videoOutput.py:18(update_data_dict)
+     1061    0.001    0.000    0.001    0.000 {method 'format' of 'str' objects}
+        8    0.001    0.000    0.001    0.000 {built-in method nt.mkdir}
+      674    0.001    0.000    0.001    0.000 {built-in method builtins.hasattr}
+        3    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:1127(get_data)
+      212    0.001    0.000    0.001    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:177(<listcomp>)
+     2042    0.001    0.000    0.001    0.000 {method 'update' of 'dict' objects}
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\traceback.py:1013(print)
+        3    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:727(_compile_bytecode)
+        3    0.001    0.000    0.001    0.000 {built-in method marshal.loads}
+       24    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:140(_path_stat)
+        8    0.000    0.000    0.001    0.000 <frozen genericpath>:16(exists)
+     2039    0.001    0.000    0.001    0.000 {built-in method builtins.id}
+     3196    0.001    0.000    0.001    0.000 {method 'append' of 'list' objects}
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\re\__init__.py:225(compile)
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\re\__init__.py:272(_compile)
+        3    0.001    0.000    0.001    0.000 {built-in method io.open_code}
+     2858    0.001    0.000    0.001    0.000 {method 'add' of 'set' objects}
+     2038    0.001    0.000    0.001    0.000 {method 'discard' of 'set' objects}
+      866    0.001    0.000    0.001    0.000 {built-in method builtins.min}
+       22    0.001    0.000    0.001    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:134(find_closest_ball)
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\re\_compiler.py:740(compile)
+     2038    0.001    0.000    0.001    0.000 {method 'copy' of 'dict' objects}
+      202    0.001    0.000    0.001    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:126(is_target_expired)
+     3964    0.001    0.000    0.001    0.000 {built-in method numpy.geterrobj}
+      568    0.001    0.000    0.001    0.000 {contourArea}
+        1    0.001    0.001    0.001    0.001 C:\Program Files\Python311\Lib\socket.py:220(__init__)
+        8    0.000    0.000    0.001    0.000 <frozen genericpath>:39(isdir)
+     2050    0.001    0.000    0.001    0.000 {built-in method _thread.get_ident}
+       70    0.000    0.000    0.001    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\numeric.py:2378(array_equal)
+       10    0.000    0.000    0.001    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:451(<listcomp>)
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\traceback.py:713(__init__)
+       90    0.001    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:96(_path_join)
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\traceback.py:394(_extract_from_extended_frame_gen)
+        1    0.000    0.000    0.001    0.001 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:292(disconnect)
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\re\_parser.py:979(parse)
+       12    0.000    0.000    0.001    0.000 C:\Program Files\Python311\Lib\traceback.py:313(line)
+      4/1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\re\_parser.py:456(_parse_sub)
+      991    0.001    0.000    0.001    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:426(__init__)
+        2    0.000    0.000    0.001    0.000 C:\Program Files\Python311\Lib\linecache.py:26(getline)
+        2    0.000    0.000    0.001    0.000 C:\Program Files\Python311\Lib\linecache.py:36(getlines)
+     1222    0.001    0.000    0.001    0.000 {built-in method numpy.asanyarray}
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\linecache.py:80(updatecache)
+        5    0.000    0.000    0.001    0.000 C:\Program Files\Python311\Lib\traceback.py:912(format)
+     2113    0.001    0.000    0.001    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2687(_max_dispatcher)
+      4/1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\re\_parser.py:516(_parse)
+      213    0.001    0.000    0.001    0.000 {boundingRect}
+        1    0.000    0.000    0.001    0.001 C:\Program Files\Python311\Lib\signal.py:1(<module>)
+     2113    0.001    0.000    0.001    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2831(_min_dispatcher)
+       70    0.000    0.000    0.000    0.000 {method 'all' of 'numpy.ndarray' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:893(_convert_)
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\RobotInterface.py:42(disconnect)
+      435    0.000    0.000    0.000    0.000 {built-in method builtins.ord}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\lib\function_base.py:3845(median)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1259(wait)
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\lib\function_base.py:3763(_ureduce)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1580(_wait)
+       70    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_methods.py:61(_all)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:520(format)
+      202    0.000    0.000    0.000    0.000 {method 'flush' of '_io.TextIOWrapper' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method _winapi.WaitForSingleObject}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\steering.py:284(start_belt)
+      991    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:898(_none_or_positive_arg)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:455(format_frame_summary)
+      994    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\multiarray.py:741(dot)
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\lib\function_base.py:3931(_median)
+      636    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:193(<lambda>)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:1653(convert_class)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:169(__enter__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:573(_code)
+      844    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2172(_sum_dispatcher)
+      278    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
+        8    0.000    0.000    0.000    0.000 <frozen ntpath>:208(split)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:566(module_from_spec)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\socket.py:499(close)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\tokenize.py:392(open)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:179(_get_module_lock)
+       10    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:454(<listcomp>)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\socket.py:495(_real_close)
+      609    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\multiarray.py:153(concatenate)
+        1    0.000    0.000    0.000    0.000 {function socket.close at 0x0000021E25396A20}
+        3    0.000    0.000    0.000    0.000 {method 'read' of '_io.BufferedReader' objects}
+      6/1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:37(_compile)
+       40    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:450(<lambda>)
+       70    0.000    0.000    0.000    0.000 {built-in method builtins.sum}
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:493(_init_module_attrs)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:584(_extract_caret_anchors_from_line_segment)
         1    0.000    0.000    0.000    0.000 {method 'readlines' of '_io._IOBase' objects}
-      210    0.000    0.000    0.000    0.000 {method 'items' of 'dict' objects}
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:11(__init__)
-        2    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\VideoDebugger.py:8(__init__)
-       20    0.000    0.000    0.000    0.000 {method 'join' of 'str' objects}
-       12    0.000    0.000    0.000    0.000 C:\Python312\Lib\textwrap.py:470(indent)
-       21    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\videoOutput.py:18(update_data_dict)
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:865(format_exception_only)
-      130    0.000    0.000    0.000    0.000 {built-in method numpy.asanyarray}
-       20    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:126(is_target_expired)
-       20    0.000    0.000    0.000    0.000 {method 'flush' of '_io.TextIOWrapper' objects}
-        1    0.000    0.000    0.000    0.000 {built-in method _io.open}
-        7    0.000    0.000    0.000    0.000 {built-in method builtins.sorted}
-       99    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\tokenize.py:313(detect_encoding)
-        8    0.000    0.000    0.000    0.000 <frozen ntpath>:179(splitroot)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:662(partition)
-       36    0.000    0.000    0.000    0.000 C:\Python312\Lib\textwrap.py:482(prefixed_lines)
-        3    0.000    0.000    0.000    0.000 <frozen abc>:117(__instancecheck__)
-        1    0.000    0.000    0.000    0.000 {method 'partition' of 'numpy.ndarray' objects}
-       21    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:449(<lambda>)
-       12    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:573(_byte_offset_to_character_offset)
-        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
-       41    0.000    0.000    0.000    0.000 {built-in method builtins.ord}
-      108    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2172(_sum_dispatcher)
-       30    0.000    0.000    0.000    0.000 {built-in method builtins.id}
-      108    0.000    0.000    0.000    0.000 {built-in method numpy.geterrobj}
-        3    0.000    0.000    0.000    0.000 {built-in method _abc._abc_instancecheck}
+        1    0.000    0.000    0.000    0.000 {built-in method sys.getwindowsversion}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:3385(mean)
+        7    0.000    0.000    0.000    0.000 {built-in method builtins.__build_class__}
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:437(cache_from_source)
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_methods.py:101(_mean)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\ast.py:33(parse)
+        7    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:660(emit)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:159(_path_isfile)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1282(_close_pipe_fds)
+        2    0.000    0.000    0.000    0.000 {built-in method builtins.compile}
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:150(_path_is_mode_type)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1146(path_stats)
+      204    0.000    0.000    0.000    0.000 {method 'pop' of 'list' objects}
+        2    0.000    0.000    0.000    0.000 {built-in method io.open}
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:392(cached)
+        2    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\VideoDebugger.py:8(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:11(__init__)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:567(_get_cached)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1335(_get_handles)
+        6    0.000    0.000    0.000    0.000 {built-in method builtins.next}
+        9    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:218(Close)
+      406    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:19(_atleast_1d_dispatcher)
+      654    0.000    0.000    0.000    0.000 {method 'popleft' of 'collections.deque' objects}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\tokenize.py:299(detect_encoding)
+        8    0.000    0.000    0.000    0.000 <frozen ntpath>:154(splitdrive)
+       90    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:119(<listcomp>)
+        6    0.000    0.000    0.000    0.000 {built-in method _winapi.CloseHandle}
+      630    0.000    0.000    0.000    0.000 {method 'append' of 'collections.deque' objects}
+        3    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:346(_walk_tb_with_full_positions)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:243(_optimize_charset)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:841(format_exception_only)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:360(_get_code_position)
+        4    0.000    0.000    0.000    0.000 {method '__exit__' of '_io._IOBase' objects}
+       11    0.000    0.000    0.000    0.000 {built-in method builtins.sorted}
+       82    0.000    0.000    0.000    0.000 {method 'encode' of 'str' objects}
+      150    0.000    0.000    0.000    0.000 {built-in method math.degrees}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:662(partition)
+      181    0.000    0.000    0.000    0.000 {method 'join' of 'str' objects}
+       96    0.000    0.000    0.000    0.000 {built-in method builtins.getattr}
+        1    0.000    0.000    0.000    0.000 <frozen abc>:117(__instancecheck__)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1599(_get_spec)
+       95    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:244(_verbose_message)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:910(<listcomp>)
+        1    0.000    0.000    0.000    0.000 {built-in method _abc._abc_instancecheck}
+       44    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:261(get)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\tokenize.py:323(read_or_stop)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:748(find_spec)
+      239    0.000    0.000    0.000    0.000 {method 'startswith' of 'str' objects}
+      289    0.000    0.000    0.000    0.000 {method 'endswith' of 'str' objects}
         2    0.000    0.000    0.000    0.000 {method 'strftime' of 'datetime.date' objects}
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\numerictypes.py:357(issubdtype)
-        8    0.000    0.000    0.000    0.000 <frozen ntpath>:35(_get_bothseps)
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\linecache.py:147(lazycache)
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\tokenize.py:337(read_or_stop)
-       27    0.000    0.000    0.000    0.000 {method 'update' of 'dict' objects}
-      108    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\multiarray.py:741(dot)
-        2    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:452(_no_nep50_warning)
+        1    0.000    0.000    0.000    0.000 {method 'partition' of 'numpy.ndarray' objects}
       6/1    0.000    0.000    0.000    0.000 <frozen abc>:121(__subclasscheck__)
         1    0.000    0.000    0.000    0.000 {method 'readline' of '_io.BufferedReader' objects}
+        6    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\_distutils_hack\__init__.py:89(find_spec)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:558(__exit__)
+       70    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:240(__next)
+       30    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:453(<lambda>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:778(exec_module)
       6/1    0.000    0.000    0.000    0.000 {built-in method _abc._abc_subclasscheck}
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\platform.py:619(_node)
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\contextlib.py:141(__exit__)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\numeric.py:1330(normalize_axis_tuple)
-       90    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:193(<lambda>)
-        2    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\numerictypes.py:283(issubclass_)
-       27    0.000    0.000    0.000    0.000 {method 'discard' of 'set' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:98(closegroup)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:770(create_module)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:497(__new__)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:386(_mk_bitmap)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:778(spec_from_file_location)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:511(_compile_info)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:173(__exit__)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:71(__init__)
+       14    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x00007FF85913DF90}
+        2    0.000    0.000    0.000    0.000 {built-in method _imp.exec_builtin}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\platform.py:575(_node)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:132(_path_split)
+        4    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:521(callback)
+        2    0.000    0.000    0.000    0.000 {built-in method _imp.create_builtin}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\functools.py:35(update_wrapper)
+       36    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:168(__getitem__)
         1    0.000    0.000    0.000    0.000 {built-in method _socket.gethostname}
-       27    0.000    0.000    0.000    0.000 {method 'copy' of 'dict' objects}
-       42    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:19(_atleast_1d_dispatcher)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:13(__init__)
-        7    0.000    0.000    0.000    0.000 {boundingRect}
-       14    0.000    0.000    0.000    0.000 {method 'format' of 'str' objects}
-       42    0.000    0.000    0.000    0.000 {method 'popleft' of 'collections.deque' objects}
-       63    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\multiarray.py:153(concatenate)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:749(Popen)
+        4    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\textwrap.py:470(indent)
+      8/3    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:178(getwidth)
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\numerictypes.py:357(issubdtype)
+       22    0.000    0.000    0.000    0.000 {built-in method builtins.setattr}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:1515(__and__)
+        3    0.000    0.000    0.000    0.000 <frozen _collections_abc>:771(get)
+      203    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:77(_atleast_2d_dispatcher)
+        1    0.000    0.000    0.000    0.000 {built-in method _winapi.CreatePipe}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\numeric.py:1330(normalize_axis_tuple)
+       30    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\signal.py:9(<lambda>)
+        8    0.000    0.000    0.000    0.000 <frozen ntpath>:35(_get_bothseps)
+       13    0.000    0.000    0.000    0.000 {built-in method _thread.allocate_lock}
+        2    0.000    0.000    0.000    0.000 {method 'close' of '_io.TextIOWrapper' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:453(_uniq)
+        4    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:468(_exit_wrapper)
+        4    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:568(_byte_offset_to_character_offset)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:642(_classify_pyc)
+       56    0.000    0.000    0.000    0.000 {method 'replace' of 'str' objects}
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:125(release)
+       44    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:256(match)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:100(acquire)
+       15    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:826(__setattr__)
         2    0.000    0.000    0.000    0.000 {built-in method now}
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\contextlib.py:299(helper)
-       27    0.000    0.000    0.000    0.000 {built-in method _thread.get_ident}
-        8    0.000    0.000    0.000    0.000 {built-in method builtins.getattr}
-        3    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:96(_parse_value_tb)
-       42    0.000    0.000    0.000    0.000 {method 'append' of 'collections.deque' objects}
-        1    0.000    0.000    0.000    0.000 {method 'reset' of '_contextvars.ContextVar' objects}
-        7    0.000    0.000    0.000    0.000 {method 'squeeze' of 'numpy.ndarray' objects}
-        1    0.000    0.000    0.000    0.000 {method '__exit__' of '_io._IOBase' objects}
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\contextlib.py:132(__enter__)
+        3    0.000    0.000    0.000    0.000 <frozen os>:674(__getitem__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\platform.py:722(_get_machine_win32)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:141(__exit__)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:422(spec_from_loader)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\encodings\cp1252.py:22(decode)
+        2    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:452(_no_nep50_warning)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1135(_get_devnull)
+       44    0.000    0.000    0.000    0.000 {method 'setdefault' of 'dict' objects}
+        2    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\numerictypes.py:283(issubclass_)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:67(_relax_case)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:299(helper)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:132(__enter__)
+        1    0.000    0.000    0.000    0.000 {built-in method winreg.OpenKeyEx}
+       10    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\textwrap.py:482(prefixed_lines)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:686(__call__)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:172(_path_isabs)
+        9    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:84(_unpack_uint32)
+        1    0.000    0.000    0.000    0.000 {built-in method nt.open}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:274(getuntil)
         4    0.000    0.000    0.000    0.000 <frozen codecs>:319(decode)
-        8    0.000    0.000    0.000    0.000 {method 'replace' of 'str' objects}
-       42    0.000    0.000    0.000    0.000 {method 'strip' of 'str' objects}
-       49    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\numeric.py:2374(_array_equal_dispatcher)
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\contextlib.py:104(__init__)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_methods.py:67(_count_reduce_items)
-        3    0.000    0.000    0.000    0.000 {method 'set' of 'cv2.VideoCapture' objects}
-       14    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\analyse.py:453(<lambda>)
+       10    0.000    0.000    0.000    0.000 {method 'squeeze' of 'numpy.ndarray' objects}
+       20    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\analyse.py:457(<lambda>)
+       22    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1421(_path_importer_cache)
+       18    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:134(<genexpr>)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:198(cb)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:86(opengroup)
+       70    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\numeric.py:2374(_array_equal_dispatcher)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:675(_validate_timestamp_pyc)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:376(_escape)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\platform.py:235(_norm_version)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:272(contextmanager)
+        3    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1414(_make_inheritable)
+        4    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:539(_push_exit_callback)
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\_methods.py:67(_count_reduce_items)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\tokenize.py:329(find_cookie)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1030(__exit__)
+        3    0.000    0.000    0.000    0.000 {method 'match' of 're.Pattern' objects}
+        3    0.000    0.000    0.000    0.000 <frozen os>:748(encodekey)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:231(__init__)
+       20    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1026(__enter__)
+       15    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:48(_is_dunder)
         1    0.000    0.000    0.000    0.000 {method 'clear' of 'dict' objects}
-        8    0.000    0.000    0.000    0.000 C:\Python312\Lib\platform.py:330(<genexpr>)
-       12    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:638(_display_width)
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\arrayprint.py:898(_none_or_positive_arg)
-        1    0.000    0.000    0.000    0.000 C:\Python312\Lib\tokenize.py:343(find_cookie)
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\_ufunc_config.py:426(__init__)
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2687(_max_dispatcher)
-        1    0.000    0.000    0.000    0.000 <string>:1(<lambda>)
-       13    0.000    0.000    0.000    0.000 {method 'decode' of 'bytes' objects}
+       11    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\types.py:164(__init__)
+       12    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:293(tell)
+        6    0.000    0.000    0.000    0.000 {built-in method _imp.is_builtin}
+       11    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:38(_is_descriptor)
+        4    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:920(find_spec)
+        1    0.000    0.000    0.000    0.000 {method 'reset' of '_contextvars.ContextVar' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:388(<listcomp>)
         4    0.000    0.000    0.000    0.000 {built-in method _codecs.utf_8_decode}
-        3    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:852(_load_lines)
-        2    0.000    0.000    0.000    0.000 {method 'match' of 're.Pattern' objects}
-       16    0.000    0.000    0.000    0.000 {built-in method nt.fspath}
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:265(__init__)
-        3    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:162(_format_final_exc_line)
+       29    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\linecache.py:147(lazycache)
+       11    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:79(_is_private)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1092(__exit__)
+        9    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:176(append)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:104(__init__)
+       26    0.000    0.000    0.000    0.000 {built-in method nt.fspath}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\numeric.py:1380(<listcomp>)
         2    0.000    0.000    0.000    0.000 {VideoWriter_fourcc}
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:312(_original_line)
-       12    0.000    0.000    0.000    0.000 {method 'encode' of 'str' objects}
-        2    0.000    0.000    0.000    0.000 C:\Python312\Lib\platform.py:453(<genexpr>)
-        2    0.000    0.000    0.000    0.000 {built-in method numpy.core._multiarray_umath.normalize_axis_index}
-       27    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:2831(_min_dispatcher)
-        9    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:662(indent)
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:170(_safe_string)
-        6    0.000    0.000    0.000    0.000 {method 'co_positions' of 'code' objects}
-        3    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:657(__init__)
-       21    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\shape_base.py:77(_atleast_2d_dispatcher)
-        6    0.000    0.000    0.000    0.000 {method 'partition' of 'str' objects}
-        6    0.000    0.000    0.000    0.000 {method 'lstrip' of 'str' objects}
-        1    0.000    0.000    0.000    0.000 {method 'set' of '_contextvars.ContextVar' objects}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:254(_requires_builtin_wrapper)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:357(__init__)
+        1    0.000    0.000    0.000    0.000 {built-in method winreg.QueryValueEx}
+        3    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:398(_simple)
+       13    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:164(__len__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:470(CompletedProcess)
+       35    0.000    0.000    0.000    0.000 {method 'rpartition' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method nt.close}
+        8    0.000    0.000    0.000    0.000 {built-in method _stat.S_ISDIR}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:307(_original_line)
+        5    0.000    0.000    0.000    0.000 {method 'decode' of 'bytes' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:216(_compile_charset)
         1    0.000    0.000    0.000    0.000 {method 'copy' of 'numpy.ndarray' objects}
-        8    0.000    0.000    0.000    0.000 C:\Python312\Lib\platform.py:332(<genexpr>)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\steering.py:283(start_belt)
-       12    0.000    0.000    0.000    0.000 {method 'isascii' of 'str' objects}
-       21    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:676(<lambda>)
+       15    0.000    0.000    0.000    0.000 {method 'strip' of 'str' objects}
+       11    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:59(_is_sunder)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:599(_check_name_wrapper)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:304(checkgroupname)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:405(parent)
+        7    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:113(__init__)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core._multiarray_umath.normalize_axis_index}
+       32    0.000    0.000    0.000    0.000 {built-in method _imp.acquire_lock}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:126(CalledProcessError)
+       32    0.000    0.000    0.000    0.000 {built-in method _imp.release_lock}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:436(_get_literal_prefix)
+       31    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\signal.py:16(<lambda>)
+        2    0.000    0.000    0.000    0.000 {built-in method fromkeys}
+        1    0.000    0.000    0.000    0.000 {built-in method _codecs.charmap_decode}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:472(__init__)
+        1    0.000    0.000    0.000    0.000 <frozen ntpath>:87(isabs)
+        3    0.000    0.000    0.000    0.000 {built-in method _winapi.DuplicateHandle}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\functools.py:65(wraps)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1423(_filter_handle_list)
+        3    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\signal.py:49(decorator)
+       10    0.000    0.000    0.000    0.000 {method 'find' of 'bytearray' objects}
+       11    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:229(__set_name__)
+        6    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:83(groups)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:1093(__new__)
+        3    0.000    0.000    0.000    0.000 <frozen os>:742(check_str)
+       19    0.000    0.000    0.000    0.000 {method 'get' of 'mappingproxy' objects}
+        4    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:466(_create_cb_wrapper)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:163(TimeoutExpired)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:165(__init__)
+        9    0.000    0.000    0.000    0.000 {built-in method from_bytes}
+       12    0.000    0.000    0.000    0.000 {method 'rfind' of 'str' objects}
+       30    0.000    0.000    0.000    0.000 {method 'isupper' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\RobotInterface.py:7(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1233(poll)
+       12    0.000    0.000    0.000    0.000 {method '__exit__' of '_thread.lock' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:570(isstring)
+        1    0.000    0.000    0.000    0.000 {built-in method _winapi.GetExitCodeProcess}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:261(__init__)
         1    0.000    0.000    0.000    0.000 <frozen codecs>:309(__init__)
-        6    0.000    0.000    0.000    0.000 <frozen _collections_abc>:341(__subclasshook__)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\RobotInterface.py:7(__init__)
-        3    0.000    0.000    0.000    0.000 {built-in method sys.exception}
-        3    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\contextlib.py:440(__init__)
-        2    0.000    0.000    0.000    0.000 {method 'startswith' of 'str' objects}
-        3    0.000    0.000    0.000    0.000 {method 'pop' of 'list' objects}
-        1    0.000    0.000    0.000    0.000 {method 'isdigit' of 'str' objects}
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\contextlib.py:446(__exit__)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:48(_new_module)
+        6    0.000    0.000    0.000    0.000 <frozen _collections_abc>:315(__subclasshook__)
+        1    0.000    0.000    0.000    0.000 {method '__exit__' of 'PyHKEY' objects}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\videoOutput.py:10(__init__)
+        3    0.000    0.000    0.000    0.000 {built-in method nt._path_splitroot}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:440(__init__)
+        3    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:657(indent)
+        4    0.000    0.000    0.000    0.000 {built-in method _imp.find_frozen}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:407(_generate_overlap_table)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:920(<dictcomp>)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:77(__init__)
+        5    0.000    0.000    0.000    0.000 {method 'pop' of 'dict' objects}
+        6    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1097(__init__)
+        3    0.000    0.000    0.000    0.000 {method 'upper' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:828(_load_lines)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:162(_format_final_exc_line)
+        1    0.000    0.000    0.000    0.000 {built-in method _sre.compile}
+       11    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:916(<lambda>)
+        1    0.000    0.000    0.000    0.000 {method 'set' of '_contextvars.ContextVar' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:804(__members__)
+        2    0.000    0.000    0.000    0.000 <frozen codecs>:260(__init__)
+        2    0.000    0.000    0.000    0.000 {built-in method sys.exc_info}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:963(fix_flags)
+        1    0.000    0.000    0.000    0.000 <string>:1(<lambda>)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:193(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:215(Handle)
+        3    0.000    0.000    0.000    0.000 {built-in method _imp._fix_co_filename}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:652(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:481(__init__)
+        2    0.000    0.000    0.000    0.000 {method 'translate' of 'bytearray' objects}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+       11    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:1149(__init__)
+        3    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_parser.py:172(__setitem__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\linecache.py:52(checkcache)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:170(_safe_string)
+        5    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\platform.py:772(_unknown_as_blank)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1120(__del__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1430(<setcomp>)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:192(STARTUPINFO)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:413(has_location)
+        6    0.000    0.000    0.000    0.000 {built-in method _winapi.GetCurrentProcess}
         1    0.000    0.000    0.000    0.000 {method 'startswith' of 'bytes' objects}
-        1    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x00007FF9DE0B88B0}
-        1    0.000    0.000    0.000    0.000 {method 'endswith' of 'str' objects}
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\videoOutput.py:10(__init__)
+        3    0.000    0.000    0.000    0.000 {method 'setter' of 'property' objects}
+        6    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\_distutils_hack\__init__.py:96(<lambda>)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\enum.py:1637(_simple_enum)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:96(_parse_value_tb)
+        2    0.000    0.000    0.000    0.000 {method 'isidentifier' of 'str' objects}
+        5    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:671(<lambda>)
+        2    0.000    0.000    0.000    0.000 {method 'lstrip' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method msvcrt.open_osfhandle}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:446(__exit__)
+        3    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\signal.py:48(_wraps)
         1    0.000    0.000    0.000    0.000 {method 'values' of 'dict' objects}
-        5    0.000    0.000    0.000    0.000 C:\Python312\Lib\platform.py:836(_unknown_as_blank)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:31(_combine_flags)
+        4    0.000    0.000    0.000    0.000 {method 'pop' of 'collections.deque' objects}
         1    0.000    0.000    0.000    0.000 {method 'seek' of '_io.BufferedReader' objects}
-        1    0.000    0.000    0.000    0.000 {built-in method _operator.index}
-        6    0.000    0.000    0.000    0.000 C:\Python312\Lib\contextlib.py:443(__enter__)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\lib\function_base.py:3840(_median_dispatcher)
-        3    0.000    0.000    0.000    0.000 C:\Python312\Lib\traceback.py:673(<lambda>)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:658(_partition_dispatcher)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:3380(_mean_dispatcher)
-        1    0.000    0.000    0.000    0.000 C:\Users\louin\Documents\GitHub\video_analysis\RobotInterface.py:50(send_command)
+        3    0.000    0.000    0.000    0.000 {built-in method builtins.globals}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\lib\function_base.py:3840(_median_dispatcher)
+        1    0.000    0.000    0.000    0.000 {method 'count' of 'list' objects}
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:443(__enter__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:223(Detach)
+        1    0.000    0.000    0.000    0.000 {method 'groups' of 're.Match' objects}
+        2    0.000    0.000    0.000    0.000 {built-in method msvcrt.get_osfhandle}
         1    0.000    0.000    0.000    0.000 {built-in method builtins.any}
-        1    0.000    0.000    0.000    0.000 <frozen codecs>:260(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\re\_compiler.py:428(_get_iscased)
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:3380(_mean_dispatcher)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1563(_internal_poll)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:795(is_package)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1122(get_filename)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:931(create_module)
+        2    0.000    0.000    0.000    0.000 {method 'co_positions' of 'code' objects}
+        2    0.000    0.000    0.000    0.000 {method 'items' of 'mappingproxy' objects}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:123(SubprocessError)
+        1    0.000    0.000    0.000    0.000 {method 'isdigit' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:695(_use_posix_spawn)
+        2    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1311(_on_error_fd_closer)
+        1    0.000    0.000    0.000    0.000 {built-in method _operator.index}
+        1    0.000    0.000    0.000    0.000 C:\Users\tobia\Documents\School\4th Semester\CDIO\video_analysis\venv\Lib\site-packages\numpy\core\fromnumeric.py:658(_partition_dispatcher)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\contextlib.py:555(__enter__)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:1089(__enter__)
+        1    0.000    0.000    0.000    0.000 {built-in method sys.audit}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\traceback.py:668(<lambda>)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python311\Lib\subprocess.py:259(_cleanup)
 
 

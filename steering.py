@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import math
 import time
-from analyse import RobotNotFoundError, BorderNotFoundError, small_goal_coords
+from analyse import RobotNotFoundError, BorderNotFoundError
 import RobotInterface
 from utils import angle_between_vectors, angle_between_vectors_signed
 from analyse import Analyse
@@ -268,12 +268,12 @@ class Steering:
         print(f"angle to target {angle_degrees}")
         if angle_degrees < 1.5:
             self.robot_interface.send_command("move", 100, speed)
-        elif 1.5 <= angle_degrees <= 8:
+        elif 1.5 <= angle_degrees <= 30:
             self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, 40)
             print(f"Signed angle degrees {signed_angle_degrees}")
-        elif angle_degrees > 8:
+        elif angle_degrees > 30:
             turn = signed_angle_degrees * -1 / 3
-            self.robot_interface.send_command("turn", turn, 30)
+            self.robot_interface.send_command("turn", turn, 15)
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
         self.move_corrected(signed_angle_degrees, angle_degrees, 30)
@@ -311,7 +311,7 @@ class Steering:
 
         # Calculate the signed angle between the robot's orientation and the target direction
         signed_angle_radians = angle_between_vectors_signed(
-            self.robot_vector, small_goal_coords
+            self.robot_vector, self.steering_instance.small_goal_coords
         )
         self.signed_angle_degrees = math.degrees(signed_angle_radians)
         self.angle_degrees = self.signed_angle_degrees

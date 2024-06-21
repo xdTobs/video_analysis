@@ -247,7 +247,7 @@ class VideoOutput:
                 cv2.arrowedLine(
                     frame,
                     self.analyser.safepoint_list[index].astype(int),
-                    self.analyser.safepoint_list[index + 1].astype(int),
+                    self.analyser.safepoint_list[(index + 1) % (len(self.analyser.safepoint_list)-1)].astype(int),
                     (255, 0, 0),
                     2,
                 )
