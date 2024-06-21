@@ -82,11 +82,11 @@ class Steering:
 
     def create_path(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray):
         self.path_indexes = self.find_path_to_target(ball_position, robot_pos, safepoint_list)
-        if len(path_indexes) == 0:
+        if len(self.path_indexes) == 0:
             return None
         path = []
-        for i in range (0, len(path_indexes)):
-            steering_vector = self.find_steering_vector(robot_pos, safepoint_list[path_indexes[i]])
+        for i in range (0, len(self.path_indexes)):
+            steering_vector = self.find_steering_vector(robot_pos, safepoint_list[self.path_indexes[i]])
             print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector)
         steering_vector = self.find_steering_vector(robot_pos, ball_position)
