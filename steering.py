@@ -219,7 +219,7 @@ class Steering:
 
         self.follow_path(keypoints, robot_pos, safepoint_list)
         if not self.is_collecting_balls:
-            self.deliver_balls_to_target(robot_vector, self.dropoff_coords, robot_pos)
+            self.deliver_balls_to_target()
     
 
         if self.is_collecting_balls:
