@@ -41,6 +41,7 @@ class Steering:
         self.target_safepoint_index = None
         self.is_targeting_ball = False
         self.is_targeting_safepoint = False
+        self.should_drive_backwards = False
 
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
@@ -99,6 +100,7 @@ class Steering:
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
         self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
         if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
+            self.move_corrected(0, 0, 30)
             self.path.pop(0)
         elif self.can_target_ball_directly(robot_pos, self.target_ball):
             while len(self.path) > 1:
@@ -266,8 +268,13 @@ class Steering:
     def move_corrected(self, signed_angle_degrees, angle_degrees, speed):
         print(f"angle to target {angle_degrees}")
 
+        if self.are_coordinates_close(self.steering_vector):
+            self.should_drive_backwards = False
+        else:
+            self.should_drive_backwards = True
 
-        if angle_degrees > 90:
+        if angle_degrees > 90 and self.should_drive_backwards:
+
             if signed_angle_degrees < 0:
                 reverse_signed_angle_degrees = signed_angle_degrees + 180
             else:
