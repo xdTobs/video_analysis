@@ -54,6 +54,7 @@ class RobotInterface:
             raise ConnectionError("Not connected to the robot")
         try:
             #Speed clamp -100 to 100
+            speedPercentage = speedPercentage * 0.4
             speedPercentage = max(-50, min(50, speedPercentage))
             
             data = {

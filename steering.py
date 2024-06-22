@@ -7,6 +7,7 @@ import RobotInterface
 from utils import angle_between_vectors, angle_between_vectors_signed
 from analyse import Analyse
 from collections import deque
+import traceback
 
 
 class Steering:
@@ -18,9 +19,9 @@ class Steering:
         self.is_ball_close_to_border = False
         self.last_target_time = 0
         self.target_ball = None
-        self.update_interval = 25  # Time in seconds
+        self.update_interval = 50  # Time in seconds
         self.distance_threshold_max = 500  # Distance threshold for starting the timer
-        self.distance_threshold_min = 100
+        self.distance_threshold_min = 60 # Distance threshold for switching target
         self.collect_ball_distance = 150
         self.signed_angle_radians = None
         self.signed_angle_degrees = None
@@ -43,7 +44,8 @@ class Steering:
         self.is_targeting_safepoint = False
         self.is_reversing = False
         self.speed = 100
-        self.is_finished_turning = False
+        self.is_finished_turning = True
+        self.closest_safepoint_index_to_robot = None
 
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
@@ -59,10 +61,10 @@ class Steering:
 
         return target_position - robot_pos
 
-    def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
+    def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, robot_vector: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
         closest_safepoint_index_to_ball = self.find_closest_safepoint_index(ball_position, safepoint_list)
-        closest_safepoint_index_to_robot = self.find_closest_safepoint_index(robot_pos, safepoint_list)
-
+        closest_safepoint_index_to_robot = self.find_closest_safepoint_index(robot_pos, safepoint_list,robot_vector, 120)
+        self.closest_safepoint_index_to_robot = closest_safepoint_index_to_robot
         if closest_safepoint_index_to_robot == closest_safepoint_index_to_ball:
             return [closest_safepoint_index_to_robot]
 
@@ -83,8 +85,8 @@ class Steering:
 
         return []
 
-    def create_path(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray):
-        self.path_indexes = self.find_path_to_target(ball_position, robot_pos, safepoint_list)
+    def create_path(self, ball_position: np.ndarray, robot_pos: np.ndarray,robot_vector : np.ndarray, safepoint_list: np.ndarray):
+        self.path_indexes = self.find_path_to_target(ball_position, robot_pos,robot_vector, safepoint_list)
         if len(self.path_indexes) == 0:
             return None
         path = []
@@ -96,24 +98,27 @@ class Steering:
         path.append(steering_vector)
         return path
 
-    def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
+    def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray,robot_vector: np.ndarray,  safepoint_list: np.ndarray) -> np.ndarray:
         if self.should_switch_target(robot_pos, self.target_ball):
             self.last_target_time = time.time()
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
-        self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
+        self.path = self.create_path(self.target_ball, robot_pos,robot_vector, safepoint_list)
 
         if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
 
-            if self.is_reversing and len(self.path) > 1 and math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
-                self.robot_interface.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])), 30)
-
-                if math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 10:
+            if self.is_reversing and len(self.path) > 1:
+                
+                if math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) > 30:
                     self.is_finished_turning = False
+                    return
 
-                else:
-                    self.is_finished_turning = True
-                    self.path.pop(0)
-                    self.is_reversing = False
+            
+        if not self.is_finished_turning and self.is_reversing and len(self.path) > 1:
+            self.robot_interface.send_command("turn", math.degrees(angle_between_vectors(self.robot_vector, self.path[1])), 15)
+            if math.degrees(angle_between_vectors(self.robot_vector, self.path[1])) < 40:
+                self.is_finished_turning = True
+                self.path.pop(0)
+                
 
             else:
                 self.path.pop(0)
@@ -128,7 +133,7 @@ class Steering:
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         if self.is_collecting_balls:
             distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
-            if distance_to_ball < 250:
+            if distance_to_ball < 300:
                 return True
         return False
 
@@ -176,9 +181,22 @@ class Steering:
                 closest_point = ball_pos
         return closest_point
 
-    def find_closest_safepoint_index(self, position: np.ndarray, safepoint_list: np.ndarray) -> int:
+    def find_closest_safepoint_index(self, position: np.ndarray, safepoint_list: np.ndarray, direction_vector : np.ndarray | None = None, robot_angle_max :int = 180) -> int:
         if len(safepoint_list) == 0:
             return None
+        if direction_vector is not None:
+            closest_distance_within_angle = sys.maxsize
+            closest_index_within_angle = 0
+            for i, point in enumerate(safepoint_list):
+                distance = np.linalg.norm(position - point)
+                angle = math.degrees(angle_between_vectors(point - position, direction_vector))
+                
+                if distance < closest_distance_within_angle and angle < robot_angle_max:
+                    closest_distance_within_angle = distance
+                    closest_index_within_angle = i
+            if closest_distance_within_angle is not sys.maxsize:
+                return closest_index_within_angle
+        
         closest_distance = sys.maxsize
         closest_index = 0
         for i, point in enumerate(safepoint_list):
@@ -186,6 +204,7 @@ class Steering:
             if distance < closest_distance:
                 closest_distance = distance
                 closest_index = i
+        
         return closest_index
 
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
@@ -249,7 +268,7 @@ class Steering:
         if corners is None:
             raise TypeError("No corners found in pick_program")
 
-        self.follow_path(keypoints, robot_pos, safepoint_list)
+        self.follow_path(keypoints, robot_pos,robot_vector, safepoint_list)
         if not self.is_collecting_balls:
             if self.is_ready_to_ejaculate():
                 self.ejaculate()
@@ -290,30 +309,33 @@ class Steering:
                 print("No program picked")
 
         except ConnectionError as e:
+            traceback.print_exc()
             print(f"Connection error {e}")
             return
         except Exception as e:
+            traceback.print_exc()
             print(f"Error: {e}")
             return
 
 
-    def move_corrected(self, signed_angle_degrees, angle_degrees):
+    def move_corrected(self, signed_angle_degrees, angle_degrees, is_collecting=False):
         print(f"angle to target {angle_degrees}")
 
         if not self.is_finished_turning:
             return
+        if not is_collecting:
+            if angle_degrees > 90:
+                if signed_angle_degrees < 0:
+                    reverse_signed_angle_degrees = signed_angle_degrees + 180
+                else:
+                    reverse_signed_angle_degrees = signed_angle_degrees - 180
 
-        if angle_degrees > 90:
-            if signed_angle_degrees < 0:
-                reverse_signed_angle_degrees = signed_angle_degrees + 180
-            else:
-                reverse_signed_angle_degrees = signed_angle_degrees - 180
-
-            self.is_reversing = True
-            self.robot_interface.send_command("move-corrected", reverse_signed_angle_degrees, -self.speed)
-            print(f"Signed angle degrees: {signed_angle_degrees}")
-
-        elif angle_degrees < 1.5:
+                self.is_reversing = True
+                self.robot_interface.send_command("move-corrected", reverse_signed_angle_degrees, -self.speed)
+                print(f"Signed angle degrees: {signed_angle_degrees}")
+                return
+            
+        if angle_degrees < 1.5:
             self.robot_interface.send_command("move", 100, self.speed)
         elif 1.5 <= angle_degrees <= 20:
             self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, self.speed)
@@ -326,7 +348,7 @@ class Steering:
         self.move_corrected(signed_angle_degrees, angle_degrees)
 
     def collect_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees)
+        self.move_corrected(signed_angle_degrees, angle_degrees, True)
 
     def start_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=100)

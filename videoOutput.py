@@ -29,6 +29,11 @@ class VideoOutput:
             self.steering_instance.is_ball_close_to_border
         )
         self.data_dict["Collecting balls"] = self.steering_instance.is_collecting_balls
+        self.data_dict["Steering vector"] = self.steering_instance.steering_vector
+        self.data_dict["Is Reversing"] = self.steering_instance.is_reversing
+        self.data_dict["Is finished turning"] = self.steering_instance.is_finished_turning
+        self.data_dict["Path"] = self.steering_instance.path
+        self.data_dict["Closest safepoint index"] = self.steering_instance.closest_safepoint_index_to_robot
 
     def showFrame(self, frame):
         self.update_data_dict()
@@ -241,16 +246,18 @@ class VideoOutput:
             cv2.circle(
                 frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1
             )
-        if self.steering_instance.path_indexes is not None and self.analyser.safepoint_list is not None:
-            for index in self.steering_instance.path_indexes:
-                # Draw arrows between safepoints
+    
+        if self.steering_instance.path is not None and self.analyser.robot_pos is not None:
+            cur_pos = self.analyser.robot_pos
+            for index in range(len(self.steering_instance.path) - 1):
                 cv2.arrowedLine(
                     frame,
-                    self.analyser.safepoint_list[index].astype(int),
-                    self.analyser.safepoint_list[(index + 1) % len(self.analyser.safepoint_list)].astype(int),
-                    (255, 0, 0),
+                    (cur_pos + self.steering_instance.path[index]).astype(int),
+                    (cur_pos + self.steering_instance.path[index + 1]).astype(int),
+                    (52, 235, 201),
                     2,
                 )
+                #cur_pos += self.steering_instance.path[index]
 
 
 
