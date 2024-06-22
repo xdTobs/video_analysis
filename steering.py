@@ -86,7 +86,8 @@ class Steering:
         if not self.is_collecting_balls:
             for i in range(0, len(self.path_indexes)):
                 if self.path_indexes[i] == 0 or self.path_indexes[i] == 8:
-                    self.path_indexes.pop(i)
+                    new_path_indexes = np.delete(self.path_indexes, i)
+                    self.path_indexes = new_path_indexes
                     break
         print(f"Path indexes: {self.path_indexes}")
 
@@ -178,10 +179,10 @@ class Steering:
 
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
-        if self.is_collecting_balls:
+        if not self.is_collecting_balls:
             return length < 40
-        print(f"Length: {length}")
-        return length < 100
+        else:
+            return length < 100
 
 
     def calculate_is_ball_close_to_borders(
@@ -259,23 +260,20 @@ class Steering:
         print(f"Steering vector length: {dist_to_target}")
 
         try:
-            if dist_to_ball < self.collect_ball_distance:
-                self.close_to_target = True
-                print("Target is close")
-                self.collect_ball(
-                    self.signed_angle_degrees, self.angle_degrees, dist_to_ball
-                )
-                return
+            if self.is_collecting_balls:
+                if dist_to_ball < self.collect_ball_distance:
+                    self.close_to_target = True
+                    print("Target is close")
+                    self.collect_ball(self.signed_angle_degrees, self.angle_degrees)
+                    return
 
-            if dist_to_ball > self.collect_ball_distance:
-                print("Target is not close")
-                self.close_to_target = False
-                self.get_near_ball(
-                    self.signed_angle_degrees, self.angle_degrees, dist_to_target
-                )
-                return
+                if dist_to_ball > self.collect_ball_distance:
+                    print("Target is not close")
+                    self.close_to_target = False
+                    self.get_near_ball(self.signed_angle_degrees, self.angle_degrees)
+                    return
             else:
-                print("No program picked")
+                self.move_corrected(self.signed_angle_degrees, self.angle_degrees)
 
         except ConnectionError as e:
             print(f"Connection error {e}")
@@ -296,10 +294,10 @@ class Steering:
             turn = signed_angle_degrees * -1 / 3
             self.robot_interface.send_command("turn", turn, 15)
 
-    def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
+    def get_near_ball(self, signed_angle_degrees, angle_degrees):
         self.move_corrected(signed_angle_degrees, angle_degrees)
 
-    def collect_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
+    def collect_ball(self, signed_angle_degrees, angle_degrees):
         self.move_corrected(signed_angle_degrees, angle_degrees)
 
     def start_belt(self):
