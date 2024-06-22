@@ -23,7 +23,7 @@ def run_video(host, webcam_index, online, port=65438):
     videoDebugger = VideoDebugger.VideoDebugger()
 
     analyser = analyse.Analyse()
-    steering_instance = steering.Steering(online, host, port)
+    steering_instance = steering.Steering(analyser, online, host, port)
 
     data_dict = {
         "Robot position": analyser.robot_pos,

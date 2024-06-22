@@ -7,13 +7,32 @@ import RobotInterface
 from utils import angle_between_vectors, angle_between_vectors_signed
 from analyse import Analyse
 from collections import deque
+from enum import Enum
 
+from steering_states.PathingState import PathingState
+from steering_states.CollectionState import CollectingState
+from steering_states.DeliveringState import DeliveringState
+from steering_states.ReversingState import ReversingState
+from steering_states.State import State
+
+class stateEnum(Enum):
+    NONE_STATE = -1
+    PATHING_STATE = 0
+    COLLECTING_STATE = 1
+    DELIVERING_STATE = 2
+    REVERSING_STATE = 3
 
 class Steering:
-    def __init__(self, online=True, host="", port=0):
+    def __init__(self, analyser : Analyse, online=True, host="", port=0):
+        
+        
         self.robot_interface = RobotInterface.RobotInterface(host, port, online)
         if online:
             self.robot_interface.connect()
+        self.analyser = analyser    
+        
+        self.state : State = PathingState(analyser, [self.analyser.safepoint_list[self.find_closest_safepoint_index(analyser.robot_pos, analyser.safepoint_list)]], 10) 
+        self.state_enum = stateEnum.PATHING_STATE
         self.steering_vector = None
         self.is_ball_close_to_border = False
         self.last_target_time = 0
