@@ -5,6 +5,7 @@ import VideoDebugger
 import BlobDetector
 import traceback
 from utils import coordinates_to_vector
+import math
 
 
 class Analyse:
@@ -159,6 +160,10 @@ class Analyse:
         mask = cv2.inRange(hsv, lower, upper)
 
         return mask
+    
+    def get_speed(self, distance: int):
+        speed = (0.01100000000*math.pow(distance,2) - 0.1200000000 * distance + 0.1)/5
+        return speed    
 
     def find_triple_green_robot(self, green_mask: np.ndarray):
         # Errode from green mask

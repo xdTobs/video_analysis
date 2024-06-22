@@ -8,7 +8,7 @@ class State():
     def __init__(self, analyser : Analyse):
         self.start_time = time.time()
         self.analyser = analyser
-        self.distance_before_swap = 60 # px
+        
         
     def on_frame(self):
         pass
@@ -86,10 +86,13 @@ class CollectionState(State):
     def __init__(self,analyser: Analyse, ball_point: list):
         super().__init__(analyser)
         self.path = ball_point
-
+        self.distance_before_swap = 60 # px
         self.timeout = 30 # seconds
+        self.speed = 0 # % of max speed
         
     def on_frame(self):
+        self.analyser.get_speed(np.norm(self.ball_point - self.analyser.robot_pos))
+        
         pass
     def swap_state(self):
         #Check timeout

@@ -9,11 +9,8 @@ from analyse import Analyse
 from collections import deque
 from enum import Enum
 
-from steering_states.PathingState import PathingState
-from steering_states.CollectionState import CollectingState
-from steering_states.DeliveringState import DeliveringState
-from steering_states.ReversingState import ReversingState
-from steering_states.State import State
+
+from steering_states.State import State, PathingState, ReversingState, CollectionState, DeliveringState
 
 class stateEnum(Enum):
     NONE_STATE = -1
@@ -131,11 +128,7 @@ class Steering:
             return True
         return False
 
-    def set_speed(self, distance: int, angle_signed_radians: float):
-        angle_radians = abs(angle_signed_radians)
-        self.speed = (0.01100000000*math.pow(distance,2) - 0.1200000000 * distance + 0.1)/5
-        
-        return self.speed
+
 
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         if ball_pos is None:
