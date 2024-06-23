@@ -49,7 +49,7 @@ class PathingState(State):
             #TODO Check that this passes absolute coords and not relative
             if len(self.analyser.keypoints) == 0:
                 return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
-            print(f"Swapping to ")
+            
             return CollectionState(self.analyser, [self.path[0]], self.steering)
         
         if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.steering_vector)) > 100:
@@ -88,7 +88,7 @@ class ReversingState(State):
                 return DeliveringState(self.analyser, self.analyser.create_path())
             return PathingState(self.analyser, self.analyser.create_path())
         
-        if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)) < 30:
+        if self.analyser.are_coordinates_close(self.path[0]) and math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)) < 30:
             #TODO Might need to use a different arugment for the path, might need to be absolute
             #TODO Might also need to skip pathing state and go straight to collection state
             if len(self.analyser.keypoints) == 0:
