@@ -29,12 +29,14 @@ class PathingState(State):
     def on_frame(self):
         if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
-        elif self.analyser.can_target_ball_directly(self.analyser.robot_pos, self.path[-1] - self.analyser.robot_pos):
-            while len(self.path) > 1:
-                self.path.pop(0)
+       # elif self.analyser.can_target_ball_directly(self.analyser.robot_pos, self.path[-1]):
+       #     while len(self.path) > 1:
+       #         self.path.pop(0)
         self.steering_vector = self.path[0] - self.analyser.robot_pos
-        signed_angle_degree = math.degrees(angle_between_vectors(self.analyser.robot_vector, self.steering_vector))
-        self.steering.move_corrected((-1/3)*signed_angle_degree, 30)
+        signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, self.steering_vector))
+        print(f"Angle to target: {signed_angle_degree}")
+        
+        self.steering.move_corrected((1/3)*signed_angle_degree, 30)
         pass
 
     def swap_state(self):
@@ -138,15 +140,12 @@ class CollectionState(State):
         #Check timeout
         if self.timeout < time.time() - self.start_time:
             #TODO Move / create
-            if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
             return PathingState(self.analyser, self.analyser.create_path(), self.steering)
 
         #TODO Check if we need to check for a certain distance to the ball
         if np.linalg.norm(self.steering_vector) < self.distance_before_swap:
-            #TODO Might need to use a different arugment for the path, might need to be absolute
-            if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+            
+            
             return PathingState(self.analyser, self.analyser.create_path(), self.steering)
 
         return self
