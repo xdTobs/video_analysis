@@ -13,3 +13,4 @@ bounds*.txt
 *.jpg
 *.png
 profile_results.txt
+*.pyc

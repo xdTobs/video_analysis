@@ -22,6 +22,7 @@ class Analyse:
         self.goal_vector = None
         self.robot_pos_at_path_creation = None
         self.path = []
+        self.path_indexes = []
         self.delivery_vector = None
         self.corners = [(0, 0), (1, 0), (0, 1), (1, 1)]
         self.border_vector = None
@@ -36,6 +37,8 @@ class Analyse:
         self.dropoff_coords = None
         self.should_calculate_corners = True
         self.safepoint_list: np.ndarray = None
+        self.middle_point = None
+        self.distance_to_middle = None
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -55,7 +58,7 @@ class Analyse:
         self.robot_height = 47
         self.course_length_cm = 167
         self.course_width_cm = 121
-        
+
         pass
 
     def analysis_pipeline(self, image: np.ndarray, has_found_corners):
@@ -139,6 +142,14 @@ class Analyse:
             corner3 = self.corners[2]
             self.course_length_px = np.linalg.norm(corner1 - corner2)
             self.course_height_px = np.linalg.norm(corner2 - corner3)
+            self.middle_point = (corner1 + corner3) / 2
+
+            cross_rect, _ = self.find_cross_bounding_rectangle(self.border_mask)
+            if len(cross_rect) > 0:
+                self.middle_point = np.array(
+                    [cross_rect[0][0] + cross_rect[0][2] // 2, cross_rect[0][1] + cross_rect[0][3] // 2])
+                #print(f"Cross found at {self.middle_point}")
+            self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
 
     @staticmethod
     def apply_threshold(image: np.ndarray, out_name: str) -> np.ndarray:
@@ -165,21 +176,21 @@ class Analyse:
         mask = cv2.inRange(hsv, lower, upper)
 
         return mask
-    
+
     def get_speed(self, distance: int):
         speed = (0.01100000000*math.pow(distance,2) - 0.1200000000 * distance + 0.1)/5
         print(f" Distance: {distance}, Speed {speed}")
         return speed
-    
+
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         #print(f"Length: {length}")
         return length < 100
-    
+
     def is_point_close(self, point: np.ndarray) -> bool:
         distance = np.linalg.norm(point - self.robot_pos)
         return distance < 100
-    
+
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
         vector_to_ball = ball_pos - robot_pos
@@ -187,7 +198,7 @@ class Analyse:
         if distance_to_ball < 250 and angle_to_ball < 80:
             return True
         return False
-    
+
     def find_steering_vector(
         self,
         robot_pos: np.ndarray,
@@ -195,7 +206,7 @@ class Analyse:
     ) -> np.ndarray:
 
         return target_position - robot_pos
-    
+
     def create_path(self):
         ball_position = self.find_closest_ball(self.keypoints, self.robot_pos)
         if ball_position is None:
@@ -212,7 +223,7 @@ class Analyse:
         path.append(steering_vector + self.robot_pos)
         self.path = path
         return path
-    
+
     def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
         closest_safepoint_index_to_ball = self.find_closest_safepoint_index(ball_position, safepoint_list)
         closest_safepoint_index_to_robot = self.find_closest_safepoint_index(robot_pos, safepoint_list)
@@ -235,7 +246,7 @@ class Analyse:
                     queue.append((neighbor, path + [neighbor]))
                     visited.add(neighbor)
         return []
-    
+
     def find_closest_ball(self, keypoints: np.ndarray, robot_pos: np.ndarray) -> np.ndarray:
         if len(keypoints) == 0:
             return None
@@ -250,7 +261,7 @@ class Analyse:
                 closest_distance = distance
                 closest_point = ball_pos
         return closest_point
-    
+
     def calculate_is_ball_close_to_borders(
         self, ball_pos: np.ndarray, corners: np.ndarray
     ) -> bool:
@@ -271,14 +282,14 @@ class Analyse:
         ):
             return True
         return False
-    
+
     def find_closest_safepoint_index(self, position: np.ndarray, safepoint_list: np.ndarray) -> int:
         if len(safepoint_list) == 0:
             return None
         closest_distance = sys.maxsize
         closest_index = 0
         for i, point in enumerate(safepoint_list):
-            
+
             distance = np.linalg.norm(position - point)
             if distance < closest_distance:
                 closest_distance = distance
@@ -470,9 +481,7 @@ class Analyse:
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
-        #print(
-        #    f"course height and length px {self.course_height_px} {self.course_length_px}"
-        #)
+        #print(f"course height and length px {self.course_height_px} {self.course_length_px}")
 
         # Heights in pixels cm / px
         # TODO fish eye ???

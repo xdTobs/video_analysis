@@ -245,7 +245,7 @@ class VideoOutput:
         if self.steering_instance.state.path is not None:
             robot_pos = self.analyser.robot_pos.astype(int)
             for idx, point in enumerate(self.steering_instance.state.path):
-                
+
                 # Draw arrows between safepoints
                 if idx == 0:
                     cv2.arrowedLine(
@@ -264,8 +264,10 @@ class VideoOutput:
                         2,
                     )
 
-
-
+        if self.analyser.middle_point is not None:
+            cv2.circle(
+                frame, self.analyser.middle_point.astype(int), 30, (255, 0, 0), 0
+            )
 
         self.videoDebugger.write_video("result", result_3channel, True)
 

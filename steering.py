@@ -22,13 +22,13 @@ class stateEnum(Enum):
 
 class Steering:
     def __init__(self, analyser : Analyse, online=True, host="", port=0):
-        
-        
+
+
         self.robot_interface = RobotInterface.RobotInterface(host, port, online)
         if online:
             self.robot_interface.connect()
         self.analyser = analyser
-        self.state : State = None 
+        self.state : State = None
         self.state_enum = None
         self.steering_vector = None
         self.is_ball_close_to_border = False
@@ -61,19 +61,19 @@ class Steering:
 
 
     def on_frame(self):
-        
+
         if self.state is None and self.analyser.safepoint_list is not None:
             path = self.analyser.create_path()
             self.state : State = PathingState(self.analyser,path, SteeringUtils(self.robot_interface))
             self.state_enum = stateEnum.PATHING_STATE
         if self.state is None:
             return
-        
-        
+
+
         self.state.on_frame()
         self.state = self.state.swap_state()
         return
-    
+
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
         self, robot_pos: np.ndarray, target_pos: np.ndarray, obstacles: np.ndarray
@@ -85,7 +85,7 @@ class Steering:
         self.robot_interface.send_command("belt", 0, speedPercentage=-100)
         time.sleep(1)
         self.robot_interface.send_command("belt", 0, speedPercentage=0)
-        
+
     def stop_motors(self):
         time.sleep(1)
         self.robot_interface.send_command("move", 0, speedPercentage=0)
@@ -93,12 +93,12 @@ class Steering:
         self.robot_interface.send_command("turn", 0, speedPercentage=0)
         time.sleep(1)
         self.robot_interface.send_command("belt", 0, speedPercentage=0)
-    
+
     def disconnect(self):
         self.robot_interface.disconnect()
         return
 
-    
+
 
     def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
         if self.should_switch_target(robot_pos, self.target_ball):
@@ -112,7 +112,7 @@ class Steering:
                 self.path.pop(0)
         self.steering_vector = self.path[0]
 
-    
+
 
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         if ball_pos is None:
@@ -133,9 +133,9 @@ class Steering:
             return True
         return False
 
-    
 
-    
+
+
 
     def pick_program_pipeline (
         self,
@@ -214,7 +214,7 @@ class Steering:
             print(f"Error: {e}")
             return
 
-    
+
 
     def deliver_balls_to_target(
         self, robot_vector: np.ndarray, dropoff_cords: np.ndarray, robot_pos: np.ndarray
