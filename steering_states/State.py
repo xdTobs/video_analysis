@@ -18,6 +18,7 @@ class State:
         self.path = None
 
     def on_frame(self):
+        self.steering.start_belt()
         pass
 
     def swap_state(self):
@@ -34,7 +35,7 @@ class PathingState(State):
     def on_frame(self):
         print("LOG PATHING", len(self.path))
 
-        self.steering.stop_belt()
+        # self.steering.stop_belt()
         if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
         # elif self.analyser.can_target_ball_directly(self.analyser.robot_pos, self.path[-1]):
@@ -48,7 +49,7 @@ class PathingState(State):
         )
         print(f"Angle to target: {signed_angle_degree}")
 
-        self.steering.move_corrected((1 / 3) * signed_angle_degree, 30)
+        self.steering.move_corrected(signed_angle_degree, 30)
         pass
 
     def swap_state(self):
@@ -111,7 +112,7 @@ class ReversingState(State):
 
     def on_frame(self):
         print("REV PATHING", len(self.path))
-        self.steering.stop_belt()
+        # self.steering.stop_belt()
         steering_vector = self.path[0] - self.analyser.robot_pos
 
         if self.analyser.is_point_close(self.path[0]):
@@ -120,7 +121,7 @@ class ReversingState(State):
                     self.analyser.robot_vector, self.result_vector
                 )
             )
-            self.steering.turn((-1 / 3) * signed_angle_degree, 10)
+            self.steering.turn(-1 * signed_angle_degree, 10)
         else:
             signed_angle_degree = math.degrees(
                 angle_between_vectors_signed(
@@ -132,7 +133,7 @@ class ReversingState(State):
             else:
                 signed_angle_degree -= 180
             print(f"Reverse angle: {signed_angle_degree}")
-            self.steering.move_corrected(1 / 3 * signed_angle_degree, -30)
+            self.steering.move_corrected(signed_angle_degree, -30)
         pass
 
     def swap_state(self):
@@ -186,7 +187,7 @@ class CollectionState(State):
                 self.analyser.robot_vector, self.steering_vector
             )
         )
-        self.steering.move_corrected(1 / 3 * signed_angle_degree, self.speed)
+        self.steering.move_corrected(signed_angle_degree, self.speed)
         self.steering.start_belt()
 
     def swap_state(self):
@@ -217,7 +218,14 @@ class DeliveringState(State):
         self.is_close_to_delivery_point = False
 
     def on_frame(self):
-        print("DEL PATHING", len(self.path))
+
+        # signed_angle_degree = math.degrees(
+        #     angle_between_vectors_signed(
+        #         self.analyser.robot_vector, self.steering_vector
+        #     )
+        # )
+        # self.steering.move_corrected(signed_angle_degree, 30)
+
         if self.has_touched_safepoint:
             print("delivering close")
             self.steering_vector = (
@@ -239,13 +247,14 @@ class DeliveringState(State):
                     )
                     < 5
                 ):
-                    self.steering.turn(1 / 3 * signed_angle_degree, 5)
-            elif self.analyser.are_coordinates_close(self.steering_vector, 50):
+                    self.steering.turn(-1 * signed_angle_degree, 5)
+            elif self.analyser.are_coordinates_close(self.steering_vector, 20):
                 self.is_close_to_delivery_point = True
             else:
-                self.steering.move_corrected(
-                    1 / 3 * signed_angle_degree, 4, turn_speed=15
-                )
+                self.steering.move_corrected(signed_angle_degree, 4, turn_speed=15)
+            print(
+                f"DELIVERING {self.is_close_to_delivery_point} {self.steering_vector} {self.analyser.robot_pos} {self.analyser.dropoff_coords} {self.is_close_to_safepoint} {self.is_close_to_delivery_point}"
+            )
 
         else:
             self.steering_vector = self.closest_safepoint - self.analyser.robot_pos
@@ -267,14 +276,11 @@ class DeliveringState(State):
                 ):
                     self.has_touched_safepoint = True
                 else:
-                    self.steering.turn(1 / 3 * signed_angle_degree, 5)
-            elif self.analyser.are_coordinates_close(self.steering_vector, 50):
+                    self.steering.turn(-1 * signed_angle_degree, 5)
+            elif self.analyser.are_coordinates_close(self.steering_vector, 20):
                 self.is_close_to_safepoint = True
             else:
-
-                self.steering.move_corrected(
-                    1 / 3 * signed_angle_degree, 4, turn_speed=15
-                )
+                self.steering.move_corrected(signed_angle_degree, 4, turn_speed=15)
 
     def swap_state(self):
         if (

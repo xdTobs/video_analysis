@@ -3,22 +3,24 @@ from RobotInterface import RobotInterface
 import time
 from utils import angle_between_vectors, angle_between_vectors_signed
 
+
 class SteeringUtils:
-    def __init__(self, robot_interface : RobotInterface):
+    def __init__(self, robot_interface: RobotInterface):
         self.robot_interface = robot_interface
 
-
-    def move_corrected(self, signed_angle_degrees, speed):
-            angle_degrees = abs(signed_angle_degrees)
-            print(f"angle to target {angle_degrees}")
-            if angle_degrees < 1.5:
-                self.robot_interface.send_command("move", 100, speed)
-            elif 1.5 <= angle_degrees <= 20:
-                self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, speed)
-                print(f"Signed angle degrees {signed_angle_degrees}")
-            elif angle_degrees > 20:
-                turn = signed_angle_degrees * -1 / 3
-                self.robot_interface.send_command("turn", turn, 30)
+    def move_corrected(self, signed_angle_degrees, speed, turn_speed=30):
+        angle_degrees = abs(signed_angle_degrees)
+        print(f"angle to target {angle_degrees}")
+        if angle_degrees < 1.5:
+            self.robot_interface.send_command("move", 100, speed)
+        elif 1.5 <= angle_degrees <= 20:
+            self.robot_interface.send_command(
+                "move-corrected", -1 * signed_angle_degrees, speed
+            )
+            print(f"Signed angle degrees {signed_angle_degrees}")
+        elif angle_degrees > 20:
+            turn = signed_angle_degrees * -1 / 3
+            self.robot_interface.send_command("turn", turn, turn_speed)
 
     def turn(self, angle_degrees, speed):
         self.robot_interface.send_command("turn", angle_degrees, speed)
@@ -42,4 +44,3 @@ class SteeringUtils:
         print("Disconnecting from robot")
         self.robot_interface.disconnect()
         return
-

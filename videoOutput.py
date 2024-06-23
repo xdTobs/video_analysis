@@ -212,7 +212,7 @@ class VideoOutput:
                     # Add text above the corner
                     text_position = (
                         coord[0].astype(int),
-                        coord[1].astype(int)- 10,
+                        coord[1].astype(int) - 10,
                     )  # Position the text 10 pixels above the corner
                     cv2.putText(
                         frame,
@@ -223,7 +223,6 @@ class VideoOutput:
                         color,
                         2,
                     )
-
 
         if self.analyser.translation_vector is not None:
             cv2.arrowedLine(
@@ -261,7 +260,7 @@ class VideoOutput:
                 else:
                     cv2.arrowedLine(
                         frame,
-                        (self.steering_instance.state.path[idx-1]).astype(int),
+                        (self.steering_instance.state.path[idx - 1]).astype(int),
                         (point).astype(int),
                         (255, 0, 0),
                         2,

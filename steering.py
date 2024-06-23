@@ -11,7 +11,14 @@ from enum import Enum
 from steering_states.SteeringUtils import SteeringUtils
 
 
-from steering_states.State import State, PathingState, ReversingState, CollectionState, DeliveringState
+from steering_states.State import (
+    State,
+    PathingState,
+    ReversingState,
+    CollectionState,
+    DeliveringState,
+)
+
 
 class stateEnum(Enum):
     NONE_STATE = -1
@@ -20,15 +27,15 @@ class stateEnum(Enum):
     DELIVERING_STATE = 2
     REVERSING_STATE = 3
 
-class Steering:
-    def __init__(self, analyser : Analyse, online=True, host="", port=0):
 
+class Steering:
+    def __init__(self, analyser: Analyse, online=True, host="", port=0):
 
         self.robot_interface = RobotInterface.RobotInterface(host, port, online)
         if online:
             self.robot_interface.connect()
         self.analyser = analyser
-        self.state : State = None
+        self.state: State = None
         self.state_enum = None
         self.steering_vector = None
         self.is_ball_close_to_border = False
@@ -46,7 +53,9 @@ class Steering:
         self.current_time = 0
         self.time_to_switch_target = 0
         self.distance_to_border_threshold = 100
-        self.distance_to_delivery_point = 30  # The distance where we want to reverse belt and deliver balls
+        self.distance_to_delivery_point = (
+            30  # The distance where we want to reverse belt and deliver balls
+        )
         self.robot_pos = None
         self.robot_vector = None
         self.path = []
@@ -59,16 +68,16 @@ class Steering:
         self.is_targeting_safepoint = False
         self.speed = 100
 
-
     def on_frame(self):
 
         if self.state is None and self.analyser.safepoint_list is not None:
             path = self.analyser.create_path()
-            self.state : State = PathingState(self.analyser,path, SteeringUtils(self.robot_interface))
+            self.state: State = PathingState(
+                self.analyser, path, SteeringUtils(self.robot_interface)
+            )
             self.state_enum = stateEnum.PATHING_STATE
         if self.state is None:
             return
-
 
         self.state.on_frame()
         self.state = self.state.swap_state()
@@ -79,7 +88,6 @@ class Steering:
         self, robot_pos: np.ndarray, target_pos: np.ndarray, obstacles: np.ndarray
     ) -> bool:
         return True
-
 
     def stop_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=-100)
@@ -98,9 +106,9 @@ class Steering:
         self.robot_interface.disconnect()
         return
 
-
-
-    def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
+    def follow_path(
+        self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray
+    ) -> np.ndarray:
         if self.should_switch_target(robot_pos, self.target_ball):
             self.last_target_time = time.time()
             self.target_ball = self.find_closest_ball(keypoints, robot_pos)
@@ -112,13 +120,15 @@ class Steering:
                 self.path.pop(0)
         self.steering_vector = self.path[0]
 
-
-
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         if ball_pos is None:
             return True
         distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
-        if self.is_target_expired() or self.target_ball is None or distance_to_ball < self.distance_threshold_min:
+        if (
+            self.is_target_expired()
+            or self.target_ball is None
+            or distance_to_ball < self.distance_threshold_min
+        ):
             return True
         return False
 
@@ -133,11 +143,7 @@ class Steering:
             return True
         return False
 
-
-
-
-
-    def pick_program_pipeline (
+    def pick_program_pipeline(
         self,
         keypoints: np.ndarray,
         robot_pos: np.ndarray,
@@ -179,7 +185,9 @@ class Steering:
             self.angle_radians = angle_between_vectors(robot_vector, self.steering_vector)  # type: ignore
             self.angle_degrees = math.degrees(self.angle_radians)
 
-        dist_to_target = math.sqrt(self.steering_vector[0] ** 2 + self.steering_vector[1] ** 2)
+        dist_to_target = math.sqrt(
+            self.steering_vector[0] ** 2 + self.steering_vector[1] ** 2
+        )
         dist_to_ball = np.linalg.norm(self.target_ball - robot_pos)
 
         self.is_ball_close_to_border = self.calculate_is_ball_close_to_borders(
@@ -213,8 +221,6 @@ class Steering:
         except Exception as e:
             print(f"Error: {e}")
             return
-
-
 
     def deliver_balls_to_target(
         self, robot_vector: np.ndarray, dropoff_cords: np.ndarray, robot_pos: np.ndarray
