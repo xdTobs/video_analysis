@@ -29,6 +29,7 @@ class VideoOutput:
             self.steering_instance.is_ball_close_to_border
         )
         self.data_dict["Collecting balls"] = self.steering_instance.is_collecting_balls
+        self.data_dict["State"] = self.steering_instance.state.__class__.__name__
 
     def showFrame(self, frame):
         self.update_data_dict()
@@ -241,16 +242,27 @@ class VideoOutput:
             cv2.circle(
                 frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1
             )
-        if self.steering_instance.path_indexes is not None and self.analyser.safepoint_list is not None:
-            for index in self.steering_instance.path_indexes:
+        if self.analyser.path is not None:
+            robot_pos = self.analyser.robot_pos.astype(int)
+            for idx, point in enumerate(self.analyser.path):
+                
                 # Draw arrows between safepoints
-                cv2.arrowedLine(
-                    frame,
-                    self.analyser.safepoint_list[index].astype(int),
-                    self.analyser.safepoint_list[(index + 1) % len(self.analyser.safepoint_list)].astype(int),
-                    (255, 0, 0),
-                    2,
-                )
+                if idx == 0:
+                    cv2.arrowedLine(
+                        frame,
+                        robot_pos,
+                        (robot_pos+point).astype(int),
+                        (255, 0, 0),
+                        2,
+                    )
+                else:
+                    cv2.arrowedLine(
+                        frame,
+                        (robot_pos+self.analyser.path[idx-1]).astype(int),
+                        (robot_pos+point).astype(int),
+                        (255, 0, 0),
+                        2,
+                    )
 
 
 
