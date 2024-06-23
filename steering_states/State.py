@@ -34,16 +34,13 @@ class PathingState(State):
                 self.path.pop(0)
         self.steering_vector = self.path[0] - self.analyser.robot_pos
         signed_angle_degree = math.degrees(angle_between_vectors(self.analyser.robot_vector, self.steering_vector))
-        self.steering.move_corrected(signed_angle_degree, 30)
+        self.steering.move_corrected((-1/3)*signed_angle_degree, 30)
         pass
 
     def swap_state(self):
         # Check timeout
 
         if time.time() - self.start_time > self.timeout:
-            #TODO Move / create
-            if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
             return PathingState(self.analyser, self.analyser.create_path(), self.steering)
 
         if len(self.path) == 1:
