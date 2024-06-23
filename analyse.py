@@ -53,7 +53,7 @@ class Analyse:
         self.robot_height = 47
         self.course_length_cm = 167
         self.course_width_cm = 121
-        
+
         pass
 
     def analysis_pipeline(self, image: np.ndarray, has_found_corners):
@@ -163,16 +163,16 @@ class Analyse:
         mask = cv2.inRange(hsv, lower, upper)
 
         return mask
-    
+
     def get_speed(self, distance: int):
         speed = (0.01100000000*math.pow(distance,2) - 0.1200000000 * distance + 0.1)/5
-        return speed    
-    
+        return speed
+
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         print(f"Length: {length}")
         return length < 100
-    
+
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
         vector_to_ball = ball_pos - robot_pos
@@ -180,7 +180,7 @@ class Analyse:
         if distance_to_ball < 250 and angle_to_ball < 80:
             return True
         return False
-    
+
     def find_steering_vector(
         self,
         robot_pos: np.ndarray,
@@ -188,10 +188,14 @@ class Analyse:
     ) -> np.ndarray:
 
         return target_position - robot_pos
-    
-    def create_path(self):
-        ball_position = self.find_closest_ball(self.keypoints, self.robot_pos)
-        self.path_indexes = self.find_path_to_target(ball_position, self.robot_pos, self.safepoint_list)
+
+    def create_path(self, deliver_balls: bool = False):
+        if deliver_balls:
+            target_position = self.dropoff_coords
+        else:
+            target_position = self.find_closest_ball(self.keypoints, self.robot_pos)
+
+        self.path_indexes = self.find_path_to_target(target_position, self.robot_pos, self.safepoint_list)
         if len(self.path_indexes) == 0:
             return None
         path = []
@@ -199,10 +203,10 @@ class Analyse:
             steering_vector = self.find_steering_vector(self.robot_pos, self.safepoint_list[self.path_indexes[i]])
             print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector)
-        steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
+        steering_vector = self.find_steering_vector(self.robot_pos, target_position)
         path.append(steering_vector)
         return path
-    
+
     def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
         closest_safepoint_index_to_ball = self.find_closest_safepoint_index(ball_position, safepoint_list)
         closest_safepoint_index_to_robot = self.find_closest_safepoint_index(robot_pos, safepoint_list)
@@ -225,7 +229,7 @@ class Analyse:
                     queue.append((neighbor, path + [neighbor]))
                     visited.add(neighbor)
         return []
-    
+
     def find_closest_ball(self, keypoints: np.ndarray, robot_pos: np.ndarray) -> np.ndarray:
         if len(keypoints) == 0:
             return None
@@ -240,7 +244,7 @@ class Analyse:
                 closest_distance = distance
                 closest_point = ball_pos
         return closest_point
-    
+
     def calculate_is_ball_close_to_borders(
         self, ball_pos: np.ndarray, corners: np.ndarray
     ) -> bool:
@@ -261,7 +265,7 @@ class Analyse:
         ):
             return True
         return False
-    
+
     def find_closest_safepoint_index(self, position: np.ndarray, safepoint_list: np.ndarray) -> int:
         if len(safepoint_list) == 0:
             return None

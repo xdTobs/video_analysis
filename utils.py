@@ -27,3 +27,7 @@ def coordinates_to_vector(point1: float, point2: float) -> np.ndarray[int, int]:
     point1_int = np.array([int(point1[0]), int(point1[1])])
     point2_int = np.array([int(point2[0]), int(point2[1])])
     return point2_int - point1_int
+
+
+def is_coordinates_close(point1: np.ndarray, point2: np.ndarray, threshold: float) -> bool:
+    return np.linalg.norm(point1 - point2) < threshold
