@@ -27,8 +27,7 @@ class Steering:
         self.robot_interface = RobotInterface.RobotInterface(host, port, online)
         if online:
             self.robot_interface.connect()
-        self.analyser = analyser    
-        
+        self.analyser = analyser
         self.state : State = None 
         self.state_enum = None
         self.steering_vector = None
@@ -88,6 +87,7 @@ class Steering:
         self.robot_interface.send_command("belt", 0, speedPercentage=0)
         
     def stop_motors(self):
+        time.sleep(1)
         self.robot_interface.send_command("move", 0, speedPercentage=0)
         time.sleep(1)
         self.robot_interface.send_command("turn", 0, speedPercentage=0)

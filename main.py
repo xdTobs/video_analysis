@@ -63,7 +63,7 @@ def run_video(host, webcam_index, online, port=65438):
             break
 
         prev_time = time.time()
-        print(f"FTAN1: {prev_time - start_time} seconds")
+        #print(f"FTAN1: {prev_time - start_time} seconds")
         start_time = time.time()
 
         analyser.analysis_pipeline(image=frame, has_found_corners=has_found_corners)
@@ -78,9 +78,9 @@ def run_video(host, webcam_index, online, port=65438):
         
 
         prev_time = time.time()
-        print(f"FTAN2: {prev_time - start_time} seconds")
+        #print(f"FTAN2: {prev_time - start_time} seconds")
         start_time = time.time()
-        print(found_corners)
+        #print(found_corners)
         if not has_found_corners:
             corners_list.append(analyser.corners)
             if len(corners_list) == 10:
@@ -92,13 +92,13 @@ def run_video(host, webcam_index, online, port=65438):
                 continue
 
         prev_time = time.time()
-        print(f"FTAN3: {prev_time - start_time} seconds")
+        #print(f"FTAN3: {prev_time - start_time} seconds")
         start_time = time.time()
 
         steering_instance.on_frame()
         
         prev_time = time.time()
-        print(f"FTAN4: {prev_time - start_time} seconds")
+        #print(f"FTAN4: {prev_time - start_time} seconds")
         start_time = time.time()
 
         video_output.showFrame(frame)
@@ -118,9 +118,9 @@ def run_video(host, webcam_index, online, port=65438):
         elif key == ord("p"):
             cv2.waitKey(0)
         prev_time = time.time()
-        print(f"FTAN5: {prev_time - start_time} seconds")
+        #print(f"FTAN5: {prev_time - start_time} seconds")
         start_time = time.time()
-        print(f"FTANX: {prev_time - init_time} seconds")
+        #print(f"FTANX: {prev_time - init_time} seconds")
         sys.stdout.flush()
 
     video.release()

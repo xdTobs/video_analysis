@@ -78,7 +78,11 @@ class ReversingState(State):
             self.steering.turn(10, 10)
         else:
             signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, steering_vector))
-            self.steering.move_corrected(signed_angle_degree, 30)
+            if signed_angle_degree < 0:
+                signed_angle_degree -= 180
+            else:
+                signed_angle_degree += 180
+            self.steering.move_corrected(signed_angle_degree, -30)
         pass
     
     def swap_state(self):
