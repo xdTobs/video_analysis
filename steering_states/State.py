@@ -175,7 +175,7 @@ class ReleaseBallsState(State):
         self.timeout = 10
 
     def on_frame(self):
-        if utils.is_coordinates_close(self.analyser.robot_pos, self.analyser.dropoff_coords, 100):
+        if is_coordinates_close(self.analyser.robot_pos, self.analyser.dropoff_coords, 100):
             self.steering.reverse_belt()
         pass
     def swap_state(self):
