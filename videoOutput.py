@@ -222,6 +222,15 @@ class VideoOutput:
                         color,
                         2,
                     )
+            if self.analyser.middle_point is not None:
+                # Draw a circle around the middle point
+                cv2.circle(
+                    frame,
+                    tuple(self.analyser.middle_point.astype(int)),
+                    50,
+                    (0, 0, 255),
+                    2,
+                )
 
 
         if self.analyser.translation_vector is not None:

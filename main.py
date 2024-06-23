@@ -75,7 +75,7 @@ def run_video(host, webcam_index, online, port=65438):
             ball_distance = np.linalg.norm(ball_vector)
 
             steering_instance.set_speed(ball_distance, angle_between_vectors_signed(analyser.robot_vector,ball_vector) )
-        
+
 
         prev_time = time.time()
         print(f"FTAN2: {prev_time - start_time} seconds")
@@ -106,7 +106,7 @@ def run_video(host, webcam_index, online, port=65438):
                 analyser.dropoff_coords,
                 analyser.safepoint_list,
                 analyser.small_goal_coords,
-                border_mask=analyser.border_mask,
+                analyser.middle_point
             )
         except RobotNotFoundError as e:
             print(f"Robot not found: {e}")

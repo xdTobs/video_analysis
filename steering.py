@@ -217,7 +217,7 @@ class Steering:
         dropoff_coords: np.ndarray,
         safepoint_list: np.ndarray,
         small_goal_coords: np.ndarray,
-        border_mask,
+        middle_cross_coords: np.ndarray,
 
     ):
 
@@ -252,13 +252,14 @@ class Steering:
 
         dist_to_target = math.sqrt(self.steering_vector[0] ** 2 + self.steering_vector[1] ** 2)
         dist_to_ball = np.linalg.norm(self.target_ball - robot_pos)
+        dist_to_middle = np.linalg.norm(middle_cross_coords - robot_pos)
 
         self.is_ball_close_to_border = self.calculate_is_ball_close_to_borders(
             self.target_ball, corners
         )
         print("Steering vector: ", self.steering_vector)
         print(f"Steering vector length: {dist_to_target}")
-
+        print("Dist to middle", dist_to_middle)
         try:
             if self.is_collecting_balls:
                 if dist_to_ball < self.collect_ball_distance:
@@ -272,6 +273,11 @@ class Steering:
                     self.close_to_target = False
                     self.get_near_ball(self.signed_angle_degrees, self.angle_degrees)
                     return
+
+                if dist_to_middle > 100:
+                    self.start_belt()
+                else:
+                    self.stop_belt()
             else:
                 self.move_corrected(self.signed_angle_degrees, self.angle_degrees)
 
@@ -301,7 +307,12 @@ class Steering:
         self.move_corrected(signed_angle_degrees, angle_degrees)
 
     def start_belt(self):
+        print("Starting belt")
         self.robot_interface.send_command("belt", 0, speedPercentage=100)
+
+    def stop_belt(self):
+        print("Stopping belt")
+        self.robot_interface.send_command("belt", 0, speedPercentage=0)
 
     def ejaculate(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=-100)
