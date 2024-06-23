@@ -20,6 +20,7 @@ class Analyse:
         self.robot_vector_not_translated = None
         self.robot_vector = None
         self.goal_vector = None
+        self.path = []
         self.delivery_vector = None
         self.corners = [(0, 0), (1, 0), (0, 1), (1, 1)]
         self.border_vector = None
@@ -205,6 +206,7 @@ class Analyse:
             path.append(steering_vector)
         steering_vector = self.find_steering_vector(self.robot_pos, target_position)
         path.append(steering_vector)
+        self.path = path
         return path
 
     def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:

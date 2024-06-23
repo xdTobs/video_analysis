@@ -81,7 +81,22 @@ class Steering:
     ) -> bool:
         return True
 
+
+    def stop_belt(self):
+        self.robot_interface.send_command("belt", 0, speedPercentage=-100)
+        time.sleep(1)
+        self.robot_interface.send_command("belt", 0, speedPercentage=0)
+        
+    def stop_motors(self):
+        self.robot_interface.send_command("move", 0, speedPercentage=0)
+        time.sleep(1)
+        self.robot_interface.send_command("turn", 0, speedPercentage=0)
+        time.sleep(1)
+        self.robot_interface.send_command("belt", 0, speedPercentage=0)
     
+    def disconnect(self):
+        self.robot_interface.disconnect()
+        return
 
     
 

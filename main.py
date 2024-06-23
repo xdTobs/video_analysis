@@ -112,6 +112,7 @@ def run_video(host, webcam_index, online, port=65438):
             cv2.destroyAllWindows()
             if online:
                 steering_instance.stop_belt()
+                steering_instance.stop_motors()
                 steering_instance.disconnect()
             break
         elif key == ord("p"):

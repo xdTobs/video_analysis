@@ -2,7 +2,7 @@ from analyse import Analyse
 import time
 import math
 import numpy as np
-from utils import angle_between_vectors
+from utils import angle_between_vectors, angle_between_vectors_signed
 from steering_states.SteeringUtils import SteeringUtils
 
 
@@ -77,16 +77,17 @@ class ReversingState(State):
         if self.analyser.are_coordinates_close(self.path[0]):
             self.steering.turn(10, 10)
         else:
-            self.steering.move_corrected(self.analyser.robot_vector, steering_vector, 30)
+            signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, steering_vector))
+            self.steering.move_corrected(signed_angle_degree, 30)
         pass
 
     def swap_state(self):
         #Check timeout
-        if self.timeout < self.analyser.get_time() - self.start_time:
+        if self.timeout < time.time() - self.start_time:
             #TODO Move / create
             if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path(deliver_balls=True),self.steering)
-            return PathingState(self.analyser, self.analyser.create_path(),self.steering)
+                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
 
         if self.analyser.are_coordinates_close(self.path[0]) and math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)) < 30:
             #TODO Might need to use a different arugment for the path, might need to be absolute
@@ -109,10 +110,10 @@ class CollectionState(State):
 
     def on_frame(self):
         ball_point = self.path[0]
-        self.analyser.get_speed(np.linalg.norm(ball_point - self.analyser.robot_pos))
+        self.speed = self.analyser.get_speed(np.linalg.norm(ball_point - self.analyser.robot_pos))
         print(f"Ball point: {ball_point}, robot vector: {self.analyser.robot_vector}")
         #TODO Assuming relative coords, might be getting absolute
-        signed_angle_degree = math.degrees(angle_between_vectors(self.analyser.robot_vector, ball_point))
+        signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, ball_point))
         self.steering.move_corrected(signed_angle_degree, self.speed)
 
         pass
