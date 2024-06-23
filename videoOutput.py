@@ -242,7 +242,10 @@ class VideoOutput:
             cv2.circle(
                 frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1
             )
-        if self.steering_instance.state.path is not None:
+        if (
+            self.steering_instance.state is not None
+            and self.steering_instance.state.path is not None
+        ):
             robot_pos = self.analyser.robot_pos.astype(int)
             for idx, point in enumerate(self.steering_instance.state.path):
 
