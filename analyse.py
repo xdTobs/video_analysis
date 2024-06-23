@@ -20,6 +20,7 @@ class Analyse:
         self.robot_vector_not_translated = None
         self.robot_vector = None
         self.goal_vector = None
+        self.robot_pos_at_path_creation = None
         self.path = []
         self.path_indexes = []
         self.delivery_vector = None
@@ -172,7 +173,7 @@ class Analyse:
 
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
-        print(f"Length: {length}")
+        #print(f"Length: {length}")
         return length < 100
 
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
@@ -199,10 +200,11 @@ class Analyse:
         path = []
         for i in range (0, len(self.path_indexes)):
             steering_vector = self.find_steering_vector(self.robot_pos, self.safepoint_list[self.path_indexes[i]])
-            print(f"Index: {i}   Steering vector: {steering_vector}")
+            #print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector)
         steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
         path.append(steering_vector)
+        self.robot_pos_at_path_creation = self.robot_pos
         self.path = path
         return path
 
@@ -421,10 +423,10 @@ class Analyse:
             right_upper_coords = ((small_goal_coords + corner2) // 2)+[0, 20]
             left_lower_coords = ((corner4 + large_goal_coords) // 2 )-[0, 20]
             left_upper_coords = ((large_goal_coords + corner3) // 2)+[0, 20]
-            print("Right lower: ", right_lower_coords)
-            print("Right upper: ", right_upper_coords)
-            print("Left lower: ", left_lower_coords)
-            print("Left upper: ", left_upper_coords)
+            #print("Right lower: ", right_lower_coords)
+            #print("Right upper: ", right_upper_coords)
+            #print("Left lower: ", left_lower_coords)
+            #print("Left upper: ", left_upper_coords)
 
             lower_vector = coordinates_to_vector(right_lower_coords, left_lower_coords)
             upper_vector = coordinates_to_vector(right_upper_coords, left_upper_coords)
@@ -457,7 +459,7 @@ class Analyse:
                     safe_point_10,
                 ]
             )
-            print("Safepoints: ", self.safepoint_list)
+            #print("Safepoints: ", self.safepoint_list)
             return
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:

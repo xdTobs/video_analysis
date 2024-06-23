@@ -242,8 +242,8 @@ class VideoOutput:
             cv2.circle(
                 frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1
             )
-        if self.analyser.path is not None:
-            robot_pos = self.analyser.robot_pos.astype(int)
+        if self.analyser.path is not None and self.analyser.robot_pos_at_path_creation is not None:
+            robot_pos = self.analyser.robot_pos_at_path_creation.astype(int)
             for idx, point in enumerate(self.analyser.path):
                 
                 # Draw arrows between safepoints
