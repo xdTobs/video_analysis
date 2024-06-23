@@ -11,6 +11,7 @@ class State():
         self.steering = steering_utils
         self.start_time = time.time()
         self.analyser = analyser
+        self.path = None
         
         
     def on_frame(self):
@@ -26,12 +27,12 @@ class PathingState(State):
         self.steering_vector = path[0]
         
     def on_frame(self):
-        if self.analyser.are_coordinates_close(self.path[0]) and len(self.path) > 1:
+        if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
-        elif self.analyser.can_target_ball_directly(self.analyser.robot_pos, self.path[-1]):
+        elif self.analyser.can_target_ball_directly(self.analyser.robot_pos, self.path[-1] - self.analyser.robot_pos):
             while len(self.path) > 1:
                 self.path.pop(0)
-        self.steering_vector = self.path[0]
+        self.steering_vector = self.path[0] - self.analyser.robot_pos
         signed_angle_degree = math.degrees(angle_between_vectors(self.analyser.robot_vector, self.steering_vector))
         self.steering.move_corrected(signed_angle_degree, 30)
         pass
@@ -51,7 +52,7 @@ class PathingState(State):
                 return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
             
             return CollectionState(self.analyser, [self.path[0]], self.steering)
-        
+        print("LOG PATH", self.path, len(self.path))
         if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.steering_vector)) > 100:
             print("LOG REVERSING", self.analyser.robot_vector, self.steering_vector, angle_between_vectors(self.analyser.robot_vector,self.steering_vector))
             #TODO Might need to use a different arugment for the path, might need to be absolute
@@ -73,7 +74,7 @@ class ReversingState(State):
             self.result_vector = np.array([1,0])
         
     def on_frame(self):
-        steering_vector = self.path[0]
+        steering_vector = self.path[0] - self.analyser.robot_pos
         
         if self.analyser.is_point_close(self.path[0]):
             signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, self.result_vector))
