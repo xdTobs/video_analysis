@@ -1,3 +1,4 @@
+import utils
 from analyse import Analyse
 import time
 import math
@@ -141,7 +142,8 @@ class DeliveringState(State):
         self.path = path
 
     def on_frame(self):
-        self.steering.move_corrected(self.analyser.robot_vector, self.path[0])
+        signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, self.analyser.dropoff_coords))
+        self.steering.move_corrected(signed_angle_degree, 15)
         pass
     def swap_state(self):
         if self.analyser.are_coordinates_close(self.path[0]):
@@ -153,9 +155,8 @@ class ReleaseBallsState(State):
         super().__init__(analyser, steering)
 
     def on_frame(self):
-        signed_angle_degrees = math.degrees(angle_between_vectors(self.analyser.robot_vector, self.analyser.delivery_vector))
-        if (self.analyser.dropoff_coords)
-        self.steering.move_corrected(signed_angle_degrees,15)
+        if utils.is_coordinates_close(self.analyser.robot_pos, self.analyser.dropoff_coords, 100):
+            self.steering.reverse_belt()
         pass
     def swap_state(self):
         if self.timeout < time.time() - self.start_time:

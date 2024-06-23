@@ -21,6 +21,7 @@ class Analyse:
         self.robot_vector = None
         self.goal_vector = None
         self.path = []
+        self.path_indexes = []
         self.delivery_vector = None
         self.corners = [(0, 0), (1, 0), (0, 1), (1, 1)]
         self.border_vector = None
@@ -190,13 +191,9 @@ class Analyse:
 
         return target_position - robot_pos
 
-    def create_path(self, deliver_balls: bool = False):
-        if deliver_balls:
-            target_position = self.dropoff_coords
-        else:
-            target_position = self.find_closest_ball(self.keypoints, self.robot_pos)
-
-        self.path_indexes = self.find_path_to_target(target_position, self.robot_pos, self.safepoint_list)
+    def create_path(self):
+        ball_position = self.find_closest_ball(self.keypoints, self.robot_pos)
+        self.path_indexes = self.find_path_to_target(ball_position, self.robot_pos, self.safepoint_list)
         if len(self.path_indexes) == 0:
             return None
         path = []
@@ -204,7 +201,7 @@ class Analyse:
             steering_vector = self.find_steering_vector(self.robot_pos, self.safepoint_list[self.path_indexes[i]])
             print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector)
-        steering_vector = self.find_steering_vector(self.robot_pos, target_position)
+        steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
         path.append(steering_vector)
         self.path = path
         return path
@@ -465,9 +462,7 @@ class Analyse:
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
         # Heights in cm
-        print(
-            f"course height and length px {self.course_height_px} {self.course_length_px}"
-        )
+        #print(f"course height and length px {self.course_height_px} {self.course_length_px}")
 
         # Heights in pixels cm / px
         # TODO fish eye ???

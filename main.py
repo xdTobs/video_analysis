@@ -48,7 +48,7 @@ def run_video(host, webcam_index, online, port=65438):
     # https://stackoverflow.com/questions/43665208/how-to-get-the-latest-frame-from-capture-device-camera-in-opencv
     video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     print("Video read")
-    
+
 
     # find most common corners
     found_corners = None
@@ -75,12 +75,12 @@ def run_video(host, webcam_index, online, port=65438):
             ball_distance = np.linalg.norm(ball_vector)
 
             steering_instance.set_speed(ball_distance, angle_between_vectors_signed(analyser.robot_vector,ball_vector) )
-        
+
 
         prev_time = time.time()
         print(f"FTAN2: {prev_time - start_time} seconds")
         start_time = time.time()
-        print(found_corners)
+        print("Found corners", found_corners)
         if not has_found_corners:
             corners_list.append(analyser.corners)
             if len(corners_list) == 10:
@@ -96,7 +96,7 @@ def run_video(host, webcam_index, online, port=65438):
         start_time = time.time()
 
         steering_instance.on_frame()
-        
+
         prev_time = time.time()
         print(f"FTAN4: {prev_time - start_time} seconds")
         start_time = time.time()
