@@ -37,6 +37,8 @@ class Analyse:
         self.dropoff_coords = None
         self.should_calculate_corners = True
         self.safepoint_list: np.ndarray = None
+        self.middle_point = None
+        self.distance_to_middle = None
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -140,6 +142,14 @@ class Analyse:
             corner3 = self.corners[2]
             self.course_length_px = np.linalg.norm(corner1 - corner2)
             self.course_height_px = np.linalg.norm(corner2 - corner3)
+            self.middle_point = (corner1 + corner3) / 2
+
+            cross_rect, _ = self.find_cross_bounding_rectangle(self.border_mask)
+            if len(cross_rect) > 0:
+                self.middle_point = np.array(
+                    [cross_rect[0][0] + cross_rect[0][2] // 2, cross_rect[0][1] + cross_rect[0][3] // 2])
+                #print(f"Cross found at {self.middle_point}")
+            self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
 
     @staticmethod
     def apply_threshold(image: np.ndarray, out_name: str) -> np.ndarray:

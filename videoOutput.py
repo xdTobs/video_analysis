@@ -245,7 +245,7 @@ class VideoOutput:
         if self.analyser.path is not None and self.analyser.robot_pos_at_path_creation is not None:
             robot_pos = self.analyser.robot_pos_at_path_creation.astype(int)
             for idx, point in enumerate(self.analyser.path):
-                
+
                 # Draw arrows between safepoints
                 if idx == 0:
                     cv2.arrowedLine(
@@ -264,8 +264,10 @@ class VideoOutput:
                         2,
                     )
 
-
-
+        if self.analyser.middle_point is not None:
+            cv2.circle(
+                frame, self.analyser.middle_point.astype(int), 30, (255, 0, 0), 0
+            )
 
         self.videoDebugger.write_video("result", result_3channel, True)
 

@@ -112,6 +112,7 @@ class CollectionState(State):
         self.distance_before_swap = 60 # px
         self.timeout = 30 # seconds
         self.speed = 0 # % of max speed
+        self.safe_distance_middle = 100 # px
 
     def on_frame(self):
         ball_point = self.path[0]
@@ -121,6 +122,10 @@ class CollectionState(State):
         signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, ball_point))
         self.steering.move_corrected(signed_angle_degree, self.speed)
 
+        if self.analyser.distance_to_middle < self.safe_distance_middle:
+            self.steering.start_belt()
+        else:
+            self.steering.stop_belt()
         pass
 
     def swap_state(self):
@@ -148,6 +153,7 @@ class DeliveringState(State):
     def on_frame(self):
         signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, self.analyser.dropoff_coords))
         self.steering.move_corrected(signed_angle_degree, 15)
+        self.steering.stop_belt()
         pass
     def swap_state(self):
         if self.analyser.are_coordinates_close(self.path[0]):
@@ -157,6 +163,7 @@ class DeliveringState(State):
 class ReleaseBallsState(State):
     def __init__(self, analyser: Analyse, steering: SteeringUtils):
         super().__init__(analyser, steering)
+        self.timeout = 10
 
     def on_frame(self):
         if utils.is_coordinates_close(self.analyser.robot_pos, self.analyser.dropoff_coords, 100):
