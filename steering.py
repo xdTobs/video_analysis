@@ -64,7 +64,8 @@ class Steering:
     def on_frame(self):
         
         if self.state is None and self.analyser.safepoint_list is not None:
-            self.state : State = PathingState(self.analyser, [self.analyser.safepoint_list[self.analyser.find_closest_safepoint_index(self.analyser.robot_pos, self.analyser.safepoint_list)]], SteeringUtils(self.robot_interface))
+            path = self.analyser.create_path()
+            self.state : State = PathingState(self.analyser,path, SteeringUtils(self.robot_interface))
             self.state_enum = stateEnum.PATHING_STATE
         if self.state is None:
             return
@@ -80,50 +81,9 @@ class Steering:
     ) -> bool:
         return True
 
-    def find_steering_vector(
-        self,
-        robot_pos: np.ndarray,
-        target_position: np.ndarray,
-    ) -> np.ndarray:
+    
 
-        return target_position - robot_pos
-
-    def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
-        closest_safepoint_index_to_ball = self.find_closest_safepoint_index(ball_position, safepoint_list)
-        closest_safepoint_index_to_robot = self.find_closest_safepoint_index(robot_pos, safepoint_list)
-
-        if closest_safepoint_index_to_robot == closest_safepoint_index_to_ball:
-            return [closest_safepoint_index_to_robot]
-
-        queue = deque([(closest_safepoint_index_to_robot, [closest_safepoint_index_to_robot])])
-        visited = set()
-        visited.add(closest_safepoint_index_to_robot)
-        safepoint_count = len(safepoint_list)
-
-        while queue:
-            current_index, path = queue.popleft()
-
-            for neighbor in [(current_index - 1) % safepoint_count, (current_index + 1) % safepoint_count]:
-                if neighbor not in visited:
-                    if neighbor == closest_safepoint_index_to_ball:
-                        return path + [neighbor]
-                    queue.append((neighbor, path + [neighbor]))
-                    visited.add(neighbor)
-
-        return []
-
-    def create_path(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray):
-        self.path_indexes = self.find_path_to_target(ball_position, robot_pos, safepoint_list)
-        if len(self.path_indexes) == 0:
-            return None
-        path = []
-        for i in range (0, len(self.path_indexes)):
-            steering_vector = self.find_steering_vector(robot_pos, safepoint_list[self.path_indexes[i]])
-            print(f"Index: {i}   Steering vector: {steering_vector}")
-            path.append(steering_vector)
-        steering_vector = self.find_steering_vector(robot_pos, ball_position)
-        path.append(steering_vector)
-        return path
+    
 
     def follow_path(self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
         if self.should_switch_target(robot_pos, self.target_ball):
@@ -158,20 +118,7 @@ class Steering:
             return True
         return False
 
-    def find_closest_ball(self, keypoints: np.ndarray, robot_pos: np.ndarray) -> np.ndarray:
-        if len(keypoints) == 0:
-            return None
-        if robot_pos is None:
-            return None
-        closest_distance = sys.maxsize
-        closest_point = None
-        for keypoint in keypoints:
-            ball_pos = np.array(keypoint.pt)
-            distance = np.linalg.norm(ball_pos - robot_pos)
-            if distance < closest_distance:
-                closest_distance = distance
-                closest_point = ball_pos
-        return closest_point
+    
 
     
 

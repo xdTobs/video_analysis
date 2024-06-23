@@ -7,6 +7,7 @@ import traceback
 from utils import coordinates_to_vector, angle_between_vectors
 import math
 import sys
+from collections import deque
 
 
 class Analyse:
@@ -179,6 +180,66 @@ class Analyse:
         if distance_to_ball < 250 and angle_to_ball < 80:
             return True
         return False
+    
+    def find_steering_vector(
+        self,
+        robot_pos: np.ndarray,
+        target_position: np.ndarray,
+    ) -> np.ndarray:
+
+        return target_position - robot_pos
+    
+    def create_path(self):
+        ball_position = self.find_closest_ball(self.keypoints, self.robot_pos)
+        self.path_indexes = self.find_path_to_target(ball_position, self.robot_pos, self.safepoint_list)
+        if len(self.path_indexes) == 0:
+            return None
+        path = []
+        for i in range (0, len(self.path_indexes)):
+            steering_vector = self.find_steering_vector(self.robot_pos, self.safepoint_list[self.path_indexes[i]])
+            print(f"Index: {i}   Steering vector: {steering_vector}")
+            path.append(steering_vector)
+        steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
+        path.append(steering_vector)
+        return path
+    
+    def find_path_to_target(self, ball_position: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray) -> np.ndarray:
+        closest_safepoint_index_to_ball = self.find_closest_safepoint_index(ball_position, safepoint_list)
+        closest_safepoint_index_to_robot = self.find_closest_safepoint_index(robot_pos, safepoint_list)
+
+        if closest_safepoint_index_to_robot == closest_safepoint_index_to_ball:
+            return [closest_safepoint_index_to_robot]
+
+        queue = deque([(closest_safepoint_index_to_robot, [closest_safepoint_index_to_robot])])
+        visited = set()
+        visited.add(closest_safepoint_index_to_robot)
+        safepoint_count = len(safepoint_list)
+
+        while queue:
+            current_index, path = queue.popleft()
+
+            for neighbor in [(current_index - 1) % safepoint_count, (current_index + 1) % safepoint_count]:
+                if neighbor not in visited:
+                    if neighbor == closest_safepoint_index_to_ball:
+                        return path + [neighbor]
+                    queue.append((neighbor, path + [neighbor]))
+                    visited.add(neighbor)
+        return []
+    
+    def find_closest_ball(self, keypoints: np.ndarray, robot_pos: np.ndarray) -> np.ndarray:
+        if len(keypoints) == 0:
+            return None
+        if robot_pos is None:
+            return None
+        closest_distance = sys.maxsize
+        closest_point = None
+        for keypoint in keypoints:
+            ball_pos = np.array(keypoint.pt)
+            distance = np.linalg.norm(ball_pos - robot_pos)
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_point = ball_pos
+        return closest_point
     
     def calculate_is_ball_close_to_borders(
         self, ball_pos: np.ndarray, corners: np.ndarray

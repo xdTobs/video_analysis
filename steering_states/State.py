@@ -49,7 +49,8 @@ class PathingState(State):
             #TODO Check that this passes absolute coords and not relative
             if len(self.analyser.keypoints) == 0:
                 return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
-            return CollectionState(self.analyser, self.path[0], self.steering)
+            print(f"Swapping to ")
+            return CollectionState(self.analyser, [self.path[0]], self.steering)
         
         if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.steering_vector)) > 100:
             #TODO Might need to use a different arugment for the path, might need to be absolute
@@ -118,7 +119,7 @@ class CollectionState(State):
     
     def swap_state(self):
         #Check timeout
-        if self.timeout < self.analyser.get_time() - self.start_time:
+        if self.timeout < time.time() - self.start_time:
             #TODO Move / create
             if len(self.analyser.keypoints) == 0:
                 return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
