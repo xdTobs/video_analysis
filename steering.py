@@ -8,6 +8,7 @@ from utils import angle_between_vectors, angle_between_vectors_signed
 from analyse import Analyse
 from collections import deque
 from enum import Enum
+from steering_states.SteeringUtils import SteeringUtils
 
 
 from steering_states.State import State, PathingState, ReversingState, CollectionState, DeliveringState
@@ -28,8 +29,8 @@ class Steering:
             self.robot_interface.connect()
         self.analyser = analyser    
         
-        self.state : State = PathingState(analyser, [self.analyser.safepoint_list[self.find_closest_safepoint_index(analyser.robot_pos, analyser.safepoint_list)]], 10) 
-        self.state_enum = stateEnum.PATHING_STATE
+        self.state : State = None 
+        self.state_enum = None
         self.steering_vector = None
         self.is_ball_close_to_border = False
         self.last_target_time = 0
@@ -59,6 +60,20 @@ class Steering:
         self.is_targeting_safepoint = False
         self.speed = 100
 
+
+    def on_frame(self):
+        
+        if self.state is None and self.analyser.safepoint_list is not None:
+            self.state : State = PathingState(self.analyser, [self.analyser.safepoint_list[self.analyser.find_closest_safepoint_index(self.analyser.robot_pos, self.analyser.safepoint_list)]], SteeringUtils(self.robot_interface))
+            self.state_enum = stateEnum.PATHING_STATE
+        if self.state is None:
+            return
+        
+        
+        self.state.on_frame()
+        self.state = self.state.swap_state()
+        return
+    
     # checks if we can go to ball without crashing into the mid cross
     def check_no_obstacles(
         self, robot_pos: np.ndarray, target_pos: np.ndarray, obstacles: np.ndarray

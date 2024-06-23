@@ -1,9 +1,10 @@
-from video_analysis.analyse import Analyse
+from analyse import Analyse
 import time
 import math
 import numpy as np
 from utils import angle_between_vectors
-from SteeringUtils import SteeringUtils
+from steering_states.SteeringUtils import SteeringUtils
+
 
 class State():
     def __init__(self, analyser : Analyse, steering_utils : SteeringUtils):
@@ -18,8 +19,8 @@ class State():
         pass
     
 class PathingState(State):
-    def __init__(self, analyser : Analyse, path : list):
-        super().__init__(analyser)
+    def __init__(self, analyser : Analyse, path : list, steering : SteeringUtils):
+        super().__init__(analyser, steering)
         self.path = path
         self.timeout = 30 # Seconds
         self.steering_vector = path[0]
@@ -31,7 +32,8 @@ class PathingState(State):
             while len(self.path) > 1:
                 self.path.pop(0)
         self.steering_vector = self.path[0]
-        
+        signed_angle_degree = math.degrees(angle_between_vectors(self.analyser.robot_vector, self.steering_vector))
+        self.steering.move_corrected(signed_angle_degree, 30)
         pass
     
     def swap_state(self):
@@ -56,8 +58,8 @@ class PathingState(State):
         return self
         
 class ReversingState(State):
-    def __init__(self, analyser: Analyse, path: list):
-        super().__init__(analyser)
+    def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
+        super().__init__(analyser,steering)
         self.path = path
         self.timeout = 30 # seconds
         
@@ -69,6 +71,12 @@ class ReversingState(State):
             self.result_vector = np.array([1,0])
         
     def on_frame(self):
+        steering_vector = self.path[0]
+        
+        if self.analyser.are_coordinates_close(self.path[0]):
+            self.steering.turn(10, 10)
+        else:
+            self.steering.move_corrected(self.analyser.robot_vector, steering_vector, 30)
         pass
     
     def swap_state(self):
@@ -79,7 +87,7 @@ class ReversingState(State):
                 return DeliveringState(self.analyser, self.analyser.create_path())
             return PathingState(self.analyser, self.analyser.create_path())
         
-        if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)) < 5:
+        if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)) < 30:
             #TODO Might need to use a different arugment for the path, might need to be absolute
             #TODO Might also need to skip pathing state and go straight to collection state
             if len(self.analyser.keypoints) == 0:
@@ -91,18 +99,23 @@ class ReversingState(State):
 
 
 class CollectionState(State):
-    def __init__(self,analyser: Analyse, ball_point: list):
-        super().__init__(analyser)
+    def __init__(self,analyser: Analyse, ball_point: list, steering: SteeringUtils):
+        super().__init__(analyser,steering)
         self.path = ball_point
         self.distance_before_swap = 60 # px
         self.timeout = 30 # seconds
         self.speed = 0 # % of max speed
         
     def on_frame(self):
-        self.analyser.get_speed(np.norm(self.ball_point - self.analyser.robot_pos))
-        
+        ball_point = self.path[0]
+        self.analyser.get_speed(np.linalg.norm(ball_point - self.analyser.robot_pos))
+        print(f"Ball point: {ball_point}, robot vector: {self.analyser.robot_vector}")
+        #TODO Assuming relative coords, might be getting absolute
+        signed_angle_degree = math.degrees(angle_between_vectors(self.analyser.robot_vector, ball_point))
+        self.steering.move_corrected(signed_angle_degree, self.speed)
         
         pass
+    
     def swap_state(self):
         #Check timeout
         if self.timeout < self.analyser.get_time() - self.start_time:
@@ -121,12 +134,12 @@ class CollectionState(State):
         return self
 
 class DeliveringState(State):
-    def __init__(self, analyser: Analyse, path: list):
-        super().__init__(analyser)
+    def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
+        super().__init__(analyser, steering)
         self.path = path
         
-        
     def on_frame(self):
+        self.steering.move_corrected(self.analyser.robot_vector, self.path[0], 30)
         pass
     def swap_state(self):
         if len(self.analyser.keypoints) != 0:

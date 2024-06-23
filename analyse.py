@@ -52,6 +52,7 @@ class Analyse:
         self.robot_height = 47
         self.course_length_cm = 167
         self.course_width_cm = 121
+        
         pass
 
     def analysis_pipeline(self, image: np.ndarray, has_found_corners):

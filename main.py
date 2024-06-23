@@ -48,7 +48,7 @@ def run_video(host, webcam_index, online, port=65438):
     # https://stackoverflow.com/questions/43665208/how-to-get-the-latest-frame-from-capture-device-camera-in-opencv
     video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     print("Video read")
-    steering_instance.start_belt()
+    
 
     # find most common corners
     found_corners = None
@@ -95,22 +95,8 @@ def run_video(host, webcam_index, online, port=65438):
         print(f"FTAN3: {prev_time - start_time} seconds")
         start_time = time.time()
 
-        try:
-            steering_instance.pick_program_pipeline(
-                analyser.keypoints,
-                analyser.robot_pos,
-                analyser.robot_vector,
-                analyser.distance_to_closest_border,
-                analyser.border_vector,
-                analyser.corners,
-                analyser.dropoff_coords,
-                analyser.safepoint_list,
-                border_mask=analyser.border_mask,
-            )
-        except RobotNotFoundError as e:
-            print(f"Robot not found: {e}")
-        except Exception as e:
-            print(f"Error: {e}")
+        steering_instance.on_frame()
+        
         prev_time = time.time()
         print(f"FTAN4: {prev_time - start_time} seconds")
         start_time = time.time()
