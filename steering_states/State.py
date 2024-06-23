@@ -1,9 +1,8 @@
-import utils
 from analyse import Analyse
 import time
 import math
 import numpy as np
-from utils import angle_between_vectors, angle_between_vectors_signed
+from utils import angle_between_vectors, angle_between_vectors_signed, is_coordinates_close
 from steering_states.SteeringUtils import SteeringUtils
 
 
