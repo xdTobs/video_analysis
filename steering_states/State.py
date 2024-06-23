@@ -53,6 +53,7 @@ class PathingState(State):
             return CollectionState(self.analyser, [self.path[0]], self.steering)
         
         if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.steering_vector)) > 100:
+            print("LOG REVERSING", self.analyser.robot_vector, self.steering_vector, angle_between_vectors(self.analyser.robot_vector,self.steering_vector))
             #TODO Might need to use a different arugment for the path, might need to be absolute
             return ReversingState(self.analyser, self.path, self.steering)
         
@@ -74,32 +75,37 @@ class ReversingState(State):
     def on_frame(self):
         steering_vector = self.path[0]
         
-        if self.analyser.are_coordinates_close(self.path[0]):
-            self.steering.turn(10, 10)
+        if self.analyser.is_point_close(self.path[0]):
+            signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, self.result_vector))
+            self.steering.turn((-1/3)*signed_angle_degree, 10)
         else:
             signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, steering_vector))
             if signed_angle_degree < 0:
-                signed_angle_degree -= 180
-            else:
                 signed_angle_degree += 180
+            else:
+                signed_angle_degree -= 180
+            print(f"Reverse angle: {signed_angle_degree}")
             self.steering.move_corrected(signed_angle_degree, -30)
         pass
     
     def swap_state(self):
         #Check timeout
-        if self.timeout < time.time() - self.start_time:
-            #TODO Move / create
-            if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
-            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
-        
-        if self.analyser.are_coordinates_close(self.path[0]) and math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)) < 30:
-            #TODO Might need to use a different arugment for the path, might need to be absolute
-            #TODO Might also need to skip pathing state and go straight to collection state
-            if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
-            return PathingState(self.analyser, self.path, self.steering)
+        # if self.timeout < time.time() - self.start_time:
+        #     #TODO Move / create
+        #     if len(self.analyser.keypoints) == 0:
+        #         return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+        #     return PathingState(self.analyser, self.analyser.create_path(), self.steering)
+        # print("LOG SWAPPING", math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)))
+        # if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)) < 90:
+        #     #TODO Might need to use a different arugment for the path, might need to be absolute
+        #     #TODO Might also need to skip pathing state and go straight to collection state
+        #     print("LOG LEN", len(self.analyser.keypoints), self.analyser.keypoints)
 
+        #     if len(self.analyser.keypoints) == 0:
+        #         return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+        #     return PathingState(self.analyser, self.path, self.steering)
+        if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.result_vector)) < 45:
+            return PathingState(self.analyser, self.path, self.steering)
         return self
         
 
@@ -117,7 +123,10 @@ class CollectionState(State):
         self.speed = self.analyser.get_speed(np.linalg.norm(ball_point - self.analyser.robot_pos))
         print(f"Ball point: {ball_point}, robot vector: {self.analyser.robot_vector}")
         #TODO Assuming relative coords, might be getting absolute
-        signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, ball_point))
+        
+        self.steering_vector = ball_point - self.analyser.robot_pos
+        
+        signed_angle_degree = math.degrees(angle_between_vectors_signed(self.analyser.robot_vector, self.steering_vector))
         self.steering.move_corrected(signed_angle_degree, self.speed)
         
         pass
@@ -131,7 +140,7 @@ class CollectionState(State):
             return PathingState(self.analyser, self.analyser.create_path(), self.steering)
         
         #TODO Check if we need to check for a certain distance to the ball
-        if np.linalg.norm(self.analyser.robot_pos - self.path) < self.distance_before_swap:
+        if np.linalg.norm(self.steering_vector) < self.distance_before_swap:
             #TODO Might need to use a different arugment for the path, might need to be absolute
             if len(self.analyser.keypoints) == 0:
                 return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)

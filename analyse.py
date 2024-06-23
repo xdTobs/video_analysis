@@ -168,12 +168,17 @@ class Analyse:
     
     def get_speed(self, distance: int):
         speed = (0.01100000000*math.pow(distance,2) - 0.1200000000 * distance + 0.1)/5
-        return speed    
+        print(f" Distance: {distance}, Speed {speed}")
+        return speed
     
     def are_coordinates_close(self, vector: np.ndarray) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         #print(f"Length: {length}")
         return length < 100
+    
+    def is_point_close(self, point: np.ndarray) -> bool:
+        distance = np.linalg.norm(point - self.robot_pos)
+        return distance < 100
     
     def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
@@ -193,6 +198,8 @@ class Analyse:
     
     def create_path(self):
         ball_position = self.find_closest_ball(self.keypoints, self.robot_pos)
+        if ball_position is None:
+            ball_position = self.dropoff_coords
         self.path_indexes = self.find_path_to_target(ball_position, self.robot_pos, self.safepoint_list)
         if len(self.path_indexes) == 0:
             return None
@@ -200,10 +207,9 @@ class Analyse:
         for i in range (0, len(self.path_indexes)):
             steering_vector = self.find_steering_vector(self.robot_pos, self.safepoint_list[self.path_indexes[i]])
             #print(f"Index: {i}   Steering vector: {steering_vector}")
-            path.append(steering_vector)
+            path.append(steering_vector+self.robot_pos)
         steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
-        path.append(steering_vector)
-        self.robot_pos_at_path_creation = self.robot_pos
+        path.append(steering_vector + self.robot_pos)
         self.path = path
         return path
     
@@ -272,6 +278,7 @@ class Analyse:
         closest_distance = sys.maxsize
         closest_index = 0
         for i, point in enumerate(safepoint_list):
+            
             distance = np.linalg.norm(position - point)
             if distance < closest_distance:
                 closest_distance = distance
