@@ -30,6 +30,7 @@ class VideoOutput:
         )
         self.data_dict["Collecting balls"] = self.steering_instance.is_collecting_balls
         self.data_dict["State"] = self.steering_instance.state.__class__.__name__
+        self.data_dict["Is ball close to middle cross"] = self.analyser.is_ball_close_to_middle
 
     def showFrame(self, frame):
         self.update_data_dict()
