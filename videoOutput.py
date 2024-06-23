@@ -242,9 +242,9 @@ class VideoOutput:
             cv2.circle(
                 frame, self.analyser.dropoff_coords.astype(int), 10, (255, 0, 255), -1
             )
-        if self.analyser.path is not None:
+        if self.steering_instance.state.path is not None:
             robot_pos = self.analyser.robot_pos.astype(int)
-            for idx, point in enumerate(self.analyser.path):
+            for idx, point in enumerate(self.steering_instance.state.path):
 
                 # Draw arrows between safepoints
                 if idx == 0:
@@ -258,7 +258,7 @@ class VideoOutput:
                 else:
                     cv2.arrowedLine(
                         frame,
-                        (self.analyser.path[idx-1]).astype(int),
+                        (self.steering_instance.state.path[idx-1]).astype(int),
                         (point).astype(int),
                         (255, 0, 0),
                         2,
