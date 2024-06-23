@@ -80,7 +80,7 @@ def run_video(host, webcam_index, online, port=65438):
         prev_time = time.time()
         print(f"FTAN2: {prev_time - start_time} seconds")
         start_time = time.time()
-        print(found_corners)
+        print("Found corners", found_corners)
         if not has_found_corners:
             corners_list.append(analyser.corners)
             if len(corners_list) == 10:

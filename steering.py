@@ -261,6 +261,11 @@ class Steering:
         print(f"Steering vector length: {dist_to_target}")
         print("Dist to middle", dist_to_middle)
         try:
+            if dist_to_middle > 130 and not self.is_collecting_balls:
+                self.start_belt()
+            else:
+                self.stop_belt()
+
             if self.is_collecting_balls:
                 if dist_to_ball < self.collect_ball_distance:
                     self.close_to_target = True
@@ -273,11 +278,6 @@ class Steering:
                     self.close_to_target = False
                     self.get_near_ball(self.signed_angle_degrees, self.angle_degrees)
                     return
-
-                if dist_to_middle > 100:
-                    self.start_belt()
-                else:
-                    self.stop_belt()
             else:
                 self.move_corrected(self.signed_angle_degrees, self.angle_degrees)
 
@@ -316,8 +316,7 @@ class Steering:
 
     def ejaculate(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=-100)
-        time.sleep(5)
-        self.robot_interface.send_command("belt", 0, speedPercentage=0)
+
 
     def disconnect(self):
         print("Disconnecting from robot")
@@ -328,7 +327,7 @@ class Steering:
         self
     ):
         # Calculate the vector to the target position
-        print(f"Robot pos: {self.robot_pos}, target pos: {self.dropoff_coords}\n")
+        print("Is ready to deliver")
         vector_to_dropoff_coords = self.dropoff_coords - self.robot_pos
         distance_to_dropoff_coords = np.linalg.norm(vector_to_dropoff_coords)
 
@@ -344,7 +343,7 @@ class Steering:
 
         if (
             distance_to_dropoff_coords <= self.distance_to_delivery_point
-            and self.angle_degrees < 5
+            and self.angle_degrees < 3
         ):
             return True
         return False
