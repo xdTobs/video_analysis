@@ -3,9 +3,11 @@ import time
 import math
 import numpy as np
 from utils import angle_between_vectors
+from SteeringUtils import SteeringUtils
 
 class State():
-    def __init__(self, analyser : Analyse):
+    def __init__(self, analyser : Analyse, steering_utils : SteeringUtils):
+        self.steering = steering_utils
         self.start_time = time.time()
         self.analyser = analyser
         
@@ -23,6 +25,12 @@ class PathingState(State):
         self.steering_vector = path[0]
         
     def on_frame(self):
+        if self.analyser.are_coordinates_close(self.path[0]) and len(self.path) > 1:
+            self.path.pop(0)
+        elif self.analyser.can_target_ball_directly(self.analyser.robot_pos, self.path[-1]):
+            while len(self.path) > 1:
+                self.path.pop(0)
+        self.steering_vector = self.path[0]
         
         pass
     
@@ -32,18 +40,18 @@ class PathingState(State):
         if time.time() - self.start_time > self.timeout:
             #TODO Move / create
             if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path())
-            return PathingState(self.analyser, self.analyser.create_path())
+                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
         
         if len(self.path) == 1:
             #TODO Check that this passes absolute coords and not relative
             if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path())
-            return CollectionState(self.analyser, self.path[0])
+                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+            return CollectionState(self.analyser, self.path[0], self.steering)
         
         if math.degrees(angle_between_vectors(self.analyser.robot_vector,self.steering_vector)) > 100:
             #TODO Might need to use a different arugment for the path, might need to be absolute
-            return ReversingState(self.analyser, self.path)
+            return ReversingState(self.analyser, self.path, self.steering)
         
         return self
         
@@ -75,8 +83,8 @@ class ReversingState(State):
             #TODO Might need to use a different arugment for the path, might need to be absolute
             #TODO Might also need to skip pathing state and go straight to collection state
             if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path())
-            return PathingState(self.analyser, self.path)
+                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+            return PathingState(self.analyser, self.path, self.steering)
 
         return self
         
@@ -93,21 +101,22 @@ class CollectionState(State):
     def on_frame(self):
         self.analyser.get_speed(np.norm(self.ball_point - self.analyser.robot_pos))
         
+        
         pass
     def swap_state(self):
         #Check timeout
         if self.timeout < self.analyser.get_time() - self.start_time:
             #TODO Move / create
             if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path())
-            return PathingState(self.analyser, self.analyser.create_path())
+                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
         
         #TODO Check if we need to check for a certain distance to the ball
         if np.linalg.norm(self.analyser.robot_pos - self.path) < self.distance_before_swap:
             #TODO Might need to use a different arugment for the path, might need to be absolute
             if len(self.analyser.keypoints) == 0:
-                return DeliveringState(self.analyser, self.analyser.create_path())
-            return PathingState(self.analyser, self.analyser.create_path())
+                return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
+            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
         
         return self
 
@@ -121,5 +130,5 @@ class DeliveringState(State):
         pass
     def swap_state(self):
         if len(self.analyser.keypoints) != 0:
-            return PathingState(self.analyser, self.analyser.create_path())
+            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
         return self

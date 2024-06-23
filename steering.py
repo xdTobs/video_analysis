@@ -122,13 +122,7 @@ class Steering:
                 self.path.pop(0)
         self.steering_vector = self.path[0]
 
-    def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
-        distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
-        if distance_to_ball < 250:
-            return True
-        return False
-
-
+    
 
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         if ball_pos is None:
@@ -164,44 +158,7 @@ class Steering:
                 closest_point = ball_pos
         return closest_point
 
-    def find_closest_safepoint_index(self, position: np.ndarray, safepoint_list: np.ndarray) -> int:
-        if len(safepoint_list) == 0:
-            return None
-        closest_distance = sys.maxsize
-        closest_index = 0
-        for i, point in enumerate(safepoint_list):
-            distance = np.linalg.norm(position - point)
-            if distance < closest_distance:
-                closest_distance = distance
-                closest_index = i
-        return closest_index
-
-    def are_coordinates_close(self, vector: np.ndarray) -> bool:
-        length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
-        print(f"Length: {length}")
-        return length < 100
-
-
-    def calculate_is_ball_close_to_borders(
-        self, ball_pos: np.ndarray, corners: np.ndarray
-    ) -> bool:
-        x_min, y_min = np.min(corners, axis=0)
-        x_max, y_max = np.max(corners, axis=0)
-
-        x, y = ball_pos
-        distance_to_left_border = x - x_min
-        distance_to_right_border = x_max - x
-        distance_to_bottom_border = y - y_min
-        distance_to_top_border = y_max - y
-
-        if (
-            distance_to_left_border < self.distance_to_border_threshold
-            or distance_to_right_border < self.distance_to_border_threshold
-            or distance_to_bottom_border < self.distance_to_border_threshold
-            or distance_to_top_border < self.distance_to_border_threshold
-        ):
-            return True
-        return False
+    
 
     def pick_program_pipeline (
         self,
@@ -280,36 +237,7 @@ class Steering:
             print(f"Error: {e}")
             return
 
-
-    def move_corrected(self, signed_angle_degrees, angle_degrees):
-        print(f"angle to target {angle_degrees}")
-        if angle_degrees < 1.5:
-            self.robot_interface.send_command("move", 100, self.speed)
-        elif 1.5 <= angle_degrees <= 20:
-            self.robot_interface.send_command("move-corrected", -1 * signed_angle_degrees, self.speed)
-            print(f"Signed angle degrees {signed_angle_degrees}")
-        elif angle_degrees > 20:
-            turn = signed_angle_degrees * -1 / 3
-            self.robot_interface.send_command("turn", turn, 30)
-
-    def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees)
-
-    def collect_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
-        self.move_corrected(signed_angle_degrees, angle_degrees)
-
-    def start_belt(self):
-        self.robot_interface.send_command("belt", 0, speedPercentage=100)
-
-    def stop_belt(self):
-        self.robot_interface.send_command("belt", 0, speedPercentage=-100)
-        time.sleep(5)
-        self.robot_interface.send_command("belt", 0, speedPercentage=0)
-
-    def disconnect(self):
-        print("Disconnecting from robot")
-        self.robot_interface.disconnect()
-        return
+    
 
     def deliver_balls_to_target(
         self, robot_vector: np.ndarray, dropoff_cords: np.ndarray, robot_pos: np.ndarray

@@ -4,8 +4,9 @@ import numpy as np
 import VideoDebugger
 import BlobDetector
 import traceback
-from utils import coordinates_to_vector
+from utils import coordinates_to_vector, angle_between_vectors
 import math
+import sys
 
 
 class Analyse:
@@ -164,6 +165,52 @@ class Analyse:
     def get_speed(self, distance: int):
         speed = (0.01100000000*math.pow(distance,2) - 0.1200000000 * distance + 0.1)/5
         return speed    
+    
+    def are_coordinates_close(self, vector: np.ndarray) -> bool:
+        length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
+        print(f"Length: {length}")
+        return length < 100
+    
+    def can_target_ball_directly(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
+        distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
+        vector_to_ball = ball_pos - robot_pos
+        angle_to_ball = math.degrees(angle_between_vectors(vector_to_ball, self.robot_vector))
+        if distance_to_ball < 250 and angle_to_ball < 80:
+            return True
+        return False
+    
+    def calculate_is_ball_close_to_borders(
+        self, ball_pos: np.ndarray, corners: np.ndarray
+    ) -> bool:
+        x_min, y_min = np.min(corners, axis=0)
+        x_max, y_max = np.max(corners, axis=0)
+
+        x, y = ball_pos
+        distance_to_left_border = x - x_min
+        distance_to_right_border = x_max - x
+        distance_to_bottom_border = y - y_min
+        distance_to_top_border = y_max - y
+
+        if (
+            distance_to_left_border < self.distance_to_border_threshold
+            or distance_to_right_border < self.distance_to_border_threshold
+            or distance_to_bottom_border < self.distance_to_border_threshold
+            or distance_to_top_border < self.distance_to_border_threshold
+        ):
+            return True
+        return False
+    
+    def find_closest_safepoint_index(self, position: np.ndarray, safepoint_list: np.ndarray) -> int:
+        if len(safepoint_list) == 0:
+            return None
+        closest_distance = sys.maxsize
+        closest_index = 0
+        for i, point in enumerate(safepoint_list):
+            distance = np.linalg.norm(position - point)
+            if distance < closest_distance:
+                closest_distance = distance
+                closest_index = i
+        return closest_index
 
     def find_triple_green_robot(self, green_mask: np.ndarray):
         # Errode from green mask
