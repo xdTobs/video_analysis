@@ -332,7 +332,7 @@ class CollectionState(State):
     def __init__(self, analyser: Analyse, ball_point: list, steering: SteeringUtils):
         super().__init__(analyser, steering)
         self.path = ball_point
-        self.distance_before_swap = 60  # px
+        self.distance_before_swap = 70  # px
         self.timeout = 15  # seconds
         self.speed = 0  # % of max speed
         self.safe_distance_middle = 100  # px
@@ -389,26 +389,4 @@ class ReleaseBallsState(State):
             return PathingState(
                 self.analyser, self.analyser.create_path(), self.steering
             )
-        return self
-
-
-class CatchCornerBallState(State):
-    def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
-        super().__init__(analyser, steering)
-        self.is_close_to_help_vector = False
-        self.path = path
-        self.distance_before_swap = 59
-        self.timeout = 40  # seconds
-
-    def on_frame(self):
-        self.steering.stop_belt()
-        self.steering_vector = self.path[0] - self.analyser.robot_pos
-
-    def swap_state(self):
-        #Check timeout
-        if time.time() - self.start_time > self.timeout:
-            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
-
-        if len(self.path) == 1 and self.analyser.is_point_close_to_robot(self.path[-1], self.distance_before_swap):
-            return BeltRunningState(self.analyser, self.analyser.create_path(), self.steering)
         return self
