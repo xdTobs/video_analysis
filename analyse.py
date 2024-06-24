@@ -61,10 +61,12 @@ class Analyse:
         self.robot_height = 47
         self.course_length_cm = 167
         self.course_width_cm = 121
+        self.test_image = None
 
         pass
 
     def analysis_pipeline(self, image: np.ndarray, has_found_corners):
+        self.test_image = image
 
         self.videoDebugger.write_video("original", image, True)
         self.green_robot_mask = self.videoDebugger.run_analysis(
@@ -704,9 +706,7 @@ class Analyse:
         for i in range(num_corners):
             v = self.corners[i]
             w = self.corners[(i + 1) % num_corners]
-            distance, projection_vector = self.distance_point_to_segment(
-                self.robot_pos, v, w
-            )
+            distance, projection_vector = self.distance_point_to_segment(pos, v, w)
             if distance < min_distance:
                 min_distance = distance
                 closest_projection = projection_vector
@@ -734,13 +734,8 @@ class Analyse:
         min_distance, ball_nav_help_vector = self.calculate_distance_to_closest_border(
             ball_point
         )
+        ball_nav_help_vector = ball_nav_help_vector * -0.7
         print(f"ball point {ball_point} - closest border point {ball_nav_help_vector}")
-        # ball_nav_help_vector = coordinates_to_vector(
-        #     ball_point, closest_border_point_to_ball
-        # )
-        ball_nav_help_vector = (
-            ball_nav_help_vector / np.linalg.norm(ball_nav_help_vector) * 50
-        )
         coords = ball_point + ball_nav_help_vector
         return min_distance, coords, ball_nav_help_vector
 

@@ -1,3 +1,4 @@
+import cv2
 from analyse import Analyse
 import time
 import math
@@ -130,7 +131,28 @@ class PathingState(State):
         min_dist, help_coords, help_vector = (
             self.analyser.create_border_ball_help_coords(ball_point=ball_point)
         )
-        if min_dist < 70:
+        if min_dist < 200:
+
+            min_dist, help_coords, help_vector = (
+                self.analyser.create_border_ball_help_coords(ball_point=ball_point)
+            )
+            frame = self.analyser.test_image.copy()
+            print(f"Help coords: {help_coords}")
+            print(f"Ball point: {ball_point}")
+            print(f"Help vector: {help_vector}")
+            int_help_coords = (int(help_coords[0]), int(help_coords[1]))
+            int_ball_point = (int(ball_point[0]), int(ball_point[1]))
+
+            cv2.circle(frame, tuple(int_help_coords), 5, (0, 0, 255), -1)
+            cv2.circle(frame, tuple(int_ball_point), 5, (0, 255, 0), -1)
+            cv2.arrowedLine(
+                frame,
+                tuple(int_help_coords),
+                tuple(int_ball_point),
+                (255, 0, 0),
+                2,
+            )
+            cv2.imwrite("test.jpg", frame)
             return BorderCollectionState(
                 self.analyser, self.path[0:-1], self.path[-1], self.steering
             )
@@ -354,6 +376,7 @@ class BorderCollectionState(State):
         min_dist, help_coords, help_vector = (
             self.analyser.create_border_ball_help_coords(ball_point)
         )
+
         path.append(help_coords)
         path.append(ball_point)
         self.help_vector = help_vector
@@ -362,7 +385,12 @@ class BorderCollectionState(State):
         self.distance_before_swap = 60
 
     def on_frame(self):
-        print(self.path)
+        self.steering_vector = self.path[0] - self.analyser.robot_pos
+        signed_angle_degree = math.degrees(
+            angle_between_vectors_signed(
+                self.analyser.robot_vector, self.steering_vector
+            )
+        )
         if len(self.path) > 2:
             self.steering_vector = self.path[0] - self.analyser.robot_pos
             signed_angle_degree = math.degrees(
