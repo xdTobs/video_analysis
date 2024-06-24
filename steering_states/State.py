@@ -70,11 +70,11 @@ class PathingState(State):
             self.analyser.robot_pos
         )
         if (
-            math.degrees(
-                angle_between_vectors(self.analyser.robot_vector, self.steering_vector)
-            )
-            > 100
-            and border_distance < 100
+                math.degrees(
+                    angle_between_vectors(self.analyser.robot_vector, self.steering_vector)
+                )
+                > 100
+                and border_distance < 100
         ):
             # TODO Might need to use a different arugment for the path, might need to be absolute
             return ReversingState(self.analyser, self.path, self.steering)
@@ -137,10 +137,10 @@ class ReversingState(State):
         #         return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
         #     return PathingState(self.analyser, self.path, self.steering)
         if (
-            math.degrees(
-                angle_between_vectors(self.analyser.robot_vector, self.result_vector)
-            )
-            < 45
+                math.degrees(
+                    angle_between_vectors(self.analyser.robot_vector, self.result_vector)
+                )
+                < 45
         ):
             return PathingState(self.analyser, self.path, self.steering)
         return self
@@ -150,13 +150,11 @@ class SafePointDeliveryState(State):
     def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
         super().__init__(analyser, steering)
         self.path = []
-        adjustment = (
-            -30 if self.analyser.robot_pos[1] < self.analyser.dropoff_coords[1] else 30
-        )
-        print("IS NORTH" if adjustment > 0 else "IS SOUTH")
-        self.closest_safepoint = self.analyser.safepoint_list[9] - np.array(
-            [40, adjustment]
-        )
+        # adjustment = (
+        #    -30 if self.analyser.robot_pos[1] < self.analyser.dropoff_coords[1] else 30
+        # )
+        # print("IS NORTH" if adjustment > 0 else "IS SOUTH")
+        self.closest_safepoint = self.analyser.safepoint_list[9]
         self.is_close_to_safepoint = False
         self.goal_vector_degrees = None
 
@@ -230,7 +228,6 @@ class CollectionState(State):
 
         # TODO Check if we need to check for a certain distance to the ball
         if np.linalg.norm(self.steering_vector) < self.distance_before_swap:
-
             return PathingState(
                 self.analyser, self.analyser.create_path(), self.steering
             )
@@ -251,21 +248,20 @@ class DeliveryPointDeliveringState(State):
                 self.analyser.robot_vector, self.steering_vector
             )
         )
-        self.path = [self.analyser.dropoff_coords]
+        self.path = [self.analyser.dropoff_coords, self.analyser.small_goal_coords]
 
-        if self.analyser.are_coordinates_close(self.steering_vector, 40):
+        if self.analyser.are_coordinates_close(self.steering_vector, 20):
             self.is_close_to_delivery_point = True
 
         self.goal_vector_degrees = math.degrees(
             angle_between_vectors_signed(
                 self.analyser.robot_vector,
-                self.analyser.dropoff_coords - self.analyser.robot_pos,
+                self.analyser.small_goal_coords - self.analyser.robot_pos,
             )
         )
         if self.is_close_to_delivery_point:
             print("CLOSE TO DELP")
             if abs(self.goal_vector_degrees) > 1:
-                self.steering.stop()
                 print("CLOSE AND TURNING")
                 self.steering.turn(-1 * self.goal_vector_degrees, 3)
             print(self.goal_vector_degrees, self.analyser.robot_vector)
@@ -274,8 +270,6 @@ class DeliveryPointDeliveringState(State):
 
     def swap_state(self):
         if self.is_close_to_delivery_point and abs(self.goal_vector_degrees) < 4:
-            # stop
-            self.steering.stop()
             return ReleaseBallsState(self.analyser, self.steering)
         return self
 
@@ -284,11 +278,17 @@ class ReleaseBallsState(State):
     def __init__(self, analyser: Analyse, steering: SteeringUtils):
         super().__init__(analyser, steering)
         self.timeout = 10
+        self.steering.reverse_belt()
+        self.counter = 0
+
+        self.steering.stop()
 
     def on_frame(self):
-        self.steering.reverse_belt()
-        self.steering.stop()
-        self.steering.move_corrected(0, 0, turn_speed=0)
+        self.counter += 1
+        if self.counter % 2 == 0:
+            self.steering.turn(1, 2)
+        else:
+            self.steering.turn(-1, 1)
 
     def swap_state(self):
         # if self.timeout < time.time() - self.start_time:
