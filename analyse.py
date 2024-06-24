@@ -188,7 +188,7 @@ class Analyse:
             upper = np.array([30, 255, 255])
         elif out_name == "border":
             lower = np.array([0, 150, 100])
-            upper = np.array([30, 245, 245])
+            upper = np.array([30, 250, 250])
 
         mask = cv2.inRange(hsv, lower, upper)
 
@@ -557,7 +557,7 @@ class Analyse:
 
             safe_point_30 = small_goal_coords + [0,- 50] + small_translation_vector * 2
             safe_point_31 = small_goal_coords + [0,- 25] + small_translation_vector * 2 
-            safe_point_32 = small_goal_coords + small_translation_vector * 2
+            safe_point_32 = small_goal_coords + [-20,0] + small_translation_vector * 2
             safe_point_33 = small_goal_coords + [0, 25] + small_translation_vector * 2
             safe_point_34 = small_goal_coords + [0, 50] + small_translation_vector * 2
             
