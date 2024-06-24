@@ -82,7 +82,7 @@ def run_video(host, webcam_index, online, port=65438):
                 has_found_corners = True
             else:
                 continue
-
+        print(corners)
         steering_instance.on_frame()
 
         video_output.showFrame(frame)

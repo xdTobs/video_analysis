@@ -36,9 +36,10 @@ class CatchMidCrossBallState(State):
         self.is_close_to_help_vector = False
         self.path = path
         self.distance_before_swap = 59
+        self.timeout = 40 # seconds
 
     def on_frame(self):
-        State.on_frame(self)
+        self.steering.stop_belt()
         self.steering_vector = self.path[0] - self.analyser.robot_pos
         signed_angle_degree = math.degrees(
             angle_between_vectors_signed(
@@ -83,12 +84,12 @@ class CatchMidCrossBallState(State):
             )
 
     def swap_state(self):
-        if len(self.path) == 1 and self.analyser.is_point_close(
-            self.path[-1], self.distance_before_swap
-        ):
-            return BeltRunningState(
-                self.analyser, self.analyser.create_path(), self.steering
-            )
+        #Check timeout
+        if time.time() - self.start_time > self.timeout:
+            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
+        
+        if len(self.path) == 1 and self.analyser.is_point_close(self.path[-1], self.distance_before_swap):
+            return BeltRunningState(self.analyser, self.analyser.create_path(), self.steering)
         return self
 
 
@@ -122,7 +123,7 @@ class BeltStoppedState(State):
 
     def swap_state(self):
         if time.time() - self.start_time > self.timeout:
-            return PathingState(
+            return ReversingState(
                 self.analyser, self.analyser.create_path(), self.steering
             )
         return self
@@ -140,15 +141,11 @@ class PathingState(State):
             return
         if self.analyser.is_point_close(self.path[0], 80) and len(self.path) > 1:
             self.path.pop(0)
-        elif (
-            self.analyser.can_target_ball_directly(
-                self.analyser.robot_pos, self.path[-1]
-            )
-            and not self.analyser.calculate_distance_to_closest_border(self.path[-1])[0]
-            < 100
-        ):
-            while len(self.path) > 1:
-                self.path.pop(0)
+        #elif self.analyser.can_target_ball_directly(
+        #    self.analyser.robot_pos, self.path[-1]
+        #) and not self.analyser.calculate_distance_to_closest_border(self.path[-1])[0] < 100:
+        #    while len(self.path) > 1:
+        #        self.path.pop(0)
         self.steering_vector = self.path[0] - self.analyser.robot_pos
         signed_angle_degree = math.degrees(
             angle_between_vectors_signed(
@@ -201,7 +198,6 @@ class PathingState(State):
         #         self.analyser, self.path[0:-1], self.path[-1], self.steering
         #     )
         if len(self.path) == 1:
-            # TODO Check that this passes absolute coords and not relative
             if len(self.analyser.keypoints) == 0:
                 return SafePointDeliveryState(
                     self.analyser, self.analyser.create_path(), self.steering
