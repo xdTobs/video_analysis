@@ -41,6 +41,8 @@ class Analyse:
         self.distance_to_middle = None
         self.is_ball_close_to_middle = False
 
+        self.egg_location = None
+
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
         self.white_mask = np.zeros((576, 1024), dtype=np.float32)
@@ -112,6 +114,7 @@ class Analyse:
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
+        self.egg_location = self.find_egg_location(self.white_mask)
         try:
             if not has_found_corners:
                 self.corners = self.find_border_corners(self.border_mask)
@@ -174,7 +177,7 @@ class Analyse:
             upper = np.array([180, sensitivity, 255])
         elif out_name == "green-mask":
             lower = np.array([31, 20, 180])
-            upper = np.array([120, 255, 255])
+            upper = np.array([100, 255, 255])
         elif out_name == "red-mask":
             lower = np.array([0, 70, 50])
             upper = np.array([10, 255, 255])
@@ -646,6 +649,12 @@ class Analyse:
         keypoints = detector.detect(mask)
         return keypoints
         pass
+
+    def find_egg_location(self, mask: np.ndarray) -> np.ndarray:
+        detector = BlobDetector.get_egg_detector()
+        location = detector.detect(mask)
+        return location
+
 
 
     def distance_point_to_segment(
