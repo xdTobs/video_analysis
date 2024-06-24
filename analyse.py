@@ -235,9 +235,12 @@ class Analyse:
         return distance < dist
 
     def is_target_in_corner(self, target: np.ndarray, threshold: int = 100) -> bool:
-        if target is None:
+        if self.corners is None:
             return False
-        return any(is_coordinates_close(target, np.array(corner), threshold) for corner in self.corners)
+        if any(is_coordinates_close(target, np.array(corner), threshold) for corner in self.corners):
+            print("Target in corner")
+            return True
+        
 
     def can_target_ball_directly(
             self, robot_pos: np.ndarray, ball_pos: np.ndarray
@@ -617,7 +620,7 @@ class Analyse:
 
             # Generate the first set of safe points using a list comprehension
             safe_points_0_to_13 = [
-                right_lower_coords + small_translation_vector * i
+                right_lower_coords + small_translation_vector * i + [0, -(i-1)*5]
                 for i in range(1, 15)
             ]
 
