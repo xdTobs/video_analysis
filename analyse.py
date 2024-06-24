@@ -221,7 +221,7 @@ class Analyse:
         angle_to_ball = math.degrees(
             angle_between_vectors(vector_to_ball, self.robot_vector)
         )
-        if distance_to_ball < 250 and angle_to_ball < 80:
+        if distance_to_ball < 150 and angle_to_ball < 60:
             return True
         return False
 
