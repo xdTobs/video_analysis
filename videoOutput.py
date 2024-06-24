@@ -74,6 +74,11 @@ class VideoOutput:
             center = (int(keypoint.pt[0]), int(keypoint.pt[1]))
             radius = int(keypoint.size / 2)
             cv2.circle(result_3channel, center, radius, (0, 255, 0), 4)
+        
+        for location in self.analyser.egg_location:
+            center = (int(location.pt[0]), int(location.pt[1]))
+            radius = int(location.size / 2)
+            cv2.circle(result_3channel, center, radius, (255, 0, 255), 4) 
 
         if self.analyser.robot_pos is not None:
             center = (int(self.analyser.robot_pos[0]), int(self.analyser.robot_pos[1]))

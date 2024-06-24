@@ -9,7 +9,7 @@ def get_ball_detector():
     params.blobColor = 255
     params.filterByArea = True
     params.minArea = 50
-    params.maxArea = 500
+    params.maxArea = 200
     params.filterByCircularity = True
     params.minCircularity = 0.6
     params.filterByConvexity = False
@@ -31,4 +31,19 @@ def get_robot_circle_detector():
     params.minCircularity = 0.5
     params.filterByConvexity = False
     # Create a detector with the parameters
+    return cv2.SimpleBlobDetector_create(params)
+
+def get_egg_detector():
+    params = cv2.SimpleBlobDetector_Params()
+    params.minThreshold = 1
+    params.maxThreshold = 256
+    params.filterByColor = True
+    params.blobColor = 255
+    params.filterByArea = True
+    params.minArea = 160
+    params.maxArea = 1000
+    params.filterByCircularity = True
+    params.minCircularity = 0.5
+    params.filterByConvexity = False
+    params.filterByInertia = False
     return cv2.SimpleBlobDetector_create(params)
