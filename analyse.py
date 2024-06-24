@@ -115,13 +115,13 @@ class Analyse:
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         if len(self.white_ball_keypoints) == 0:
             self.keypoints = self.orange_ball_keypoints
-        
+
         else:
             self.keypoints = self.filter_keypoints_close_to_middle_cross(self.white_ball_keypoints)
-            
-           
-                
-    
+
+
+
+
         self.egg_location = self.find_egg_location(self.white_mask)
         try:
             if not has_found_corners:
@@ -171,7 +171,7 @@ class Analyse:
     def filter_keypoints_close_to_middle_cross(self, keypoints: np.ndarray) -> np.ndarray:
         if self.middle_point is None:
             raise ValueError("Middle point has not been calculated.")
-        
+
         keypoints_close_to_middle = []
         keypoints_not_close_to_middle = []
         for keypoint in keypoints:
@@ -185,7 +185,7 @@ class Analyse:
             return keypoints_close_to_middle
         return keypoints_not_close_to_middle
 
-        
+
 
     def calculate_is_ball_close_to_middle(
         self, ball_position: np.ndarray, threshold: float = 60
@@ -250,7 +250,7 @@ class Analyse:
         angle_to_ball = math.degrees(
             angle_between_vectors(vector_to_ball, self.robot_vector)
         )
-        if distance_to_ball < 100 and angle_to_ball < 45:
+        if distance_to_ball < 150 and angle_to_ball < 60:
             return True
         return False
 
@@ -560,16 +560,16 @@ class Analyse:
             safe_point_3 = right_lower_coords + small_translation_vector * 4
             safe_point_4 = right_lower_coords + small_translation_vector * 5
             safe_point_5 = right_lower_coords + small_translation_vector * 6
-            safe_point_6 = right_lower_coords + small_translation_vector * 7 
+            safe_point_6 = right_lower_coords + small_translation_vector * 7
             safe_point_7 = right_lower_coords + small_translation_vector * 8
             safe_point_8 = right_lower_coords + small_translation_vector * 9
             safe_point_9 = right_lower_coords + small_translation_vector * 10
             safe_point_10 = right_lower_coords + small_translation_vector * 11
             safe_point_11 = right_lower_coords + small_translation_vector * 12
             safe_point_12 = right_lower_coords + small_translation_vector * 13
-            
+
             safe_point_13 = large_goal_coords - [0,- 50] - small_translation_vector * 2
-            safe_point_14 = large_goal_coords - [0,- 25] - small_translation_vector * 2 
+            safe_point_14 = large_goal_coords - [0,- 25] - small_translation_vector * 2
             safe_point_15 = large_goal_coords - small_translation_vector * 2
             safe_point_16 = large_goal_coords - [0, 25] - small_translation_vector * 2
             safe_point_17 = large_goal_coords - [0, 50] - small_translation_vector * 2
@@ -579,7 +579,7 @@ class Analyse:
             safe_point_20 = left_upper_coords - small_translation_vector * 4
             safe_point_21 = left_upper_coords - small_translation_vector * 5
             safe_point_22 = left_upper_coords - small_translation_vector * 6
-            safe_point_23 = left_upper_coords - small_translation_vector * 7 
+            safe_point_23 = left_upper_coords - small_translation_vector * 7
             safe_point_24 = left_upper_coords - small_translation_vector * 8
             safe_point_25 = left_upper_coords - small_translation_vector * 9
             safe_point_26 = left_upper_coords - small_translation_vector * 10
@@ -588,11 +588,11 @@ class Analyse:
             safe_point_29 = left_upper_coords - small_translation_vector * 13
 
             safe_point_30 = small_goal_coords + [0,- 50] + small_translation_vector * 2
-            safe_point_31 = small_goal_coords + [0,- 25] + small_translation_vector * 2 
+            safe_point_31 = small_goal_coords + [0,- 25] + small_translation_vector * 2
             safe_point_32 = small_goal_coords + small_translation_vector * 2
             safe_point_33 = small_goal_coords + [0, 25] + small_translation_vector * 2
             safe_point_34 = small_goal_coords + [0, 50] + small_translation_vector * 2
-            
+
 
             self.safepoint_list = np.array(
                 [
@@ -630,7 +630,7 @@ class Analyse:
                     safe_point_32,
                     safe_point_33,
                     safe_point_34,
-                    
+
                 ]
             )
             # print("Safepoints: ", self.safepoint_list)
