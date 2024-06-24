@@ -102,7 +102,7 @@ class PathingState(State):
         self.steering.stop_belt()
         if self.analyser.is_ball_close_to_middle:
             return
-        if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
+        if self.analyser.is_point_close(self.path[0], 80) and len(self.path) > 1:
             self.path.pop(0)
         elif self.analyser.can_target_ball_directly(
             self.analyser.robot_pos, self.path[-1]
@@ -189,7 +189,7 @@ class ReversingState(State):
         #    else:
         #        signed_angle_degree -= 180
         #    self.steering.move_corrected(signed_angle_degree, -30, state=self)
-        
+        self.steering.stop_belt()
         self.steering.move_corrected(0, -30, state=self, turn_speed=15, turn_speed_turning=5)
         pass
 
@@ -222,7 +222,7 @@ class SafePointDeliveryState(State):
 
         #    -30 if self.analyser.robot_pos[1] < self.analyser.dropoff_coords[1] else 30
         # )
-        self.closest_safepoint = self.analyser.safepoint_list[9]
+        self.closest_safepoint = self.analyser.safepoint_list[33]
         self.is_close_to_safepoint = False
         self.goal_vector_degrees = None
 
