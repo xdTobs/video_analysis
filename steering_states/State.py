@@ -121,19 +121,14 @@ class PathingState(State):
             self.analyser.robot_pos
         )
         if (
-            # math.degrees(
-            #     angle_between_vectors(self.analyser.robot_vector, self.steering_vector)
-            # )
-            # > 100
             math.degrees(
                 angle_between_vectors(
                     self.analyser.robot_vector, self.analyser.border_vector
                 )
             )
             < 45
-            and border_distance < 100
+            and border_distance < 200
         ):
-            # TODO Might need to use a different arugment for the path, might need to be absolute
             return ReversingState(self.analyser, self.path, self.steering)
 
         return self
@@ -203,8 +198,9 @@ class ReversingState(State):
 class SafePointDeliveryState(State):
     def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
         super().__init__(analyser, steering)
-        self.path = []
+        self.path = path
         # adjustment = (
+
         #    -30 if self.analyser.robot_pos[1] < self.analyser.dropoff_coords[1] else 30
         # )
         self.closest_safepoint = self.analyser.safepoint_list[9]
