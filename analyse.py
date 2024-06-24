@@ -113,7 +113,15 @@ class Analyse:
 
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
-        self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
+        if len(self.white_ball_keypoints) == 0:
+            self.keypoints = self.orange_ball_keypoints
+        
+        else:
+            self.keypoints = self.filter_keypoints_close_to_middle_cross(self.white_ball_keypoints)
+            
+           
+                
+    
         self.egg_location = self.find_egg_location(self.white_mask)
         try:
             if not has_found_corners:
@@ -158,6 +166,26 @@ class Analyse:
                 )
                 # print(f"Cross found at {self.middle_point}")
             self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
+
+
+    def filter_keypoints_close_to_middle_cross(self, keypoints: np.ndarray) -> np.ndarray:
+        if self.middle_point is None:
+            raise ValueError("Middle point has not been calculated.")
+        
+        keypoints_close_to_middle = []
+        keypoints_not_close_to_middle = []
+        for keypoint in keypoints:
+            ball_pos = np.array(keypoint.pt)
+            distance_to_middle = np.linalg.norm(ball_pos - self.middle_point)
+            if distance_to_middle < 100:
+                keypoints_close_to_middle.append(keypoint)
+            else:
+                keypoints_not_close_to_middle.append(keypoint)
+        if len(keypoints_not_close_to_middle) == 0:
+            return keypoints_close_to_middle
+        return keypoints_not_close_to_middle
+
+        
 
     def calculate_is_ball_close_to_middle(
         self, ball_position: np.ndarray, threshold: float = 100
