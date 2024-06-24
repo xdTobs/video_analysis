@@ -36,9 +36,11 @@ class PathingState(State):
         # self.steering.stop_belt()
         if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
-        # elif self.analyser.can_target_ball_directly(self.analyser.robot_pos, self.path[-1]):
-        #     while len(self.path) > 1:
-        #         self.path.pop(0)
+        elif self.analyser.can_target_ball_directly(
+            self.analyser.robot_pos, self.path[-1]
+        ):
+            while len(self.path) > 1:
+                self.path.pop(0)
         self.steering_vector = self.path[0] - self.analyser.robot_pos
         signed_angle_degree = math.degrees(
             angle_between_vectors_signed(

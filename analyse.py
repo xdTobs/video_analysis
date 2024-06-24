@@ -159,7 +159,9 @@ class Analyse:
                 # print(f"Cross found at {self.middle_point}")
             self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
 
-    def calculate_is_ball_close_to_middle(self, ball_position: np.ndarray, threshold: float = 100) -> bool:
+    def calculate_is_ball_close_to_middle(
+        self, ball_position: np.ndarray, threshold: float = 100
+    ) -> bool:
         if self.middle_point is None:
             raise ValueError("Middle point has not been calculated.")
 
@@ -232,14 +234,16 @@ class Analyse:
         if ball_position is None:
             ball_position = self.dropoff_coords
 
-        self.is_ball_close_to_middle = self.calculate_is_ball_close_to_middle(ball_position)
+        self.is_ball_close_to_middle = self.calculate_is_ball_close_to_middle(
+            ball_position
+        )
         if self.is_ball_close_to_middle:
-            #TODO: Add logic to handle ball close to middle
+            # TODO: Add logic to handle ball close to middle
             print("Ball is close to middle")
 
-
-
-        self.path_indexes = self.find_path_to_target(ball_position, self.robot_pos, self.safepoint_list)
+        self.path_indexes = self.find_path_to_target(
+            ball_position, self.robot_pos, self.safepoint_list
+        )
         if len(self.path_indexes) == 0:
             return None
         path = []
@@ -654,8 +658,6 @@ class Analyse:
         detector = BlobDetector.get_egg_detector()
         location = detector.detect(mask)
         return location
-
-
 
     def distance_point_to_segment(
         self, p: np.ndarray, v: np.ndarray, w: np.ndarray
