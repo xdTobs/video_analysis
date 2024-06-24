@@ -251,6 +251,10 @@ class SafePointDeliveryState(State):
             self.steering.move_corrected(signed_angle_degree, 5, turn_speed=15, state=self, turn_speed_turning=3)
 
     def swap_state(self):
+
+        if self.analyser.keypoints > 0:
+            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
+        
         if self.is_close_to_safepoint and abs(self.goal_vector_degrees) < 2:
             return DeliveryPointDeliveringState(self.analyser, self.steering)
         return self
