@@ -212,6 +212,10 @@ class Analyse:
     def can_target_ball_directly(
         self, robot_pos: np.ndarray, ball_pos: np.ndarray
     ) -> bool:
+        if (self.distance_to_closest_border(ball_pos) < 100) or (
+            self.distance_to_closest_border(robot_pos) < 100
+        ):
+            return False
         distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
         vector_to_ball = ball_pos - robot_pos
         angle_to_ball = math.degrees(
