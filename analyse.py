@@ -467,7 +467,7 @@ class Analyse:
                 self.large_goal_coords, self.small_goal_coords
             )
 
-            self.translation_vector = self.goal_vector * 0.9
+            self.translation_vector = self.goal_vector * 0.92
 
             self.dropoff_coords = self.large_goal_coords + self.translation_vector
             self.delivery_vector = coordinates_to_vector(
