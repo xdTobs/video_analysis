@@ -113,7 +113,10 @@ class Analyse:
 
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
-        self.keypoints = self.white_ball_keypoints + self.orange_ball_keypoints
+        if len(self.white_ball_keypoints) == 0:
+            self.keypoints = self.orange_ball_keypoints
+        else:
+            self.keypoints = self.white_ball_keypoints
         self.egg_location = self.find_egg_location(self.white_mask)
         try:
             if not has_found_corners:
