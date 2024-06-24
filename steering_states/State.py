@@ -53,13 +53,13 @@ class CatchMidCrossBallState(State):
         if len(self.path)>2:
             self.steering.move_corrected(signed_angle_degree, 30, state=self, turn_speed=15)
             print(f"LOG - {self.__class__.__name__} - driving to safepoint mid ball  - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
-            if(self.analyser.is_point_close(point=self.path[0])):
+            if(self.analyser.is_point_close_to_robot(point=self.path[0])):
                 self.path.pop(0)
         elif len(self.path)==2:
             print(f"LOG - {self.__class__.__name__} - driving to mid ball help vector - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
 
             self.steering.move_corrected(signed_angle_degrees=signed_angle_degree, speed=10, state=self, turn_speed=15, turn_speed_turning=5)
-            if(self.analyser.is_point_close(point=self.path[0], dist=30)):
+            if(self.analyser.is_point_close_to_robot(point=self.path[0], dist=30)):
                 self.is_close_to_help_vector = True
 
             if self.is_close_to_help_vector:
@@ -75,7 +75,7 @@ class CatchMidCrossBallState(State):
         if time.time() - self.start_time > self.timeout:
             return PathingState(self.analyser, self.analyser.create_path(), self.steering)
 
-        if len(self.path) == 1 and self.analyser.is_point_close(self.path[-1], self.distance_before_swap):
+        if len(self.path) == 1 and self.analyser.is_point_close_to_robot(self.path[-1], self.distance_before_swap):
             return BeltRunningState(self.analyser, self.analyser.create_path(), self.steering)
         return self
 
@@ -126,10 +126,11 @@ class PathingState(State):
 
         ball_distance = self.analyser.calculate_distance_to_closest_border(self.path[-1])[0]
 
-        print(f"\nIS BALL CLOSE TO BORDER{ball_distance}\n")
+        self.analyser.is_target_in_corner(self.path[-1],30)
+
         if self.analyser.is_ball_close_to_middle:
             return
-        if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
+        if self.analyser.is_point_close_to_robot(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
         elif self.analyser.can_target_ball_directly(
             self.analyser.robot_pos, self.path[-1]
