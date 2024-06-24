@@ -55,8 +55,8 @@ class RobotInterface:
         try:
             #Speed clamp -100 to 100
             speedPercentage = max(-50, min(50, speedPercentage))
-            if command == "belt":
-                speedPercentage = 100
+            if command == "belt" and speedPercentage < 0:
+                speedPercentage = -100
 
 
             data = {
