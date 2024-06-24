@@ -278,7 +278,7 @@ class Analyse:
             ball_position
         )
 
-        if self.is_target_a_corner_ball:
+        if self.is_target_in_corner(ball_position, 40):
             self.path_indexes = self.find_path_to_target(
                 ball_position, self.robot_pos, self.corner_safepoint_list
             )
