@@ -8,21 +8,20 @@ class SteeringUtils:
     def __init__(self, robot_interface: RobotInterface):
         self.robot_interface = robot_interface
 
-    def move_corrected(self, signed_angle_degrees, speed, turn_speed=30, state=None, turn_speed_turning=30):
+    def move_corrected(self, signed_angle_degrees, speed, turn_speed=30, state=None):
         angle_degrees = abs(signed_angle_degrees)
         if angle_degrees < 1.5:
             self.robot_interface.send_command("move", 20, speed, state=state)
         elif 1.5 <= angle_degrees <= 20:
             self.robot_interface.send_command(
-                "move-corrected", -1 * signed_angle_degrees, speed, state=state
+                "move-corrected", -1 / 3 * signed_angle_degrees, speed, state=state
             )
         elif angle_degrees > 20:
             turn = signed_angle_degrees * -1 / 3
-            self.robot_interface.send_command("turn", turn, turn_speed_turning, state)
+            self.robot_interface.send_command("turn", turn, turn_speed, state)
 
     def turn(self, angle_degrees, speed, state=None):
         self.robot_interface.send_command("turn", angle_degrees, speed, state=state)
-
 
     def stop(self):
         self.robot_interface.send_command("stop", 0, 0)

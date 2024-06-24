@@ -21,7 +21,6 @@ class Analyse:
         self.robot_vector = None
         self.goal_vector = None
         self.robot_pos_at_path_creation = None
-        self.path = []
         self.path_indexes = []
         self.delivery_vector = None
         self.corners = [(0, 0), (1, 0), (0, 1), (1, 1)]
@@ -61,10 +60,12 @@ class Analyse:
         self.robot_height = 47
         self.course_length_cm = 167
         self.course_width_cm = 121
+        self.test_image = None
 
         pass
 
     def analysis_pipeline(self, image: np.ndarray, has_found_corners):
+        self.test_image = image
 
         self.videoDebugger.write_video("original", image, True)
         self.green_robot_mask = self.videoDebugger.run_analysis(
@@ -115,13 +116,12 @@ class Analyse:
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         if len(self.white_ball_keypoints) == 0:
             self.keypoints = self.orange_ball_keypoints
-        
+
         else:
-            self.keypoints = self.filter_keypoints_close_to_middle_cross(self.white_ball_keypoints)
-            
-           
-                
-    
+            self.keypoints = self.filter_keypoints_close_to_middle_cross(
+                self.white_ball_keypoints
+            )
+
         self.egg_location = self.find_egg_location(self.white_mask)
         try:
             if not has_found_corners:
@@ -167,11 +167,12 @@ class Analyse:
                 # print(f"Cross found at {self.middle_point}")
             self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
 
-
-    def filter_keypoints_close_to_middle_cross(self, keypoints: np.ndarray) -> np.ndarray:
+    def filter_keypoints_close_to_middle_cross(
+        self, keypoints: np.ndarray
+    ) -> np.ndarray:
         if self.middle_point is None:
             raise ValueError("Middle point has not been calculated.")
-        
+
         keypoints_close_to_middle = []
         keypoints_not_close_to_middle = []
         for keypoint in keypoints:
@@ -184,8 +185,6 @@ class Analyse:
         if len(keypoints_not_close_to_middle) == 0:
             return keypoints_close_to_middle
         return keypoints_not_close_to_middle
-
-        
 
     def calculate_is_ball_close_to_middle(
         self, ball_position: np.ndarray, threshold: float = 60
@@ -218,7 +217,6 @@ class Analyse:
             lower = np.array([0, 150, 100])
             upper = np.array([30, 250, 250])
 
-
         mask = cv2.inRange(hsv, lower, upper)
 
         return mask
@@ -230,11 +228,11 @@ class Analyse:
         print(f" Distance: {distance}, Speed {speed}")
         return speed
 
-    def are_coordinates_close(self, vector: np.ndarray, dist=50) -> bool:
+    def are_coordinates_close(self, vector: np.ndarray, dist=40) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         return length < dist
 
-    def is_point_close(self, point: np.ndarray, dist=50) -> bool:
+    def is_point_close(self, point: np.ndarray, dist=40) -> bool:
         distance = np.linalg.norm(point - self.robot_pos)
         return distance < dist
 
@@ -281,7 +279,6 @@ class Analyse:
             steering_vector = self.find_steering_vector(
                 self.robot_pos, self.safepoint_list[self.path_indexes[i]]
             )
-            # print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector + self.robot_pos)
         if self.is_ball_close_to_middle:
             middle_vector = ball_position - self.middle_point
@@ -296,7 +293,36 @@ class Analyse:
             path.append(steering_vector + self.robot_pos)
         steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
         path.append(steering_vector + self.robot_pos)
-        self.path = path
+
+        if len(path) > 0:
+            ball_point = path[-1]
+            min_dist, help_coords, help_vector = self.create_border_ball_help_coords(
+                ball_point=ball_point
+            )
+            # if ball_coords is close to corner,
+            is_close_to_corner = False
+            for corner in self.corners:
+                if np.linalg.norm(ball_point - corner) < 50:
+                    is_close_to_corner = True
+
+            if (
+                not is_close_to_corner
+                and min_dist < 50
+                and ball_point[0] != self.dropoff_coords[0]
+                and ball_point[1] != self.dropoff_coords[1]
+            ):
+                # print(
+                #     f"min dist {min_dist} help coords {help_coords} help vector {help_vector}"
+                # )
+                help_vector = help_vector * -8
+                helper = path[-1] + help_vector
+                helper_rounded = np.round(helper)
+                print("xx", helper, path[-1], help_vector, helper_rounded)
+
+                path.insert(-2, helper_rounded)
+
+                # print(f"ball {path[-1]}")
+        print("path", path)
         return path
 
     def find_path_to_target(
@@ -389,7 +415,9 @@ class Analyse:
             for i, point in enumerate(safepoint_list):
                 point_relative_to_middle = point > self.middle_point
                 # Check if safepoint has the same orientation as the ball relative to the middle
-                if np.array_equal(point_relative_to_middle, ball_position_relative_to_middle):
+                if np.array_equal(
+                    point_relative_to_middle, ball_position_relative_to_middle
+                ):
                     filtered_safepoints.append((i, point))
         else:
             filtered_safepoints = enumerate(safepoint_list)
@@ -400,6 +428,7 @@ class Analyse:
                 closest_distance = distance
                 closest_index = i
         return closest_index
+
     def find_triple_green_robot(self, green_mask: np.ndarray):
         # Errode from green mask
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
@@ -560,16 +589,16 @@ class Analyse:
             safe_point_3 = right_lower_coords + small_translation_vector * 4
             safe_point_4 = right_lower_coords + small_translation_vector * 5
             safe_point_5 = right_lower_coords + small_translation_vector * 6
-            safe_point_6 = right_lower_coords + small_translation_vector * 7 
+            safe_point_6 = right_lower_coords + small_translation_vector * 7
             safe_point_7 = right_lower_coords + small_translation_vector * 8
             safe_point_8 = right_lower_coords + small_translation_vector * 9
             safe_point_9 = right_lower_coords + small_translation_vector * 10
             safe_point_10 = right_lower_coords + small_translation_vector * 11
             safe_point_11 = right_lower_coords + small_translation_vector * 12
             safe_point_12 = right_lower_coords + small_translation_vector * 13
-            
-            safe_point_13 = large_goal_coords - [0,- 50] - small_translation_vector * 2
-            safe_point_14 = large_goal_coords - [0,- 25] - small_translation_vector * 2 
+
+            safe_point_13 = large_goal_coords - [0, -50] - small_translation_vector * 2
+            safe_point_14 = large_goal_coords - [0, -25] - small_translation_vector * 2
             safe_point_15 = large_goal_coords - small_translation_vector * 2
             safe_point_16 = large_goal_coords - [0, 25] - small_translation_vector * 2
             safe_point_17 = large_goal_coords - [0, 50] - small_translation_vector * 2
@@ -579,7 +608,7 @@ class Analyse:
             safe_point_20 = left_upper_coords - small_translation_vector * 4
             safe_point_21 = left_upper_coords - small_translation_vector * 5
             safe_point_22 = left_upper_coords - small_translation_vector * 6
-            safe_point_23 = left_upper_coords - small_translation_vector * 7 
+            safe_point_23 = left_upper_coords - small_translation_vector * 7
             safe_point_24 = left_upper_coords - small_translation_vector * 8
             safe_point_25 = left_upper_coords - small_translation_vector * 9
             safe_point_26 = left_upper_coords - small_translation_vector * 10
@@ -587,12 +616,11 @@ class Analyse:
             safe_point_28 = left_upper_coords - small_translation_vector * 12
             safe_point_29 = left_upper_coords - small_translation_vector * 13
 
-            safe_point_30 = small_goal_coords + [0,- 50] + small_translation_vector * 2
-            safe_point_31 = small_goal_coords + [0,- 25] + small_translation_vector * 2 
+            safe_point_30 = small_goal_coords + [0, -50] + small_translation_vector * 2
+            safe_point_31 = small_goal_coords + [0, -25] + small_translation_vector * 2
             safe_point_32 = small_goal_coords + small_translation_vector * 2
             safe_point_33 = small_goal_coords + [0, 25] + small_translation_vector * 2
             safe_point_34 = small_goal_coords + [0, 50] + small_translation_vector * 2
-            
 
             self.safepoint_list = np.array(
                 [
@@ -630,7 +658,6 @@ class Analyse:
                     safe_point_32,
                     safe_point_33,
                     safe_point_34,
-                    
                 ]
             )
             # print("Safepoints: ", self.safepoint_list)
@@ -784,9 +811,7 @@ class Analyse:
         for i in range(num_corners):
             v = self.corners[i]
             w = self.corners[(i + 1) % num_corners]
-            distance, projection_vector = self.distance_point_to_segment(
-                self.robot_pos, v, w
-            )
+            distance, projection_vector = self.distance_point_to_segment(pos, v, w)
             if distance < min_distance:
                 min_distance = distance
                 closest_projection = projection_vector
@@ -808,6 +833,15 @@ class Analyse:
         if self.corners is None:
             raise BorderNotFoundError("No border corners found")
         return self.corners
+
+    def create_border_ball_help_coords(self, ball_point):
+        # create a vector 50 pixels long from the ball to the border
+        min_distance, ball_nav_help_vector = self.calculate_distance_to_closest_border(
+            ball_point
+        )
+        ball_nav_help_vector = ball_nav_help_vector
+        coords = ball_point + ball_nav_help_vector
+        return min_distance, coords, ball_nav_help_vector
 
 
 class RobotNotFoundError(Exception):

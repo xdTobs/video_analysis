@@ -47,7 +47,6 @@ class Steering:
         )
         self.robot_pos = None
         self.robot_vector = None
-        self.path = []
         self.path_indexes = []
         self.is_collecting_balls = True
         # first is if we are turning second is if we are turning right
@@ -60,7 +59,11 @@ class Steering:
     def on_frame(self):
 
         path = self.analyser.create_path()
-        if path is not None and self.state is None and self.analyser.safepoint_list is not None:
+        if (
+            path is not None
+            and self.state is None
+            and self.analyser.safepoint_list is not None
+        ):
             self.state: State = PathingState(
                 self.analyser, path, SteeringUtils(self.robot_interface)
             )
@@ -95,20 +98,6 @@ class Steering:
     def disconnect(self):
         self.robot_interface.disconnect()
         return
-
-    def follow_path(
-        self, keypoints: np.ndarray, robot_pos: np.ndarray, safepoint_list: np.ndarray
-    ) -> np.ndarray:
-        if self.should_switch_target(robot_pos, self.target_ball):
-            self.last_target_time = time.time()
-            self.target_ball = self.find_closest_ball(keypoints, robot_pos)
-        self.path = self.create_path(self.target_ball, robot_pos, safepoint_list)
-        if self.are_coordinates_close(self.path[0]) and len(self.path) > 1:
-            self.path.pop(0)
-        elif self.can_target_ball_directly(robot_pos, self.target_ball):
-            while len(self.path) > 1:
-                self.path.pop(0)
-        self.steering_vector = self.path[0]
 
     def should_switch_target(self, robot_pos: np.ndarray, ball_pos: np.ndarray) -> bool:
         if ball_pos is None:
