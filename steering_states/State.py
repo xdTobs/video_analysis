@@ -133,8 +133,6 @@ class PathingState(State):
 
         ball_distance = self.analyser.calculate_distance_to_closest_border(self.path[-1])[0]
 
-        self.analyser.is_target_in_corner(self.path[-1], 30)
-
         if self.analyser.is_ball_close_to_middle:
             return
         if self.analyser.is_point_close_to_robot(self.path[0]) and len(self.path) > 1:

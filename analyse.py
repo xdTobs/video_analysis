@@ -235,11 +235,9 @@ class Analyse:
         return distance < dist
 
     def is_target_in_corner(self, target: np.ndarray, threshold: int = 100) -> bool:
-        if self.corners is None:
+        if target is None:
             return False
-        if any(is_coordinates_close(target, np.array(corner), threshold) for corner in self.corners):
-            print("Target in corner")
-            return True
+        return any(is_coordinates_close(target, np.array(corner), threshold) for corner in self.corners)
 
     def can_target_ball_directly(
             self, robot_pos: np.ndarray, ball_pos: np.ndarray
