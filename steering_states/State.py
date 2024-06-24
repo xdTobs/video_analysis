@@ -86,7 +86,7 @@ class PathingState(State):
             self.path.pop(0)
         elif self.analyser.can_target_ball_directly(
             self.analyser.robot_pos, self.path[-1]
-        ):
+        ) and not self.analyser.calculate_distance_to_closest_border(self.path[-1])[0] < 100:
             while len(self.path) > 1:
                 self.path.pop(0)
         self.steering_vector = self.path[0] - self.analyser.robot_pos
