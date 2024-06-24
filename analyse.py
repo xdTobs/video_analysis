@@ -116,13 +116,12 @@ class Analyse:
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
         if len(self.white_ball_keypoints) == 0:
             self.keypoints = self.orange_ball_keypoints
-        
+
         else:
-            self.keypoints = self.filter_keypoints_close_to_middle_cross(self.white_ball_keypoints)
-            
-           
-                
-    
+            self.keypoints = self.filter_keypoints_close_to_middle_cross(
+                self.white_ball_keypoints
+            )
+
         self.egg_location = self.find_egg_location(self.white_mask)
         try:
             if not has_found_corners:
@@ -168,11 +167,12 @@ class Analyse:
                 # print(f"Cross found at {self.middle_point}")
             self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
 
-
-    def filter_keypoints_close_to_middle_cross(self, keypoints: np.ndarray) -> np.ndarray:
+    def filter_keypoints_close_to_middle_cross(
+        self, keypoints: np.ndarray
+    ) -> np.ndarray:
         if self.middle_point is None:
             raise ValueError("Middle point has not been calculated.")
-        
+
         keypoints_close_to_middle = []
         keypoints_not_close_to_middle = []
         for keypoint in keypoints:
@@ -185,8 +185,6 @@ class Analyse:
         if len(keypoints_not_close_to_middle) == 0:
             return keypoints_close_to_middle
         return keypoints_not_close_to_middle
-
-        
 
     def calculate_is_ball_close_to_middle(
         self, ball_position: np.ndarray, threshold: float = 100
@@ -218,7 +216,6 @@ class Analyse:
         elif out_name == "border":
             lower = np.array([0, 150, 100])
             upper = np.array([30, 250, 250])
-
 
         mask = cv2.inRange(hsv, lower, upper)
 
@@ -302,14 +299,14 @@ class Analyse:
             min_dist, help_coords, help_vector = self.create_border_ball_help_coords(
                 ball_point=ball_point
             )
-            # if ball_coords is close to corner, 
+            # if ball_coords is close to corner,
             is_close_to_corner = False
             for corner in self.corners:
                 if np.linalg.norm(ball_point - corner) < 50:
                     is_close_to_corner = True
 
             if (
-                not is_close_to_corner 
+                not is_close_to_corner
                 and min_dist < 50
                 and ball_point[0] != self.dropoff_coords[0]
                 and ball_point[1] != self.dropoff_coords[1]
@@ -322,9 +319,7 @@ class Analyse:
                 helper_rounded = np.round(helper)
                 print("xx", helper, path[-1], help_vector, helper_rounded)
 
-
-
-                path.insert(-1, helper_rounded)
+                path.insert(-2, helper_rounded)
 
                 # print(f"ball {path[-1]}")
         print("path", path)
@@ -594,16 +589,16 @@ class Analyse:
             safe_point_3 = right_lower_coords + small_translation_vector * 4
             safe_point_4 = right_lower_coords + small_translation_vector * 5
             safe_point_5 = right_lower_coords + small_translation_vector * 6
-            safe_point_6 = right_lower_coords + small_translation_vector * 7 
+            safe_point_6 = right_lower_coords + small_translation_vector * 7
             safe_point_7 = right_lower_coords + small_translation_vector * 8
             safe_point_8 = right_lower_coords + small_translation_vector * 9
             safe_point_9 = right_lower_coords + small_translation_vector * 10
             safe_point_10 = right_lower_coords + small_translation_vector * 11
             safe_point_11 = right_lower_coords + small_translation_vector * 12
             safe_point_12 = right_lower_coords + small_translation_vector * 13
-            
-            safe_point_13 = large_goal_coords - [0,- 50] - small_translation_vector * 2
-            safe_point_14 = large_goal_coords - [0,- 25] - small_translation_vector * 2 
+
+            safe_point_13 = large_goal_coords - [0, -50] - small_translation_vector * 2
+            safe_point_14 = large_goal_coords - [0, -25] - small_translation_vector * 2
             safe_point_15 = large_goal_coords - small_translation_vector * 2
             safe_point_16 = large_goal_coords - [0, 25] - small_translation_vector * 2
             safe_point_17 = large_goal_coords - [0, 50] - small_translation_vector * 2
@@ -613,7 +608,7 @@ class Analyse:
             safe_point_20 = left_upper_coords - small_translation_vector * 4
             safe_point_21 = left_upper_coords - small_translation_vector * 5
             safe_point_22 = left_upper_coords - small_translation_vector * 6
-            safe_point_23 = left_upper_coords - small_translation_vector * 7 
+            safe_point_23 = left_upper_coords - small_translation_vector * 7
             safe_point_24 = left_upper_coords - small_translation_vector * 8
             safe_point_25 = left_upper_coords - small_translation_vector * 9
             safe_point_26 = left_upper_coords - small_translation_vector * 10
@@ -621,12 +616,11 @@ class Analyse:
             safe_point_28 = left_upper_coords - small_translation_vector * 12
             safe_point_29 = left_upper_coords - small_translation_vector * 13
 
-            safe_point_30 = small_goal_coords + [0,- 50] + small_translation_vector * 2
-            safe_point_31 = small_goal_coords + [0,- 25] + small_translation_vector * 2 
+            safe_point_30 = small_goal_coords + [0, -50] + small_translation_vector * 2
+            safe_point_31 = small_goal_coords + [0, -25] + small_translation_vector * 2
             safe_point_32 = small_goal_coords + small_translation_vector * 2
             safe_point_33 = small_goal_coords + [0, 25] + small_translation_vector * 2
             safe_point_34 = small_goal_coords + [0, 50] + small_translation_vector * 2
-            
 
             self.safepoint_list = np.array(
                 [
@@ -664,7 +658,6 @@ class Analyse:
                     safe_point_32,
                     safe_point_33,
                     safe_point_34,
-                    
                 ]
             )
             # print("Safepoints: ", self.safepoint_list)
