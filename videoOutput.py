@@ -229,6 +229,27 @@ class VideoOutput:
                         color,
                         2,
                     )
+            if self.analyser.corner_safepoint_list is None:
+                print("Error: corner_safepoint_list is None")
+            else:
+                for index, coord in enumerate(self.analyser.corner_safepoint_list):
+                    color = (0, 255, 0)
+
+                    cv2.circle(frame, tuple(coord.astype(int)), 5, color, -1)
+                    # Add text above the corner
+                    text_position = (
+                        coord[0].astype(int),
+                        coord[1].astype(int) - 10,
+                    )  # Position the text 10 pixels above the corner
+                    cv2.putText(
+                        frame,
+                        f"{index}",
+                        text_position,
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        color,
+                        2,
+                    )
 
         if self.analyser.translation_vector is not None:
             cv2.arrowedLine(

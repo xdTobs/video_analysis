@@ -37,6 +37,7 @@ class Analyse:
         self.dropoff_coords = None
         self.should_calculate_corners = True
         self.safepoint_list: np.ndarray = None
+        self.corner_safepoint_list: np.ndarray = None
         self.middle_point = None
         self.distance_to_middle = None
         self.is_ball_close_to_middle = False
@@ -132,6 +133,7 @@ class Analyse:
                 self.calculate_distance_to_closest_border(self.robot_pos)
             )
             self.calculate_safepoints()
+            self.calculate_corner_safepoints()
 
         except BorderNotFoundError as e:
             print(e)
@@ -271,8 +273,13 @@ class Analyse:
             ball_position
         )
 
-        self.path_indexes = self.find_path_to_target(
-            ball_position, self.robot_pos, self.safepoint_list
+        if self.is_target_a_corner_ball:
+            self.path_indexes = self.find_path_to_target(
+                ball_position, self.robot_pos, self.corner_safepoint_list
+            )
+        else:
+            self.path_indexes = self.find_path_to_target(
+                ball_position, self.robot_pos, self.safepoint_list
         )
         if len(self.path_indexes) == 0:
             return None
@@ -532,10 +539,7 @@ class Analyse:
 
     def calculate_safepoints(self):
         if self.corners is not None:
-            corner1 = self.corners[0]
-            corner2 = self.corners[1]
-            corner3 = self.corners[2]
-            corner4 = self.corners[3]
+            corner1, corner2, corner3, corner4 = self.corners
 
             small_goal_coords = self.small_goal_coords
             large_goal_coords = self.large_goal_coords
@@ -544,96 +548,97 @@ class Analyse:
             right_upper_coords = ((small_goal_coords + corner2) // 2) + [0, 20]
             left_lower_coords = ((corner4 + large_goal_coords) // 2) - [0, 20]
             left_upper_coords = ((large_goal_coords + corner3) // 2) + [0, 20]
-            # print("Right lower: ", right_lower_coords)
-            # print("Right upper: ", right_upper_coords)
-            # print("Left lower: ", left_lower_coords)
-            # print("Left upper: ", left_upper_coords)
 
             lower_vector = coordinates_to_vector(right_lower_coords, left_lower_coords)
             upper_vector = coordinates_to_vector(right_upper_coords, left_upper_coords)
 
-            small_translation_vector = lower_vector * 1 / 15
+            small_translation_vector = lower_vector / 15
             large_translation_vector = lower_vector * 0.4
 
-            safe_point_1 = right_lower_coords + small_translation_vector * 2
-            safe_point_2 = right_lower_coords + small_translation_vector * 3
-            safe_point_3 = right_lower_coords + small_translation_vector * 4
-            safe_point_4 = right_lower_coords + small_translation_vector * 5
-            safe_point_5 = right_lower_coords + small_translation_vector * 6
-            safe_point_6 = right_lower_coords + small_translation_vector * 7
-            safe_point_7 = right_lower_coords + small_translation_vector * 8
-            safe_point_8 = right_lower_coords + small_translation_vector * 9
-            safe_point_9 = right_lower_coords + small_translation_vector * 10
-            safe_point_10 = right_lower_coords + small_translation_vector * 11
-            safe_point_11 = right_lower_coords + small_translation_vector * 12
-            safe_point_12 = right_lower_coords + small_translation_vector * 13
+            # Generate the first set of safe points using a list comprehension
+            safe_points_1_to_12 = [
+                right_lower_coords + small_translation_vector * i
+                for i in range(2, 14)
+            ]
 
-            safe_point_13 = large_goal_coords - [0,- 50] - small_translation_vector * 2
-            safe_point_14 = large_goal_coords - [0,- 25] - small_translation_vector * 2
-            safe_point_15 = large_goal_coords - small_translation_vector * 2
-            safe_point_16 = large_goal_coords - [0, 25] - small_translation_vector * 2
-            safe_point_17 = large_goal_coords - [0, 50] - small_translation_vector * 2
+            # Generate the second set of safe points
+            safe_points_13_to_17 = [
+                large_goal_coords - [0, y_offset] - small_translation_vector * 2
+                for y_offset in [50, 25, 0, -25, -50]
+            ]
 
-            safe_point_18 = left_upper_coords - small_translation_vector * 2
-            safe_point_19 = left_upper_coords - small_translation_vector * 3
-            safe_point_20 = left_upper_coords - small_translation_vector * 4
-            safe_point_21 = left_upper_coords - small_translation_vector * 5
-            safe_point_22 = left_upper_coords - small_translation_vector * 6
-            safe_point_23 = left_upper_coords - small_translation_vector * 7
-            safe_point_24 = left_upper_coords - small_translation_vector * 8
-            safe_point_25 = left_upper_coords - small_translation_vector * 9
-            safe_point_26 = left_upper_coords - small_translation_vector * 10
-            safe_point_27 = left_upper_coords - small_translation_vector * 11
-            safe_point_28 = left_upper_coords - small_translation_vector * 12
-            safe_point_29 = left_upper_coords - small_translation_vector * 13
+            # Generate the third set of safe points
+            safe_points_18_to_29 = [
+                left_upper_coords - small_translation_vector * i
+                for i in range(2, 14)
+            ]
 
-            safe_point_30 = small_goal_coords + [0,- 50] + small_translation_vector * 2
-            safe_point_31 = small_goal_coords + [0,- 25] + small_translation_vector * 2
-            safe_point_32 = small_goal_coords + small_translation_vector * 2
-            safe_point_33 = small_goal_coords + [0, 25] + small_translation_vector * 2
-            safe_point_34 = small_goal_coords + [0, 50] + small_translation_vector * 2
+            # Generate the fourth set of safe points
+            safe_points_30_to_34 = [
+                small_goal_coords + [0, y_offset] + small_translation_vector * 2
+                for y_offset in [-50, -25, 0, 25, 50]
+            ]
 
-
+            # Combine all safe points into one list
             self.safepoint_list = np.array(
-                [
-                    safe_point_1,
-                    safe_point_2,
-                    safe_point_3,
-                    safe_point_4,
-                    safe_point_5,
-                    safe_point_6,
-                    safe_point_7,
-                    safe_point_8,
-                    safe_point_9,
-                    safe_point_10,
-                    safe_point_11,
-                    safe_point_12,
-                    safe_point_13,
-                    safe_point_14,
-                    safe_point_15,
-                    safe_point_16,
-                    safe_point_17,
-                    safe_point_18,
-                    safe_point_19,
-                    safe_point_20,
-                    safe_point_21,
-                    safe_point_22,
-                    safe_point_23,
-                    safe_point_24,
-                    safe_point_25,
-                    safe_point_26,
-                    safe_point_27,
-                    safe_point_28,
-                    safe_point_29,
-                    safe_point_30,
-                    safe_point_31,
-                    safe_point_32,
-                    safe_point_33,
-                    safe_point_34,
-
-                ]
+                safe_points_1_to_12 + 
+                safe_points_13_to_17 + 
+                safe_points_18_to_29 + 
+                safe_points_30_to_34
             )
-            # print("Safepoints: ", self.safepoint_list)
+
+            return
+
+    def calculate_corner_safepoints(self):
+        if self.corners is not None:
+            corner1, corner2, corner3, corner4 = self.corners
+
+            small_goal_coords = self.small_goal_coords
+            large_goal_coords = self.large_goal_coords
+
+            right_lower_coords = ((corner1 + small_goal_coords) // 2) - [0, -70]
+            right_upper_coords = ((small_goal_coords + corner2) // 2) + [0, -70]
+            left_lower_coords = ((corner4 + large_goal_coords) // 2) - [0, -70]
+            left_upper_coords = ((large_goal_coords + corner3) // 2) + [0, -70]
+
+            lower_vector = coordinates_to_vector(right_lower_coords, left_lower_coords)
+            upper_vector = coordinates_to_vector(right_upper_coords, left_upper_coords)
+
+            small_translation_vector = lower_vector / 15
+            large_translation_vector = lower_vector * 0.4
+
+            # Generate the first set of safe points using a list comprehension
+            safe_points_0_to_13 = [
+                right_lower_coords + small_translation_vector * i
+                for i in range(1, 15)
+            ]
+
+            # Generate the second set of safe points
+            safe_points_14_to_26 = [
+                large_goal_coords - [0, y_offset] - small_translation_vector 
+                for y_offset in [-150, -125, -100, -75, -50, -25, 0, 25, 50, 75, 100, 125, 150]
+            ]
+
+            # Generate the third set of safe points
+            safe_points_27_to_40 = [
+                left_upper_coords - small_translation_vector * i
+                for i in range(1, 15)
+            ]
+
+            # Generate the fourth set of safe points
+            safe_points_41_to_53 = [
+                small_goal_coords + [0, y_offset] + small_translation_vector 
+                for y_offset in [-150, -125, -100, -75, -50, -25, 0, 25, 50, 75, 100, 125, 150]
+            ]
+
+            # Combine all safe points into one list
+            self.corner_safepoint_list = np.array(
+                safe_points_0_to_13 + 
+                safe_points_14_to_26 + 
+                safe_points_27_to_40 + 
+                safe_points_41_to_53
+            )
+
             return
 
     def convert_perspective(self, point: np.ndarray) -> tuple[float, float]:
