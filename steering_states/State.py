@@ -125,7 +125,7 @@ class PathingState(State):
     def on_frame(self): 
         if self.analyser.is_ball_close_to_middle:
             return
-        if self.analyser.is_point_close(self.path[0], 80) and len(self.path) > 1:
+        if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
         elif self.analyser.can_target_ball_directly(
             self.analyser.robot_pos, self.path[-1]

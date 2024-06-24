@@ -14,7 +14,7 @@ class SteeringUtils:
             self.robot_interface.send_command("move", 20, speed, state=state)
         elif 1.5 <= angle_degrees <= 20:
             self.robot_interface.send_command(
-                "move-corrected", -1 * signed_angle_degrees, speed, state=state
+                "move-corrected", -1/3 * signed_angle_degrees, speed, state=state
             )
         elif angle_degrees > 20:
             turn = signed_angle_degrees * -1 / 3

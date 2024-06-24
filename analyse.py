@@ -202,7 +202,7 @@ class Analyse:
 
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
-            sensitivity = 50
+            sensitivity = 65
             lower = np.array([0, 0, 255 - sensitivity])
             upper = np.array([180, sensitivity, 255])
         elif out_name == "green-mask":
@@ -215,8 +215,8 @@ class Analyse:
             lower = np.array([10, 5, 220])
             upper = np.array([30, 255, 255])
         elif out_name == "border":
-            lower = np.array([0, 150, 100])
-            upper = np.array([30, 250, 250])
+            lower = np.array([0, 130, 180])
+            upper = np.array([30, 255, 255])
 
 
         mask = cv2.inRange(hsv, lower, upper)
@@ -230,11 +230,11 @@ class Analyse:
         print(f" Distance: {distance}, Speed {speed}")
         return speed
 
-    def are_coordinates_close(self, vector: np.ndarray, dist=50) -> bool:
+    def are_coordinates_close(self, vector: np.ndarray, dist=40) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         return length < dist
 
-    def is_point_close(self, point: np.ndarray, dist=50) -> bool:
+    def is_point_close(self, point: np.ndarray, dist=40) -> bool:
         distance = np.linalg.norm(point - self.robot_pos)
         return distance < dist
 
