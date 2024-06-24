@@ -216,7 +216,8 @@ class Analyse:
             upper = np.array([30, 255, 255])
         elif out_name == "border":
             lower = np.array([0, 150, 100])
-            upper = np.array([30, 245, 245])
+            upper = np.array([30, 250, 250])
+
 
         mask = cv2.inRange(hsv, lower, upper)
 
@@ -233,7 +234,7 @@ class Analyse:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         return length < dist
 
-    def is_point_close(self, point: np.ndarray, dist=150) -> bool:
+    def is_point_close(self, point: np.ndarray, dist=100) -> bool:
         distance = np.linalg.norm(point - self.robot_pos)
         return distance < dist
 
@@ -249,7 +250,7 @@ class Analyse:
         angle_to_ball = math.degrees(
             angle_between_vectors(vector_to_ball, self.robot_vector)
         )
-        if distance_to_ball < 150 and angle_to_ball < 60:
+        if distance_to_ball < 250 and angle_to_ball < 80:
             return True
         return False
 
@@ -284,11 +285,15 @@ class Analyse:
             path.append(steering_vector + self.robot_pos)
         if self.is_ball_close_to_middle:
             middle_vector = ball_position - self.middle_point
-            extended_vector = middle_vector * 8
+            middle_vector = middle_vector / np.linalg.norm(middle_vector)
+            extended_vector = middle_vector * 130
             end_coordinates = self.middle_point + extended_vector
             steering_vector = self.find_steering_vector(self.robot_pos, end_coordinates)
             path.append(steering_vector + self.robot_pos)
 
+        if self.calculate_distance_to_closest_border(ball_position)[0] < 100:
+            steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
+            path.append(steering_vector + self.robot_pos)
         steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
         path.append(steering_vector + self.robot_pos)
         self.path = path
@@ -550,7 +555,6 @@ class Analyse:
             small_translation_vector = lower_vector * 1 / 15
             large_translation_vector = lower_vector * 0.4
 
-            
             safe_point_1 = right_lower_coords + small_translation_vector * 2
             safe_point_2 = right_lower_coords + small_translation_vector * 3
             safe_point_3 = right_lower_coords + small_translation_vector * 4
