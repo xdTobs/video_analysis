@@ -140,16 +140,6 @@ if __name__ == "__main__":
         print("Exiting... Please provide the missing values in the .env file")
         sys.exit(1)
 
-    pr = cProfile.Profile()
-    pr.enable()  # Start profiling
     run_video(
         host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
     )
-
-    pr.disable()  # Stop profiling
-
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats("cumulative")
-    ps.print_stats()  # Print the profiling results
-    with open("profile_results.txt", "w") as f:
-        f.write(s.getvalue())
