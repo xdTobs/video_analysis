@@ -278,7 +278,7 @@ class CollectionState(State):
         super().__init__(analyser, steering)
         self.path = ball_point
         self.distance_before_swap = 80  # px
-        self.timeout = 30  # seconds
+        self.timeout = 15  # seconds
         self.speed = 0  # % of max speed
         self.safe_distance_middle = 100  # px
 
