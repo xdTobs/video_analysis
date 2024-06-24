@@ -292,12 +292,12 @@ class VideoOutput:
 
                 cv2.arrowedLine(
                     frame,
-                    self.analyser.robot_pos.astype(int),
                     (
                         self.steering_instance.state.path[-1]
                         + self.steering_instance.state.help_vector
                     ).astype(int),
-                    (255, 0, 255),
+                    self.steering_instance.state.path[-1].astype(int),
+                    (255, 0, 128),
                     2,
                 )
                 help_coords = self.steering_instance.state.help_coords
