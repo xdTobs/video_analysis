@@ -237,13 +237,9 @@ class Analyse:
     def is_target_in_corner(self, target: np.ndarray, threshold: int = 100) -> bool:
         if self.corners is None:
             return False
-        for corner_index, corner in enumerate(self.corners):
-            print(f"Corner: {corner} index: {corner_index}, Target: {target}")
-            print(f"is target in corner: {is_coordinates_close(target, np.array(corner), threshold)}")
-            if is_coordinates_close(target,np.array(corner),threshold):
-                return True
-        return False
-
+        if any(is_coordinates_close(target, np.array(corner), threshold) for corner in self.corners):
+            print("Target in corner")
+            return True
 
     def can_target_ball_directly(
             self, robot_pos: np.ndarray, ball_pos: np.ndarray
@@ -271,6 +267,8 @@ class Analyse:
 
     def create_path(self):
         ball_position = self.find_closest_ball(self.keypoints, self.robot_pos)
+        ball_in_corner = self.is_target_in_corner(ball_position, 40)
+
         if ball_position is None:
             ball_position = self.dropoff_coords
 
@@ -278,21 +276,27 @@ class Analyse:
             ball_position
         )
 
-        if self.is_target_in_corner(ball_position, 40):
+        if ball_in_corner:
             self.path_indexes = self.find_path_to_target(
                 ball_position, self.robot_pos, self.corner_safepoint_list
             )
         else:
             self.path_indexes = self.find_path_to_target(
                 ball_position, self.robot_pos, self.safepoint_list
-        )
+            )
         if len(self.path_indexes) == 0:
             return None
         path = []
         for i in range(0, len(self.path_indexes)):
-            steering_vector = self.find_steering_vector(
-                self.robot_pos, self.safepoint_list[self.path_indexes[i]]
-            )
+            if ball_in_corner:
+                steering_vector = self.find_steering_vector(
+                    self.robot_pos, self.corner_safepoint_list[self.path_indexes[i]]
+                )
+            else:
+                steering_vector = self.find_steering_vector(
+                    self.robot_pos, self.safepoint_list[self.path_indexes[i]]
+                )
+
             # print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector + self.robot_pos)
         if self.is_ball_close_to_middle:
@@ -587,9 +591,9 @@ class Analyse:
 
             # Combine all safe points into one list
             self.safepoint_list = np.array(
-                safe_points_1_to_12 + 
-                safe_points_13_to_17 + 
-                safe_points_18_to_29 + 
+                safe_points_1_to_12 +
+                safe_points_13_to_17 +
+                safe_points_18_to_29 +
                 safe_points_30_to_34
             )
 
@@ -621,7 +625,7 @@ class Analyse:
 
             # Generate the second set of safe points
             safe_points_14_to_26 = [
-                large_goal_coords - [0, y_offset] - small_translation_vector 
+                large_goal_coords - [0, y_offset] - small_translation_vector
                 for y_offset in [-150, -125, -100, -75, -50, -25, 0, 25, 50, 75, 100, 125, 150]
             ]
 
@@ -633,15 +637,15 @@ class Analyse:
 
             # Generate the fourth set of safe points
             safe_points_41_to_53 = [
-                small_goal_coords + [0, y_offset] + small_translation_vector 
+                small_goal_coords + [0, y_offset] + small_translation_vector
                 for y_offset in [-150, -125, -100, -75, -50, -25, 0, 25, 50, 75, 100, 125, 150]
             ]
 
             # Combine all safe points into one list
             self.corner_safepoint_list = np.array(
-                safe_points_0_to_13 + 
-                safe_points_14_to_26 + 
-                safe_points_27_to_40 + 
+                safe_points_0_to_13 +
+                safe_points_14_to_26 +
+                safe_points_27_to_40 +
                 safe_points_41_to_53
             )
 
