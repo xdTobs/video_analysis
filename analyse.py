@@ -205,7 +205,7 @@ class Analyse:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         return length < dist
 
-    def is_point_close(self, point: np.ndarray, dist=100) -> bool:
+    def is_point_close(self, point: np.ndarray, dist=150) -> bool:
         distance = np.linalg.norm(point - self.robot_pos)
         return distance < dist
 
@@ -256,7 +256,7 @@ class Analyse:
             path.append(steering_vector + self.robot_pos)
         if self.is_ball_close_to_middle:
             middle_vector = ball_position - self.middle_point
-            extended_vector = middle_vector * 5
+            extended_vector = middle_vector * 8
             end_coordinates = self.middle_point + extended_vector
             steering_vector = self.find_steering_vector(self.robot_pos, end_coordinates)
             path.append(steering_vector + self.robot_pos)

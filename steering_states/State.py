@@ -55,9 +55,9 @@ class CatchMidCrossBallState(State):
                 self.path.pop(0)
         elif len(self.path)==2:
             print(f"LOG - {self.__class__.__name__} - driving to mid ball help vector - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
-            if not self.is_close_to_help_vector:
-                self.steering.move_corrected(signed_angle_degrees=signed_angle_degree, speed=10, state=self, turn_speed=15, turn_speed_turning=5)
-            elif(self.analyser.is_point_close(point=self.path[0], dist=30)):
+            
+            self.steering.move_corrected(signed_angle_degrees=signed_angle_degree, speed=10, state=self, turn_speed=15, turn_speed_turning=5)
+            if(self.analyser.is_point_close(point=self.path[0], dist=30)):
                 self.is_close_to_help_vector = True
 
             if self.is_close_to_help_vector:
@@ -69,6 +69,25 @@ class CatchMidCrossBallState(State):
             self.steering.move_corrected(signed_angle_degrees=signed_angle_degree, speed=6, state=self, turn_speed=15, turn_speed_turning=5)
 
     def swap_state(self):
+        if len(self.path) == 1 and self.analyser.is_point_close(self.path[-1], self.distance_before_swap):
+            return BeltRunningState(self.analyser, self.analyser.create_path(), self.steering)
+        return self
+    
+class BeltRunningState(State):
+    def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
+        super().__init__(analyser, steering)
+        self.path = path
+        self.timeout = 0.5
+
+    def on_frame(self):
+        self.steering.start_belt()
+        pass
+
+    def swap_state(self):
+        if time.time() - self.start_time > self.timeout:
+            return ReversingState(
+                self.analyser, self.analyser.create_path(), self.steering
+            )
         return self
 
 class PathingState(State):
@@ -80,6 +99,7 @@ class PathingState(State):
         self.steering_vector = path[0]
 
     def on_frame(self):
+        self.steering.stop_belt()
         if self.analyser.is_ball_close_to_middle:
             return
         if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
