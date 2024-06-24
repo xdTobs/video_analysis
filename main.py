@@ -3,12 +3,10 @@ import cProfile
 import io
 import os
 import pstats
-import time
 from dotenv import load_dotenv
 import sys
 import cv2
 import numpy as np
-from analyse import RobotNotFoundError
 import VideoDebugger
 import analyse
 import steering
@@ -49,22 +47,14 @@ def run_video(host, webcam_index, online, port=65438):
     video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     print("Video read")
 
-
     # find most common corners
-    found_corners = None
     corners_list = []
     has_found_corners = False
     while True:
-        start_time = time.time()
-        init_time = start_time
         ret, frame = video.read()
 
         if not ret:
             break
-
-        prev_time = time.time()
-        #print(f"FTAN1: {prev_time - start_time} seconds")
-        start_time = time.time()
 
         analyser.analysis_pipeline(image=frame, has_found_corners=has_found_corners)
 
@@ -74,15 +64,15 @@ def run_video(host, webcam_index, online, port=65438):
             )
             ball_distance = np.linalg.norm(ball_vector)
 
-            steering_instance.set_speed(ball_distance, angle_between_vectors_signed(analyser.robot_vector,ball_vector) )
+            steering_instance.set_speed(
+                ball_distance,
+                angle_between_vectors_signed(analyser.robot_vector, ball_vector),
+            )
 
-
-        prev_time = time.time()
-        #print(f"FTAN2: {prev_time - start_time} seconds")
-        start_time = time.time()
-        #print(found_corners)
+        # print(found_corners)
         if not has_found_corners:
-            corners_list.append(analyser.corners)
+            if analyser.corners is not None:
+                corners_list.append(analyser.corners)
             if len(corners_list) == 10:
                 corners_list = np.array(corners_list)
                 corners = np.median(corners_list, axis=0)
@@ -91,15 +81,7 @@ def run_video(host, webcam_index, online, port=65438):
             else:
                 continue
 
-        prev_time = time.time()
-        #print(f"FTAN3: {prev_time - start_time} seconds")
-        start_time = time.time()
-
         steering_instance.on_frame()
-
-        prev_time = time.time()
-        #print(f"FTAN4: {prev_time - start_time} seconds")
-        start_time = time.time()
 
         video_output.showFrame(frame)
 
@@ -117,12 +99,8 @@ def run_video(host, webcam_index, online, port=65438):
             break
         elif key == ord("p"):
             cv2.waitKey(0)
-        prev_time = time.time()
-        #print(f"FTAN5: {prev_time - start_time} seconds")
-        start_time = time.time()
-        #print(f"FTANX: {prev_time - init_time} seconds")
-        sys.stdout.flush()
 
+    sys.stdout.flush()
     video.release()
     cv2.destroyAllWindows()
 
@@ -162,16 +140,6 @@ if __name__ == "__main__":
         print("Exiting... Please provide the missing values in the .env file")
         sys.exit(1)
 
-    pr = cProfile.Profile()
-    pr.enable()  # Start profiling
     run_video(
         host=HOST, webcam_index=WEBCAM_INDEX, online=not is_offline, port=int(PORT)
     )
-
-    pr.disable()  # Stop profiling
-
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats("cumulative")
-    ps.print_stats()  # Print the profiling results
-    with open("profile_results.txt", "w") as f:
-        f.write(s.getvalue())
