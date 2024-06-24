@@ -48,8 +48,7 @@ class PathingState(State):
             )
         )
 
-        self.steering.move_corrected(signed_angle_degree, 30)
-        pass
+        self.steering.move_corrected(signed_angle_degree, 30, turn_speed=15)
 
     def swap_state(self):
         # Check timeout
@@ -72,10 +71,16 @@ class PathingState(State):
             self.analyser.robot_pos
         )
         if (
+            # math.degrees(
+            #     angle_between_vectors(self.analyser.robot_vector, self.steering_vector)
+            # )
+            # > 100
             math.degrees(
-                angle_between_vectors(self.analyser.robot_vector, self.steering_vector)
+                angle_between_vectors(
+                    self.analyser.robot_vector, self.analyser.border_vector
+                )
             )
-            > 100
+            < 45
             and border_distance < 100
         ):
             # TODO Might need to use a different arugment for the path, might need to be absolute
