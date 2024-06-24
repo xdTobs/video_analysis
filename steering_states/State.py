@@ -36,7 +36,7 @@ class CatchMidCrossBallState(State):
         self.is_close_to_help_vector = False
         self.path = path
         self.distance_before_swap = 59
-        self.timeout = 40 # seconds
+        self.timeout = 40  # seconds
 
     def on_frame(self):
         self.steering.stop_belt()
@@ -84,12 +84,18 @@ class CatchMidCrossBallState(State):
             )
 
     def swap_state(self):
-        #Check timeout
+        # Check timeout
         if time.time() - self.start_time > self.timeout:
-            return PathingState(self.analyser, self.analyser.create_path(), self.steering)
-        
-        if len(self.path) == 1 and self.analyser.is_point_close(self.path[-1], self.distance_before_swap):
-            return BeltRunningState(self.analyser, self.analyser.create_path(), self.steering)
+            return PathingState(
+                self.analyser, self.analyser.create_path(), self.steering
+            )
+
+        if len(self.path) == 1 and self.analyser.is_point_close(
+            self.path[-1], self.distance_before_swap
+        ):
+            return BeltRunningState(
+                self.analyser, self.analyser.create_path(), self.steering
+            )
         return self
 
 
@@ -139,11 +145,11 @@ class PathingState(State):
     def on_frame(self):
         if self.analyser.is_ball_close_to_middle:
             return
-        if self.analyser.is_point_close(self.path[0], 80) and len(self.path) > 1:
+        if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
-        #elif self.analyser.can_target_ball_directly(
+        # elif self.analyser.can_target_ball_directly(
         #    self.analyser.robot_pos, self.path[-1]
-        #) and not self.analyser.calculate_distance_to_closest_border(self.path[-1])[0] < 100:
+        # ) and not self.analyser.calculate_distance_to_closest_border(self.path[-1])[0] < 100:
         #    while len(self.path) > 1:
         #        self.path.pop(0)
         self.steering_vector = self.path[0] - self.analyser.robot_pos

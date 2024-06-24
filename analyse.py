@@ -228,11 +228,11 @@ class Analyse:
         print(f" Distance: {distance}, Speed {speed}")
         return speed
 
-    def are_coordinates_close(self, vector: np.ndarray, dist=50) -> bool:
+    def are_coordinates_close(self, vector: np.ndarray, dist=40) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         return length < dist
 
-    def is_point_close(self, point: np.ndarray, dist=50) -> bool:
+    def is_point_close(self, point: np.ndarray, dist=40) -> bool:
         distance = np.linalg.norm(point - self.robot_pos)
         return distance < dist
 
