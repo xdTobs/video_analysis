@@ -255,8 +255,6 @@ class VideoOutput:
         ):
             robot_pos = self.analyser.robot_pos.astype(int)
             for idx, point in enumerate(self.steering_instance.state.path):
-
-                # Draw arrows between safepoints
                 if idx == 0:
                     cv2.arrowedLine(
                         frame,
@@ -282,28 +280,28 @@ class VideoOutput:
         self.videoDebugger.write_video("result", result_3channel, True)
 
         # if state is BorderCollectionState
-        if (
-            self.steering_instance.state is not None
-            and self.steering_instance.state.__class__.__name__
-            == "BorderCollectionState"
-        ):
-            # draw help vector from border and out through ball
-            if self.steering_instance.state.help_vector is not None:
+        # if (
+        #     self.steering_instance.state is not None
+        #     and self.steering_instance.state.__class__.__name__
+        #     == "BorderCollectionState"
+        # ):
+        #     # draw help vector from border and out through ball
+        #     if self.steering_instance.state.help_vector is not None:
 
-                cv2.arrowedLine(
-                    frame,
-                    (
-                        self.steering_instance.state.path[-1]
-                        + self.steering_instance.state.help_vector
-                    ).astype(int),
-                    self.steering_instance.state.path[-1].astype(int),
-                    (255, 0, 128),
-                    2,
-                )
-                help_coords = self.steering_instance.state.help_coords
-                int_help_coords = (int(help_coords[0]), int(help_coords[1]))
-                print(f"help_coords: {help_coords}")
-                cv2.circle(frame, int_help_coords, 10, (255, 0, 255), -1)
+        #         cv2.arrowedLine(
+        #             frame,
+        #             (
+        #                 self.steering_instance.state.path[-1]
+        #                 + self.steering_instance.state.help_vector
+        #             ).astype(int),
+        #             self.steering_instance.state.path[-1].astype(int),
+        #             (255, 0, 128),
+        #             2,
+        #         )
+        #         help_coords = self.steering_instance.state.help_coords
+        #         int_help_coords = (int(help_coords[0]), int(help_coords[1]))
+        #         print(f"help_coords: {help_coords}")
+        #         cv2.circle(frame, int_help_coords, 10, (255, 0, 255), -1)
 
         for r in cross_rect:
             cv2.rectangle(

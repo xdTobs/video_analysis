@@ -21,7 +21,6 @@ class Analyse:
         self.robot_vector = None
         self.goal_vector = None
         self.robot_pos_at_path_creation = None
-        self.path = []
         self.path_indexes = []
         self.delivery_vector = None
         self.corners = [(0, 0), (1, 0), (0, 1), (1, 1)]
@@ -258,7 +257,6 @@ class Analyse:
             steering_vector = self.find_steering_vector(
                 self.robot_pos, self.safepoint_list[self.path_indexes[i]]
             )
-            # print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector + self.robot_pos)
         if self.is_ball_close_to_middle:
             middle_vector = ball_position - self.middle_point
@@ -268,7 +266,38 @@ class Analyse:
             path.append(steering_vector + self.robot_pos)
         steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
         path.append(steering_vector + self.robot_pos)
-        self.path = path
+
+        if len(path) > 0:
+            ball_point = path[-1]
+            min_dist, help_coords, help_vector = self.create_border_ball_help_coords(
+                ball_point=ball_point
+            )
+            # if ball_coords is close to corner, 
+            is_close_to_corner = False
+            for corner in self.corners:
+                if np.linalg.norm(ball_point - corner) < 50:
+                    is_close_to_corner = True
+
+            if (
+                not is_close_to_corner 
+                and min_dist < 50
+                and ball_point[0] != self.dropoff_coords[0]
+                and ball_point[1] != self.dropoff_coords[1]
+            ):
+                # print(
+                #     f"min dist {min_dist} help coords {help_coords} help vector {help_vector}"
+                # )
+                help_vector = help_vector * -8
+                helper = path[-1] + help_vector
+                helper_rounded = np.round(helper)
+                print("xx", helper, path[-1], help_vector, helper_rounded)
+
+
+
+                path.insert(-1, helper_rounded)
+
+                # print(f"ball {path[-1]}")
+        print("path", path)
         return path
 
     def find_path_to_target(
@@ -734,8 +763,7 @@ class Analyse:
         min_distance, ball_nav_help_vector = self.calculate_distance_to_closest_border(
             ball_point
         )
-        ball_nav_help_vector = ball_nav_help_vector * -0.7
-        print(f"ball point {ball_point} - closest border point {ball_nav_help_vector}")
+        ball_nav_help_vector = ball_nav_help_vector
         coords = ball_point + ball_nav_help_vector
         return min_distance, coords, ball_nav_help_vector
 

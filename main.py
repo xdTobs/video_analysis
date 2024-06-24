@@ -3,6 +3,7 @@ import cProfile
 import io
 import os
 import pstats
+from time import sleep
 from dotenv import load_dotenv
 import sys
 import cv2
@@ -52,6 +53,7 @@ def run_video(host, webcam_index, online, port=65438):
     has_found_corners = False
     while True:
         ret, frame = video.read()
+        sleep(0.2)
 
         if not ret:
             break
