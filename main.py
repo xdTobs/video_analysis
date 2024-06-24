@@ -42,7 +42,7 @@ def run_video(host, webcam_index, online, port=65438):
     frame_number = 0
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 576)
-
+    video.set(cv2.CAP_PROP_AUTOFOCUS, 0)
     # https://stackoverflow.com/questions/43665208/how-to-get-the-latest-frame-from-capture-device-camera-in-opencv
     video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     print("Video read")
