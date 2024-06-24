@@ -26,7 +26,7 @@ class SteeringUtils:
         self.robot_interface.send_command("turn", round(angle_degrees), speed)
 
     def stop(self):
-        self.robot_interface.send_command("move", 0, 0)
+        self.robot_interface.send_command("stop", 0, 0)
 
     def get_near_ball(self, signed_angle_degrees, angle_degrees, dist_to_ball):
         self.move_corrected(signed_angle_degrees, angle_degrees)

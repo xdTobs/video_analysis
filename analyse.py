@@ -174,7 +174,7 @@ class Analyse:
             upper = np.array([180, sensitivity, 255])
         elif out_name == "green-mask":
             lower = np.array([31, 20, 180])
-            upper = np.array([120, 255, 255])
+            upper = np.array([100, 255, 255])
         elif out_name == "red-mask":
             lower = np.array([0, 70, 50])
             upper = np.array([10, 255, 255])
@@ -234,7 +234,9 @@ class Analyse:
             #TODO: Add logic to handle ball close to middle
             print("Ball is close to middle")
 
-
+        if self.can_target_ball_directly(self.robot_pos, ball_position):
+            self.path = [ball_position]
+            return [ball_position]
 
         self.path_indexes = self.find_path_to_target(ball_position, self.robot_pos, self.safepoint_list)
         if len(self.path_indexes) == 0:
