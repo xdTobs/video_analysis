@@ -27,16 +27,61 @@ class State:
         return self.__class__.__name__
 
 
+class CatchMidCrossBallState(State):
+    def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
+        super().__init__(analyser, steering)
+        self.is_close_to_help_vector = False
+        self.path = path
+        self.distance_before_swap = 59
+
+    def on_frame(self):
+        self.steering_vector = self.path[0] - self.analyser.robot_pos
+        signed_angle_degree = math.degrees(
+            angle_between_vectors_signed(
+                self.analyser.robot_vector, self.steering_vector
+            )
+        )
+
+        ball_vector = self.path[-1] - self.analyser.robot_pos
+        ball_vector_degrees = math.degrees(
+            angle_between_vectors_signed(
+                self.analyser.robot_vector, ball_vector
+            )
+        )
+        if len(self.path)>2:
+            self.steering.move_corrected(signed_angle_degree, 30, state=self, turn_speed=15)
+            print(f"LOG - {self.__class__.__name__} - driving to safepoint mid ball  - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
+            if(self.analyser.is_point_close(point=self.path[0])):
+                self.path.pop(0)
+        elif len(self.path)==2:
+            print(f"LOG - {self.__class__.__name__} - driving to mid ball help vector - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
+            if not self.is_close_to_help_vector:
+                self.steering.move_corrected(signed_angle_degrees=signed_angle_degree, speed=10, state=self, turn_speed=15, turn_speed_turning=5)
+            elif(self.analyser.is_point_close(point=self.path[0], dist=30)):
+                self.is_close_to_help_vector = True
+
+            if self.is_close_to_help_vector:
+                self.steering.turn(-1 * signed_angle_degree, 3, state=self)
+                if ball_vector_degrees < 4:
+                    self.path.pop(0)
+        elif len(self.path)==1:
+            print(f"LOG - {self.__class__.__name__} - driving to mid ball - {self.path[0]} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
+            self.steering.move_corrected(signed_angle_degrees=signed_angle_degree, speed=6, state=self, turn_speed=15, turn_speed_turning=5)
+
+    def swap_state(self):
+        return self
+
 class PathingState(State):
     def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
         super().__init__(analyser, steering)
         self.path = path
-        self.timeout = 30  # Seconds
+        self.timeout = 30
+        print("PATH" ,path)
         self.steering_vector = path[0]
 
     def on_frame(self):
-
-        # self.steering.stop_belt()
+        if self.analyser.is_ball_close_to_middle:
+            return
         if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
         elif self.analyser.can_target_ball_directly(
@@ -56,7 +101,8 @@ class PathingState(State):
 
     def swap_state(self):
         # Check timeout
-
+        if self.analyser.is_ball_close_to_middle:
+            return CatchMidCrossBallState(self.analyser, self.path, self.steering)
         if time.time() - self.start_time > self.timeout:
             return PathingState(
                 self.analyser, self.analyser.create_path(), self.steering

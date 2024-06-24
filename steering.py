@@ -59,11 +59,13 @@ class Steering:
 
     def on_frame(self):
 
-        if self.state is None and self.analyser.safepoint_list is not None:
-            path = self.analyser.create_path()
+        path = self.analyser.create_path()
+        if path is not None and self.state is None and self.analyser.safepoint_list is not None:
             self.state: State = PathingState(
                 self.analyser, path, SteeringUtils(self.robot_interface)
             )
+        if path is None:
+            return
         if self.state is None and self.analyser.safepoint_list is None:
             return
 

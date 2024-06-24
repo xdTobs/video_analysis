@@ -146,7 +146,6 @@ class Analyse:
             corner3 = self.corners[2]
             self.course_length_px = np.linalg.norm(corner1 - corner2)
             self.course_height_px = np.linalg.norm(corner2 - corner3)
-            self.middle_point = (corner1 + corner3) / 2
 
             cross_rect, _ = self.find_cross_bounding_rectangle(self.border_mask)
             if len(cross_rect) > 0:
@@ -174,9 +173,9 @@ class Analyse:
 
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
-            sensitivity = 35
+            sensitivity = 45
             lower = np.array([0, 0, 255 - sensitivity])
-            upper = np.array([180, sensitivity, 255])
+            upper = np.array([190, sensitivity, 255])
         elif out_name == "green-mask":
             lower = np.array([31, 20, 180])
             upper = np.array([100, 255, 255])
@@ -205,9 +204,9 @@ class Analyse:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         return length < dist
 
-    def is_point_close(self, point: np.ndarray) -> bool:
+    def is_point_close(self, point: np.ndarray, dist=100) -> bool:
         distance = np.linalg.norm(point - self.robot_pos)
-        return distance < 100
+        return distance < dist
 
     def can_target_ball_directly(
         self, robot_pos: np.ndarray, ball_pos: np.ndarray
@@ -256,7 +255,7 @@ class Analyse:
             path.append(steering_vector + self.robot_pos)
         if self.is_ball_close_to_middle:
             middle_vector = ball_position - self.middle_point
-            extended_vector = middle_vector * 5
+            extended_vector = middle_vector * 8
             end_coordinates = self.middle_point + extended_vector
             steering_vector = self.find_steering_vector(self.robot_pos, end_coordinates)
             path.append(steering_vector + self.robot_pos)
