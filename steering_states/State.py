@@ -44,39 +44,57 @@ class CatchMidCrossBallState(State):
 
         ball_vector = self.path[-1] - self.analyser.robot_pos
         ball_vector_degrees = math.degrees(
-            angle_between_vectors_signed(
-                self.analyser.robot_vector, ball_vector
-            )
+            angle_between_vectors_signed(self.analyser.robot_vector, ball_vector)
         )
-        if len(self.path)>2:
-            self.steering.move_corrected(signed_angle_degree, 30, state=self, turn_speed=15)
-            print(f"LOG - {self.__class__.__name__} - driving to safepoint mid ball  - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
-            if(self.analyser.is_point_close(point=self.path[0])):
+        if len(self.path) > 2:
+            self.steering.move_corrected(
+                signed_angle_degree, 30, state=self, turn_speed=15
+            )
+            print(
+                f"LOG - {self.__class__.__name__} - driving to safepoint mid ball  - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}"
+            )
+            if self.analyser.is_point_close(point=self.path[0]):
                 self.path.pop(0)
-        elif len(self.path)==2:
-            print(f"LOG - {self.__class__.__name__} - driving to mid ball help vector - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
+        elif len(self.path) == 2:
+            print(
+                f"LOG - {self.__class__.__name__} - driving to mid ball help vector - {self.path} - {self.analyser.robot_pos} - {self.analyser.robot_vector}"
+            )
             if not self.is_close_to_help_vector:
-                self.steering.move_corrected(signed_angle_degrees=signed_angle_degree, speed=10, state=self, turn_speed=15, turn_speed_turning=5)
-            elif(self.analyser.is_point_close(point=self.path[0], dist=30)):
+                self.steering.move_corrected(
+                    signed_angle_degrees=signed_angle_degree,
+                    speed=10,
+                    state=self,
+                    turn_speed=15,
+                    turn_speed_turning=5,
+                )
+            elif self.analyser.is_point_close(point=self.path[0], dist=30):
                 self.is_close_to_help_vector = True
 
             if self.is_close_to_help_vector:
                 self.steering.turn(-1 * signed_angle_degree, 3, state=self)
                 if ball_vector_degrees < 4:
                     self.path.pop(0)
-        elif len(self.path)==1:
-            print(f"LOG - {self.__class__.__name__} - driving to mid ball - {self.path[0]} - {self.analyser.robot_pos} - {self.analyser.robot_vector}")
-            self.steering.move_corrected(signed_angle_degrees=signed_angle_degree, speed=6, state=self, turn_speed=15, turn_speed_turning=5)
+        elif len(self.path) == 1:
+            print(
+                f"LOG - {self.__class__.__name__} - driving to mid ball - {self.path[0]} - {self.analyser.robot_pos} - {self.analyser.robot_vector}"
+            )
+            self.steering.move_corrected(
+                signed_angle_degrees=signed_angle_degree,
+                speed=6,
+                state=self,
+                turn_speed=15,
+                turn_speed_turning=5,
+            )
 
     def swap_state(self):
         return self
+
 
 class PathingState(State):
     def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
         super().__init__(analyser, steering)
         self.path = path
         self.timeout = 30
-        print("PATH" ,path)
         self.steering_vector = path[0]
 
     def on_frame(self):
@@ -84,11 +102,11 @@ class PathingState(State):
             return
         if self.analyser.is_point_close(self.path[0]) and len(self.path) > 1:
             self.path.pop(0)
-        elif self.analyser.can_target_ball_directly(
-            self.analyser.robot_pos, self.path[-1]
-        ):
-            while len(self.path) > 1:
-                self.path.pop(0)
+        # elif self.analyser.can_target_ball_directly(
+        #     self.analyser.robot_pos, self.path[-1]
+        # ):
+        #     while len(self.path) > 1:
+        #         self.path.pop(0)
         self.steering_vector = self.path[0] - self.analyser.robot_pos
         signed_angle_degree = math.degrees(
             angle_between_vectors_signed(
@@ -108,6 +126,14 @@ class PathingState(State):
                 self.analyser, self.analyser.create_path(), self.steering
             )
 
+        ball_point = self.path[-1]
+        min_dist, help_coords, help_vector = (
+            self.analyser.create_border_ball_help_coords(ball_point=ball_point)
+        )
+        if min_dist < 70:
+            return BorderCollectionState(
+                self.analyser, self.path[0:-1], self.path[-1], self.steering
+            )
         if len(self.path) == 1:
             # TODO Check that this passes absolute coords and not relative
             if len(self.analyser.keypoints) == 0:
@@ -126,7 +152,7 @@ class PathingState(State):
                     self.analyser.robot_vector, self.analyser.border_vector
                 )
             )
-            < 45
+            < 85
             and border_distance < 200
         ):
             return ReversingState(self.analyser, self.path, self.steering)
@@ -186,10 +212,10 @@ class ReversingState(State):
         #         return DeliveringState(self.analyser, self.analyser.create_path(), self.steering)
         #     return PathingState(self.analyser, self.path, self.steering)
         if (
-                math.degrees(
-                    angle_between_vectors(self.analyser.robot_vector, self.result_vector)
-                )
-                < 45
+            math.degrees(
+                angle_between_vectors(self.analyser.robot_vector, self.result_vector)
+            )
+            < 45
         ):
             return PathingState(self.analyser, self.path, self.steering)
         return self
@@ -229,7 +255,9 @@ class SafePointDeliveryState(State):
             if abs(self.goal_vector_degrees) > 1:
                 self.steering.turn(-1 * self.goal_vector_degrees, 3, state=self)
         else:
-            self.steering.move_corrected(signed_angle_degree, 5, turn_speed=15, state=self, turn_speed_turning=3)
+            self.steering.move_corrected(
+                signed_angle_degree, 5, turn_speed=15, state=self, turn_speed_turning=3
+            )
 
     def swap_state(self):
         if self.is_close_to_safepoint and abs(self.goal_vector_degrees) < 2:
@@ -265,7 +293,9 @@ class DeliveryPointDeliveringState(State):
             if abs(self.goal_vector_degrees) > 1:
                 self.steering.turn(-1 * self.goal_vector_degrees, 3, state=self)
         else:
-            self.steering.move_corrected(signed_angle_degree, 4, turn_speed=15, state=self, turn_speed_turning=3)
+            self.steering.move_corrected(
+                signed_angle_degree, 4, turn_speed=15, state=self, turn_speed_turning=3
+            )
 
     def swap_state(self):
         if self.is_close_to_delivery_point and abs(self.goal_vector_degrees) < 4:
@@ -287,7 +317,6 @@ class CollectionState(State):
         self.speed = self.analyser.get_speed(
             np.linalg.norm(ball_point - self.analyser.robot_pos)
         )
-        # TODO Assuming relative coords, might be getting absolute
 
         self.steering_vector = ball_point - self.analyser.robot_pos
 
@@ -296,7 +325,9 @@ class CollectionState(State):
                 self.analyser.robot_vector, self.steering_vector
             )
         )
-        self.steering.move_corrected(signed_angle_degree, self.speed, state=self, turn_speed_turning=5)
+        self.steering.move_corrected(
+            signed_angle_degree, self.speed, state=self, turn_speed_turning=5
+        )
         self.steering.start_belt()
 
     def swap_state(self):
@@ -308,6 +339,84 @@ class CollectionState(State):
             )
 
         # TODO Check if we need to check for a certain distance to the ball
+        if np.linalg.norm(self.steering_vector) < self.distance_before_swap:
+            return PathingState(
+                self.analyser, self.analyser.create_path(), self.steering
+            )
+
+        return self
+
+
+class BorderCollectionState(State):
+    def __init__(self, analyser: Analyse, path, ball_point, steering: SteeringUtils):
+        super().__init__(analyser, steering)
+        min_dist, help_coords, help_vector = (
+            self.analyser.create_border_ball_help_coords(ball_point)
+        )
+        path.append(help_coords)
+        path.append(ball_point)
+        self.help_vector = help_vector
+        self.help_coords = help_coords
+        self.path = path
+        self.distance_before_swap = 60
+
+    def on_frame(self):
+        print(self.path)
+        if len(self.path) > 2:
+            self.steering_vector = self.path[0] - self.analyser.robot_pos
+            signed_angle_degree = math.degrees(
+                angle_between_vectors_signed(
+                    self.analyser.robot_vector, self.steering_vector
+                )
+            )
+            if self.analyser.is_point_close(self.path[0]):
+                self.path.pop(0)
+            else:
+                self.steering.move_corrected(
+                    signed_angle_degrees=signed_angle_degree,
+                    speed=10,
+                    state=self,
+                    turn_speed=15,
+                )
+        if len(self.path) == 1:
+            self.steering_vector = self.path[0] - self.analyser.robot_pos
+            signed_angle_degree = math.degrees(
+                angle_between_vectors_signed(
+                    self.analyser.robot_vector, self.steering_vector
+                )
+            )
+            if abs(signed_angle_degree) > 4 and self.analyser.is_point_close(
+                self.path[0]
+            ):
+                self.steering.turn(-1 * signed_angle_degree, 3, state=self)
+            elif abs(signed_angle_degree) > 4:
+                self.steering.move_corrected(
+                    signed_angle_degree=signed_angle_degree,
+                    speed=10,
+                    state=self,
+                    turn_speed=15,
+                )
+            else:
+                self.path.pop(0)
+
+        if len(self.path) == 0:
+            self.steering_vector = self.path[0] - self.analyser.robot_pos
+            self.steering.move_corrected(
+                signed_angle_degree=signed_angle_degree,
+                speed=10,
+                state=self,
+                turn_speed=15,
+            )
+
+    def swap_state(self):
+        # Check timeout
+        # if self.timeout < time.time() - self.start_time:
+        #     # TODO Move / create
+        #     return PathingState(
+        #         self.analyser, self.analyser.create_path(), self.steering
+        #     )
+
+        # # TODO Check if we need to check for a certain distance to the ball
         if np.linalg.norm(self.steering_vector) < self.distance_before_swap:
             return PathingState(
                 self.analyser, self.analyser.create_path(), self.steering

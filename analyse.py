@@ -359,7 +359,9 @@ class Analyse:
             for i, point in enumerate(safepoint_list):
                 point_relative_to_middle = point > self.middle_point
                 # Check if safepoint has the same orientation as the ball relative to the middle
-                if np.array_equal(point_relative_to_middle, ball_position_relative_to_middle):
+                if np.array_equal(
+                    point_relative_to_middle, ball_position_relative_to_middle
+                ):
                     filtered_safepoints.append((i, point))
         else:
             filtered_safepoints = enumerate(safepoint_list)
@@ -370,6 +372,7 @@ class Analyse:
                 closest_distance = distance
                 closest_index = i
         return closest_index
+
     def find_triple_green_robot(self, green_mask: np.ndarray):
         # Errode from green mask
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
@@ -725,6 +728,21 @@ class Analyse:
         if self.corners is None:
             raise BorderNotFoundError("No border corners found")
         return self.corners
+
+    def create_border_ball_help_coords(self, ball_point):
+        # create a vector 50 pixels long from the ball to the border
+        min_distance, ball_nav_help_vector = self.calculate_distance_to_closest_border(
+            ball_point
+        )
+        print(f"ball point {ball_point} - closest border point {ball_nav_help_vector}")
+        # ball_nav_help_vector = coordinates_to_vector(
+        #     ball_point, closest_border_point_to_ball
+        # )
+        ball_nav_help_vector = (
+            ball_nav_help_vector / np.linalg.norm(ball_nav_help_vector) * 50
+        )
+        coords = ball_point + ball_nav_help_vector
+        return min_distance, coords, ball_nav_help_vector
 
 
 class RobotNotFoundError(Exception):
