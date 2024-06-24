@@ -222,7 +222,7 @@ class VideoOutput:
                     )  # Position the text 10 pixels above the corner
                     cv2.putText(
                         frame,
-                        f"Safe  {index}",
+                        f"{index}",
                         text_position,
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.5,
