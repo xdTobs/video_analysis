@@ -234,8 +234,9 @@ class Analyse:
 
         self.is_ball_close_to_middle = self.calculate_is_ball_close_to_middle(ball_position)
         if self.is_ball_close_to_middle:
-            #TODO: Add logic to handle ball close to middle
-            print("Ball is close to middle")
+            middle_vector = ball_position - self.middle_point
+            extended_vector = middle_vector * 5
+            end_coordinates = self.middle_point + extended_vector
 
 
 
@@ -248,6 +249,12 @@ class Analyse:
                 self.robot_pos, self.safepoint_list[self.path_indexes[i]]
             )
             # print(f"Index: {i}   Steering vector: {steering_vector}")
+            path.append(steering_vector + self.robot_pos)
+        if self.is_ball_close_to_middle:
+            middle_vector = ball_position - self.middle_point
+            extended_vector = middle_vector * 5
+            end_coordinates = self.middle_point + extended_vector
+            steering_vector = self.find_steering_vector(self.robot_pos, end_coordinates)
             path.append(steering_vector + self.robot_pos)
         steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
         path.append(steering_vector + self.robot_pos)
@@ -334,16 +341,27 @@ class Analyse:
     ) -> int:
         if len(safepoint_list) == 0:
             return None
-        closest_distance = sys.maxsize
-        closest_index = 0
-        for i, point in enumerate(safepoint_list):
+        ball_position_relative_to_middle = position > self.middle_point
 
+        closest_distance = sys.maxsize
+        closest_index = None
+
+        if self.is_ball_close_to_middle:
+            filtered_safepoints = []
+            for i, point in enumerate(safepoint_list):
+                point_relative_to_middle = point > self.middle_point
+                # Check if safepoint has the same orientation as the ball relative to the middle
+                if np.array_equal(point_relative_to_middle, ball_position_relative_to_middle):
+                    filtered_safepoints.append((i, point))
+        else:
+            filtered_safepoints = enumerate(safepoint_list)
+
+        for i, point in filtered_safepoints:
             distance = np.linalg.norm(position - point)
             if distance < closest_distance:
                 closest_distance = distance
                 closest_index = i
         return closest_index
-
     def find_triple_green_robot(self, green_mask: np.ndarray):
         # Errode from green mask
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
