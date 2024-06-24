@@ -188,7 +188,7 @@ class Analyse:
         
 
     def calculate_is_ball_close_to_middle(
-        self, ball_position: np.ndarray, threshold: float = 100
+        self, ball_position: np.ndarray, threshold: float = 60
     ) -> bool:
         if self.middle_point is None:
             raise ValueError("Middle point has not been calculated.")
@@ -202,7 +202,7 @@ class Analyse:
 
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
-            sensitivity = 35
+            sensitivity = 50
             lower = np.array([0, 0, 255 - sensitivity])
             upper = np.array([180, sensitivity, 255])
         elif out_name == "green-mask":
@@ -230,11 +230,11 @@ class Analyse:
         print(f" Distance: {distance}, Speed {speed}")
         return speed
 
-    def are_coordinates_close(self, vector: np.ndarray, dist=100) -> bool:
+    def are_coordinates_close(self, vector: np.ndarray, dist=50) -> bool:
         length = math.sqrt(vector[0] ** 2 + vector[1] ** 2)
         return length < dist
 
-    def is_point_close(self, point: np.ndarray, dist=100) -> bool:
+    def is_point_close(self, point: np.ndarray, dist=50) -> bool:
         distance = np.linalg.norm(point - self.robot_pos)
         return distance < dist
 
