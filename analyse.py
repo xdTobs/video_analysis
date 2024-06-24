@@ -39,6 +39,7 @@ class Analyse:
         self.safepoint_list: np.ndarray = None
         self.middle_point = None
         self.distance_to_middle = None
+        self.is_ball_close_to_middle = False
 
         self.new_white_mask = None
         self.white_average = np.zeros((576, 1024), dtype=np.float32)
@@ -155,6 +156,13 @@ class Analyse:
                 # print(f"Cross found at {self.middle_point}")
             self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
 
+    def calculate_is_ball_close_to_middle(self, ball_position: np.ndarray, threshold: float = 100) -> bool:
+        if self.middle_point is None:
+            raise ValueError("Middle point has not been calculated.")
+
+        distance_to_middle = np.linalg.norm(ball_position - self.middle_point)
+        return distance_to_middle < threshold
+
     @staticmethod
     def apply_threshold(image: np.ndarray, out_name: str) -> np.ndarray:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -220,9 +228,15 @@ class Analyse:
         ball_position = self.find_closest_ball(self.keypoints, self.robot_pos)
         if ball_position is None:
             ball_position = self.dropoff_coords
-        self.path_indexes = self.find_path_to_target(
-            ball_position, self.robot_pos, self.safepoint_list
-        )
+
+        self.is_ball_close_to_middle = self.calculate_is_ball_close_to_middle(ball_position)
+        if self.is_ball_close_to_middle:
+            #TODO: Add logic to handle ball close to middle
+            print("Ball is close to middle")
+
+
+
+        self.path_indexes = self.find_path_to_target(ball_position, self.robot_pos, self.safepoint_list)
         if len(self.path_indexes) == 0:
             return None
         path = []
@@ -632,6 +646,7 @@ class Analyse:
         keypoints = detector.detect(mask)
         return keypoints
         pass
+
 
     def distance_point_to_segment(
         self, p: np.ndarray, v: np.ndarray, w: np.ndarray
