@@ -450,11 +450,9 @@ class Analyse:
                 self.large_goal_coords, self.small_goal_coords
             )
 
-            self.translation_vector = self.goal_vector * 14 / 15
+            self.translation_vector = self.goal_vector * 0.9
 
-            self.dropoff_coords = (
-                self.large_goal_coords + self.translation_vector - np.array([30, 0])
-            )
+            self.dropoff_coords = self.large_goal_coords + self.translation_vector
             self.delivery_vector = coordinates_to_vector(
                 self.dropoff_coords, self.small_goal_coords
             )
