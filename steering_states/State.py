@@ -256,7 +256,7 @@ class SafePointDeliveryState(State):
 
         #    -30 if self.analyser.robot_pos[1] < self.analyser.dropoff_coords[1] else 30
         # )
-        self.closest_safepoint = self.analyser.safepoint_list[31]
+        self.closest_safepoint = self.analyser.safepoint_list[27]
         self.is_close_to_safepoint = False
         self.goal_vector_degrees = None
 
