@@ -767,11 +767,20 @@ class Analyse:
             raise BorderNotFoundError()
         return corners
 
+    def is_keypoint_inside_border(self, keypoint: np.ndarray) -> bool:
+        if self.corners is None:
+            raise ValueError("Border corners are not set")
+
+        if not cv2.pointPolygonTest(self.corners, keypoint.pt, False) >= 0:
+            return False
+        return True
+
     def find_ball_keypoints(self, mask: np.ndarray) -> np.ndarray:
         detector = BlobDetector.get_ball_detector()
         keypoints = detector.detect(mask)
+        # check if keypoints are inside the border
+        keypoints = [keypoint for keypoint in keypoints if self.is_keypoint_inside_border(keypoint)]
         return keypoints
-        pass
 
     def find_egg_location(self, mask: np.ndarray) -> np.ndarray:
         detector = BlobDetector.get_egg_detector()
