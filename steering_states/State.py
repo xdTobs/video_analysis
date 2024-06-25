@@ -131,15 +131,15 @@ class PathingState(State):
 
     def on_frame(self):
 
-        ball_distance = self.analyser.calculate_distance_to_closest_border(self.path[-1])[0]
+        ball_distance_to_border = self.analyser.calculate_distance_to_closest_border(self.path[-1])[0]
 
         if self.analyser.is_ball_close_to_middle:
             return
-        if self.analyser.is_point_close_to_robot(self.path[0]) and len(self.path) > 1:
+        if self.analyser.is_point_close_to_robot(self.path[0], 50) and len(self.path) > 1:
             self.path.pop(0)
         elif self.analyser.can_target_ball_directly(
                 self.analyser.robot_pos, self.path[-1]
-        ) and not ball_distance < 125:
+        ) and not ball_distance_to_border < 125:
             while len(self.path) > 1:
                 self.path.pop(0)
         self.steering_vector = self.path[0] - self.analyser.robot_pos

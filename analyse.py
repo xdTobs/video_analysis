@@ -621,10 +621,10 @@ class Analyse:
             center_left = ((left_upper_coords + left_lower_coords) // 2) + [90,0]
             center_right = ((right_upper_coords + right_lower_coords) // 2)  + [-90,0]
 
-            
+
             # Combine all safe points into one list
             self.corner_safepoint_list = np.array(
-                [center_bottom, center_top, center_left, center_right]
+                [center_bottom, center_left, center_top, center_right]
             )
 
             return
