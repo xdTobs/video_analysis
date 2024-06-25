@@ -760,6 +760,7 @@ class Analyse:
     def find_ball_keypoints(self, mask: np.ndarray) -> np.ndarray:
         detector = BlobDetector.get_ball_detector()
         keypoints = detector.detect(mask)
+
         # check if keypoints are inside the border
         keypoints = [keypoint for keypoint in keypoints if self.is_keypoint_inside_border(keypoint)]
         return keypoints

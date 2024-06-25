@@ -33,7 +33,7 @@ class CatchMidCrossBallState(State):
         self.is_close_to_help_vector = False
         self.path = path
         self.distance_before_swap = 59
-        self.timeout = 40  # seconds
+        self.timeout = 45  # seconds
 
     def on_frame(self):
         self.steering.stop_belt()
@@ -149,7 +149,7 @@ class PathingState(State):
             )
         )
 
-        self.steering.move_corrected(signed_angle_degree, 30, state=self, turn_speed=15)
+        self.steering.move_corrected(signed_angle_degree, 40, state=self, turn_speed=15)
         pass
 
     def swap_state(self):
@@ -280,9 +280,9 @@ class SafePointDeliveryState(State):
         )
         if self.is_close_to_safepoint:
             if abs(self.goal_vector_degrees) > 1:
-                self.steering.turn(-1 * self.goal_vector_degrees, 3, state=self)
+                self.steering.turn(-1 * self.goal_vector_degrees, 15, state=self)
         else:
-            self.steering.move_corrected(signed_angle_degree, 5, turn_speed=15, state=self, turn_speed_turning=3)
+            self.steering.move_corrected(signed_angle_degree, 20, turn_speed=20, state=self, turn_speed_turning=10)
 
     def swap_state(self):
 
@@ -320,9 +320,9 @@ class DeliveryPointDeliveringState(State):
         )
         if self.is_close_to_delivery_point:
             if abs(self.goal_vector_degrees) > 1:
-                self.steering.turn(-1 * self.goal_vector_degrees, 3, state=self)
+                self.steering.turn(-1 * self.goal_vector_degrees, 10, state=self)
         else:
-            self.steering.move_corrected(signed_angle_degree, 4, turn_speed=15, state=self, turn_speed_turning=3)
+            self.steering.move_corrected(signed_angle_degree, 15, turn_speed=20, state=self, turn_speed_turning=10)
 
     def swap_state(self):
         if self.is_close_to_delivery_point and abs(self.goal_vector_degrees) < 4:
@@ -336,7 +336,7 @@ class CollectionState(State):
         self.path = ball_point
         self.distance_before_swap = 70  # px
         self.timeout = 15  # seconds
-        self.speed = 0  # % of max speed
+        self.speed = 80  # % of max speed
         self.safe_distance_middle = 100  # px
 
     def on_frame(self):
@@ -353,7 +353,7 @@ class CollectionState(State):
                 self.analyser.robot_vector, self.steering_vector
             )
         )
-        self.steering.move_corrected(signed_angle_degree, self.speed, state=self, turn_speed_turning=5)
+        self.steering.move_corrected(signed_angle_degree, self.speed, state=self, turn_speed_turning=10)
         self.steering.start_belt()
 
     def swap_state(self):
@@ -399,8 +399,8 @@ class CatchCornerBallState(State):
         super().__init__(analyser, steering)
         self.path = path
         self.distance_before_swap = 50
-        self.timeout = 10  # seconds
-        self.speed = 30  # % of max speed
+        self.timeout = 15   # seconds
+        self.speed = 80  # % of max speed
 
     def on_frame(self):
         ball_point = self.path[0]
@@ -416,7 +416,7 @@ class CatchCornerBallState(State):
                 self.analyser.robot_vector, self.steering_vector
             )
         )
-        self.steering.move_corrected(signed_angle_degree, self.speed, state=self, turn_speed_turning=5)
+        self.steering.move_corrected(signed_angle_degree, self.speed, state=self, turn_speed_turning=10)
         self.steering.start_belt()
 
     def swap_state(self):
