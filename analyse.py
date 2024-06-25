@@ -580,7 +580,7 @@ class Analyse:
             # Generate the second set of safe points
             safe_points_13_to_17 = [
                 large_goal_coords - [0, y_offset] - small_translation_vector * 3
-                for y_offset in [60, 30, 0, -30, -60]
+                for y_offset in [-60, -30, 0, 30, 60]
             ]
 
             # Generate the third set of safe points
