@@ -610,16 +610,10 @@ class Analyse:
             left_lower_coords = ((corner4 + large_goal_coords) // 2) - [0, -70]
             left_upper_coords = ((large_goal_coords + corner3) // 2) + [0, -70]
 
-            lower_vector = coordinates_to_vector(right_lower_coords, left_lower_coords)
-            upper_vector = coordinates_to_vector(right_upper_coords, left_upper_coords)
-
-            small_translation_vector = lower_vector / 15
-            large_translation_vector = lower_vector * 0.4
-
-            center_bottom = ((right_lower_coords + left_lower_coords) // 2) + [0,-30]
-            center_top = ((right_upper_coords + left_upper_coords) // 2) + [0,30]
-            center_left = ((left_upper_coords + left_lower_coords) // 2) + [90,0]
-            center_right = ((right_upper_coords + right_lower_coords) // 2)  + [-90,0]
+            center_bottom = ((right_lower_coords + left_lower_coords) // 2) + [0,-15]
+            center_top = ((right_upper_coords + left_upper_coords) // 2) + [0,15]
+            center_left = ((left_upper_coords + left_lower_coords) // 2) + [50,0]
+            center_right = ((right_upper_coords + right_lower_coords) // 2)  + [-50,0]
 
 
             # Combine all safe points into one list
