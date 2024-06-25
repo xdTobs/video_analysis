@@ -166,6 +166,8 @@ class PathingState(State):
                 return SafePointDeliveryState(
                     self.analyser, self.analyser.create_path(), self.steering
                 )
+            elif self.analyser.is_target_in_corner(self.path[-1]):
+                return CatchCornerBallState(self.analyser, self.path, self.steering)
 
             return CollectionState(self.analyser, [self.path[0]], self.steering)
 
@@ -389,4 +391,39 @@ class ReleaseBallsState(State):
             return PathingState(
                 self.analyser, self.analyser.create_path(), self.steering
             )
+        return self
+
+
+class CatchCornerBallState(State):
+    def __init__(self, analyser: Analyse, path: list, steering: SteeringUtils):
+        super().__init__(analyser, steering)
+        self.path = path
+        self.distance_before_swap = 50
+        self.timeout = 10  # seconds
+        self.speed = 30  # % of max speed
+
+    def on_frame(self):
+        ball_point = self.path[0]
+        self.speed = self.analyser.get_speed(
+            np.linalg.norm(ball_point - self.analyser.robot_pos)
+        )
+        # TODO Assuming relative coords, might be getting absolute
+
+        self.steering_vector = ball_point - self.analyser.robot_pos
+
+        signed_angle_degree = math.degrees(
+            angle_between_vectors_signed(
+                self.analyser.robot_vector, self.steering_vector
+            )
+        )
+        self.steering.move_corrected(signed_angle_degree, self.speed, state=self, turn_speed_turning=5)
+        self.steering.start_belt()
+
+    def swap_state(self):
+        #Check timeout
+        if time.time() - self.start_time > self.timeout:
+            return ReversingState(self.analyser, self.analyser.create_path(), self.steering)
+
+        if len(self.path) == 1 and self.analyser.is_point_close_to_robot(self.path[-1], self.distance_before_swap):
+            return ReversingState(self.analyser, self.analyser.create_path(), self.steering)
         return self

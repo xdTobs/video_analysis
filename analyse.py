@@ -164,8 +164,9 @@ class Analyse:
                         cross_rect[0][1] + cross_rect[0][3] // 2,
                     ]
                 )
-                # print(f"Cross found at {self.middle_point}")
-            self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
+                if self.middle_point is not None:
+                    # print(f"Cross found at {self.middle_point}")
+                    self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
 
     def filter_keypoints_close_to_middle_cross(self, keypoints: np.ndarray) -> np.ndarray:
         if self.middle_point is None:
@@ -311,6 +312,12 @@ class Analyse:
             path.append(steering_vector + self.robot_pos)
         steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
         path.append(steering_vector + self.robot_pos)
+
+        # check if path contains same element twice
+        if len(path) > 1:
+            for i in range(1, len(path)):
+                if np.array_equal(path[i], path[i - 1]):
+                    path.pop(i)
         self.path = path
         return path
 
