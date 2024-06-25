@@ -60,7 +60,11 @@ class Steering:
     def on_frame(self):
 
         path = self.analyser.create_path()
-        if path is not None and self.state is None and self.analyser.safepoint_list is not None:
+        if (
+            path is not None
+            and self.state is None
+            and self.analyser.safepoint_list is not None
+        ):
             self.state: State = PathingState(
                 self.analyser, path, SteeringUtils(self.robot_interface)
             )
@@ -81,7 +85,7 @@ class Steering:
 
     def stop_belt(self):
         self.robot_interface.send_command("belt", 0, speedPercentage=-100)
-        time.sleep(1)
+        time.sleep(10)
         self.robot_interface.send_command("belt", 0, speedPercentage=0)
 
     def stop_motors(self):

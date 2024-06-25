@@ -80,38 +80,38 @@ class Analyse:
             self.apply_threshold, "white-ball", image
         )
         self.white_average = (
-                self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         )
         self.white_mask = (
-                                  self.white_average.astype(np.uint8) > self.average_threshold
-                          ).astype(np.uint8) * 255
+            self.white_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.white_average = (
-                self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
+            self.alpha * self.new_white_mask + (1 - self.alpha) * self.white_average
         )
         self.white_mask = (
-                                  self.white_average.astype(np.uint8) > self.average_threshold
-                          ).astype(np.uint8) * 255
+            self.white_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.new_orange_mask = self.videoDebugger.run_analysis(
             self.apply_threshold, "orange-ball", image
         )
         self.orange_average = (
-                self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
+            self.alpha * self.new_orange_mask + (1 - self.alpha) * self.orange_average
         )
         self.orange_mask = (
-                                   self.orange_average.astype(np.uint8) > self.average_threshold
-                           ).astype(np.uint8) * 255
+            self.orange_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.new_border_mask = self.videoDebugger.run_analysis(
             self.isolate_borders, "border", image
         )
         self.border_average = (
-                self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
+            self.alpha * self.new_border_mask + (1 - self.alpha) * self.border_average
         )
         self.border_mask = (
-                                   self.border_average.astype(np.uint8) > self.average_threshold
-                           ).astype(np.uint8) * 255
+            self.border_average.astype(np.uint8) > self.average_threshold
+        ).astype(np.uint8) * 255
 
         self.white_ball_keypoints = self.find_ball_keypoints(self.white_mask)
         self.orange_ball_keypoints = self.find_ball_keypoints(self.orange_mask)
@@ -119,7 +119,9 @@ class Analyse:
             self.keypoints = self.orange_ball_keypoints
 
         else:
-            self.keypoints = self.filter_keypoints_close_to_middle_cross(self.white_ball_keypoints)
+            self.keypoints = self.filter_keypoints_close_to_middle_cross(
+                self.white_ball_keypoints
+            )
 
         self.egg_location = self.find_egg_location(self.white_mask)
         try:
@@ -166,9 +168,13 @@ class Analyse:
                 )
                 if self.middle_point is not None:
                     # print(f"Cross found at {self.middle_point}")
-                    self.distance_to_middle = np.linalg.norm(self.robot_pos - self.middle_point)
+                    self.distance_to_middle = np.linalg.norm(
+                        self.robot_pos - self.middle_point
+                    )
 
-    def filter_keypoints_close_to_middle_cross(self, keypoints: np.ndarray) -> np.ndarray:
+    def filter_keypoints_close_to_middle_cross(
+        self, keypoints: np.ndarray
+    ) -> np.ndarray:
         if self.middle_point is None:
             raise ValueError("Middle point has not been calculated.")
 
@@ -186,11 +192,12 @@ class Analyse:
         return keypoints_not_close_to_middle
 
     def calculate_is_ball_close_to_middle(
-            self, ball_position: np.ndarray, threshold: float = 60
+        self, ball_position: np.ndarray, threshold: float = 60
     ) -> bool:
         if self.middle_point is None:
             raise ValueError("Middle point has not been calculated.")
-
+        if ball_position is None:
+            raise BallNotFoundError("Ball not found")
         distance_to_middle = np.linalg.norm(ball_position - self.middle_point)
         return distance_to_middle < threshold
 
@@ -200,7 +207,7 @@ class Analyse:
 
         if out_name == "white-ball":
             # https://stackoverflow.com/questions/22588146/tracking-white-color-using-python-opencv
-            sensitivity = 65
+            sensitivity = 45
             lower = np.array([0, 0, 255 - sensitivity])
             upper = np.array([180, sensitivity, 255])
         elif out_name == "green-mask":
@@ -213,8 +220,8 @@ class Analyse:
             lower = np.array([10, 5, 220])
             upper = np.array([30, 255, 255])
         elif out_name == "border":
-            lower = np.array([0, 130, 180])
-            upper = np.array([30, 255, 255])
+            lower = np.array([0, 100, 100])
+            upper = np.array([40, 250, 250])
 
         mask = cv2.inRange(hsv, lower, upper)
 
@@ -222,8 +229,8 @@ class Analyse:
 
     def get_speed(self, distance: int):
         speed = (
-                        0.01100000000 * math.pow(distance, 2) - 0.1200000000 * distance + 0.1
-                ) / 5
+            0.01100000000 * math.pow(distance, 2) - 0.1200000000 * distance + 0.1
+        ) / 5
         print(f" Distance: {distance}, Speed {speed}")
         return speed
 
@@ -238,14 +245,16 @@ class Analyse:
     def is_target_in_corner(self, target: np.ndarray, threshold: int = 100) -> bool:
         if target is None:
             return False
-        return any(is_coordinates_close(target, np.array(corner), threshold) for corner in self.corners)
-
+        return any(
+            is_coordinates_close(target, np.array(corner), threshold)
+            for corner in self.corners
+        )
 
     def can_target_ball_directly(
-            self, robot_pos: np.ndarray, ball_pos: np.ndarray
+        self, robot_pos: np.ndarray, ball_pos: np.ndarray
     ) -> bool:
         if (self.calculate_distance_to_closest_border(ball_pos)[0] < 100) or (
-                self.calculate_distance_to_closest_border(robot_pos)[0] < 100
+            self.calculate_distance_to_closest_border(robot_pos)[0] < 100
         ):
             return False
         distance_to_ball = np.linalg.norm(ball_pos - robot_pos)
@@ -258,23 +267,31 @@ class Analyse:
         return False
 
     def find_steering_vector(
-            self,
-            robot_pos: np.ndarray,
-            target_position: np.ndarray,
+        self,
+        robot_pos: np.ndarray,
+        target_position: np.ndarray,
     ) -> np.ndarray:
 
         return target_position - robot_pos
 
     def create_path(self):
+        extended_vector = None
         ball_position = self.find_closest_ball(self.keypoints, self.robot_pos)
         ball_in_corner = self.is_target_in_corner(ball_position, 40)
 
+        if ball_position is not None:
+            self.is_ball_close_to_middle = self.calculate_is_ball_close_to_middle(
+                ball_position
+            )
+
+            if self.is_ball_close_to_middle:
+                middle_vector = ball_position - self.middle_point
+                middle_vector = middle_vector / np.linalg.norm(middle_vector)
+                extended_vector = middle_vector * 140
+                ball_position = ball_position + extended_vector
+
         if ball_position is None:
             ball_position = self.dropoff_coords
-
-        self.is_ball_close_to_middle = self.calculate_is_ball_close_to_middle(
-            ball_position
-        )
 
         if ball_in_corner:
             self.path_indexes = self.find_path_to_target(
@@ -299,19 +316,19 @@ class Analyse:
 
             # print(f"Index: {i}   Steering vector: {steering_vector}")
             path.append(steering_vector + self.robot_pos)
-        if self.is_ball_close_to_middle:
-            middle_vector = ball_position - self.middle_point
-            middle_vector = middle_vector / np.linalg.norm(middle_vector)
-            extended_vector = middle_vector * 130
-            end_coordinates = self.middle_point + extended_vector
-            steering_vector = self.find_steering_vector(self.robot_pos, end_coordinates)
-            path.append(steering_vector + self.robot_pos)
+        if (
+            self.is_ball_close_to_middle
+            and ball_position is not None
+            and extended_vector is not None
+        ):
+            path.append(ball_position - extended_vector)
 
         if self.calculate_distance_to_closest_border(ball_position)[0] < 100:
             steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
             path.append(steering_vector + self.robot_pos)
         steering_vector = self.find_steering_vector(self.robot_pos, ball_position)
-        path.append(steering_vector + self.robot_pos)
+        if not self.is_ball_close_to_middle:
+            path.append(steering_vector + self.robot_pos)
 
         # check if path contains same element twice
         if len(path) > 1:
@@ -322,10 +339,10 @@ class Analyse:
         return path
 
     def find_path_to_target(
-            self,
-            ball_position: np.ndarray,
-            robot_pos: np.ndarray,
-            safepoint_list: np.ndarray,
+        self,
+        ball_position: np.ndarray,
+        robot_pos: np.ndarray,
+        safepoint_list: np.ndarray,
     ) -> np.ndarray:
         closest_safepoint_index_to_ball = self.find_closest_safepoint_index(
             ball_position, safepoint_list
@@ -359,7 +376,7 @@ class Analyse:
         return []
 
     def find_closest_ball(
-            self, keypoints: np.ndarray, robot_pos: np.ndarray
+        self, keypoints: np.ndarray, robot_pos: np.ndarray
     ) -> np.ndarray:
         if len(keypoints) == 0:
             return None
@@ -376,7 +393,7 @@ class Analyse:
         return closest_point
 
     def calculate_is_ball_close_to_borders(
-            self, ball_pos: np.ndarray, corners: np.ndarray
+        self, ball_pos: np.ndarray, corners: np.ndarray
     ) -> bool:
         x_min, y_min = np.min(corners, axis=0)
         x_max, y_max = np.max(corners, axis=0)
@@ -388,16 +405,16 @@ class Analyse:
         distance_to_top_border = y_max - y
 
         if (
-                distance_to_left_border < self.distance_to_border_threshold
-                or distance_to_right_border < self.distance_to_border_threshold
-                or distance_to_bottom_border < self.distance_to_border_threshold
-                or distance_to_top_border < self.distance_to_border_threshold
+            distance_to_left_border < self.distance_to_border_threshold
+            or distance_to_right_border < self.distance_to_border_threshold
+            or distance_to_bottom_border < self.distance_to_border_threshold
+            or distance_to_top_border < self.distance_to_border_threshold
         ):
             return True
         return False
 
     def find_closest_safepoint_index(
-            self, position: np.ndarray, safepoint_list: np.ndarray
+        self, position: np.ndarray, safepoint_list: np.ndarray
     ) -> int:
         if len(safepoint_list) == 0:
             return None
@@ -411,7 +428,9 @@ class Analyse:
             for i, point in enumerate(safepoint_list):
                 point_relative_to_middle = point > self.middle_point
                 # Check if safepoint has the same orientation as the ball relative to the middle
-                if np.array_equal(point_relative_to_middle, ball_position_relative_to_middle):
+                if np.array_equal(
+                    point_relative_to_middle, ball_position_relative_to_middle
+                ):
                     filtered_safepoints.append((i, point))
         else:
             filtered_safepoints = enumerate(safepoint_list)
@@ -460,8 +479,8 @@ class Analyse:
             bottom_pos = np.array(
                 self.convert_perspective(
                     (
-                            self.green_points_not_translated[bottom_points[0]]
-                            + self.green_points_not_translated[bottom_points[1]]
+                        self.green_points_not_translated[bottom_points[0]]
+                        + self.green_points_not_translated[bottom_points[1]]
                     )
                     / 2
                 )
@@ -476,21 +495,21 @@ class Analyse:
             top_pos = np.array((0, 0))
             print(e)
         self.robot_vector_not_translated = (
-                np.array(self.green_points_not_translated[top_point])
-                - np.array(
-            self.green_points_not_translated[bottom_points[0]]
-            + self.green_points_not_translated[bottom_points[1]]
-        )
-                / 2
+            np.array(self.green_points_not_translated[top_point])
+            - np.array(
+                self.green_points_not_translated[bottom_points[0]]
+                + self.green_points_not_translated[bottom_points[1]]
+            )
+            / 2
         )
         self.robot_pos_not_translated = (
-                                                self.green_points_not_translated[bottom_points[0]]
-                                                + self.green_points_not_translated[bottom_points[1]]
-                                        ) / 2
+            self.green_points_not_translated[bottom_points[0]]
+            + self.green_points_not_translated[bottom_points[1]]
+        ) / 2
         return bottom_pos, top_pos - bottom_pos
 
     def find_red_green_robot(
-            self, green_mask: np.ndarray, red_mask: np.ndarray
+        self, green_mask: np.ndarray, red_mask: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         detector = BlobDetector.get_robot_circle_detector()
         green_keypoints = detector.detect(green_mask)
@@ -546,7 +565,7 @@ class Analyse:
                 self.large_goal_coords, self.small_goal_coords
             )
 
-            self.translation_vector = self.goal_vector * 0.92
+            self.translation_vector = self.goal_vector * 0.89
 
             self.dropoff_coords = self.large_goal_coords + self.translation_vector
             self.delivery_vector = coordinates_to_vector(
@@ -573,8 +592,7 @@ class Analyse:
 
             # Generate the first set of safe points using a list comprehension
             safe_points_1_to_12 = [
-                right_lower_coords + small_translation_vector * i
-                for i in range(3, 13)
+                right_lower_coords + small_translation_vector * i for i in range(3, 13)
             ]
 
             # Generate the second set of safe points
@@ -585,8 +603,7 @@ class Analyse:
 
             # Generate the third set of safe points
             safe_points_18_to_29 = [
-                left_upper_coords - small_translation_vector * i
-                for i in range(3, 13)
+                left_upper_coords - small_translation_vector * i for i in range(3, 13)
             ]
 
             # Generate the fourth set of safe points
@@ -597,10 +614,10 @@ class Analyse:
 
             # Combine all safe points into one list
             self.safepoint_list = np.array(
-                safe_points_1_to_12 +
-                safe_points_13_to_17 +
-                safe_points_18_to_29 +
-                safe_points_30_to_34
+                safe_points_1_to_12
+                + safe_points_13_to_17
+                + safe_points_18_to_29
+                + safe_points_30_to_34
             )
 
             return
@@ -617,17 +634,23 @@ class Analyse:
             left_lower_coords = ((corner4 + large_goal_coords) // 2) - [0, -70]
             left_upper_coords = ((large_goal_coords + corner3) // 2) + [0, -70]
 
-            bottom_right = ((right_lower_coords + left_lower_coords) // 2) + [70,-15]
-            bottom_left = ((right_lower_coords + left_lower_coords) // 2) + [-70,-15]
-            center_left = ((left_upper_coords + left_lower_coords) // 2) + [60,0]
-            top_left = ((right_upper_coords + left_upper_coords) // 2) + [-70,15]
-            top_right = ((right_upper_coords + left_upper_coords) // 2) + [70,15]
-            center_right = ((right_upper_coords + right_lower_coords) // 2)  + [-60,0]
-
+            bottom_right = ((right_lower_coords + left_lower_coords) // 2) + [70, -15]
+            bottom_left = ((right_lower_coords + left_lower_coords) // 2) + [-70, -15]
+            center_left = ((left_upper_coords + left_lower_coords) // 2) + [60, 0]
+            top_left = ((right_upper_coords + left_upper_coords) // 2) + [-70, 15]
+            top_right = ((right_upper_coords + left_upper_coords) // 2) + [70, 15]
+            center_right = ((right_upper_coords + right_lower_coords) // 2) + [-60, 0]
 
             # Combine all safe points into one list
             self.corner_safepoint_list = np.array(
-                [bottom_right, bottom_left, center_left, top_left, top_right, center_right]
+                [
+                    bottom_right,
+                    bottom_left,
+                    center_left,
+                    top_left,
+                    top_right,
+                    center_right,
+                ]
             )
 
             return
@@ -641,7 +664,7 @@ class Analyse:
         if self.course_length_px is None:
             raise ValueError("Course length is not set")
         conversionFactor = self.course_length_cm / (
-                self.course_length_px * 1024 / self.course_length_cm
+            self.course_length_px * 1024 / self.course_length_cm
         )
 
         vector_from_middle = np.array([point[0] - 1024 / 2, point[1] - 576 / 2])
@@ -649,7 +672,7 @@ class Analyse:
         vector_from_middle *= conversionFactor
 
         projected_vector = (
-                vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
+            vector_from_middle / self.cam_height * (self.cam_height - self.robot_height)
         )
 
         # Convert back to pixels
@@ -662,7 +685,7 @@ class Analyse:
         return result
 
     def construct_vector_from_circles(
-            self, green: np.ndarray, red: np.ndarray
+        self, green: np.ndarray, red: np.ndarray
     ) -> np.ndarray:
         return red - green
 
@@ -691,7 +714,7 @@ class Analyse:
 
             # Check if the approximated contour has the characteristics of a cross
             if (
-                    len(approx) >= 4 and cv2.contourArea(contour) > 100
+                len(approx) >= 4 and cv2.contourArea(contour) > 100
             ):  # Area threshold to filter noise
                 x, y, w, h = cv2.boundingRect(contour)
                 aspect_ratio = float(w) / h
@@ -717,7 +740,7 @@ class Analyse:
 
         h, w = mask.shape[:2]
         mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=255)
-        mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1: h + 1, 1: w + 1]
+        mask = cv2.floodFill(mask, None, (0, 0), 0, flags=8)[1][1 : h + 1, 1 : w + 1]
         return mask
 
     def find_border_corners(self, image: np.ndarray) -> np.ndarray:
@@ -762,7 +785,11 @@ class Analyse:
         keypoints = detector.detect(mask)
 
         # check if keypoints are inside the border
-        keypoints = [keypoint for keypoint in keypoints if self.is_keypoint_inside_border(keypoint)]
+        keypoints = [
+            keypoint
+            for keypoint in keypoints
+            if self.is_keypoint_inside_border(keypoint)
+        ]
         return keypoints
 
     def find_egg_location(self, mask: np.ndarray) -> np.ndarray:
@@ -771,7 +798,7 @@ class Analyse:
         return location
 
     def distance_point_to_segment(
-            self, p: np.ndarray, v: np.ndarray, w: np.ndarray
+        self, p: np.ndarray, v: np.ndarray, w: np.ndarray
     ) -> float:
         l2 = np.sum((w - v) ** 2)
         if l2 == 0.0:

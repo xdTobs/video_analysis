@@ -74,13 +74,15 @@ def run_video(host, webcam_index, online, port=65438):
             if analyser.corners is not None:
                 corners_list.append(analyser.corners)
             if len(corners_list) == 10:
+                for c in corners_list:
+                    print(c)
                 corners_list = np.array(corners_list)
                 corners = np.median(corners_list, axis=0)
                 corners = corners.astype(int)
                 has_found_corners = True
             else:
                 continue
-        #print(corners)
+        # print(corners)
         steering_instance.on_frame()
 
         video_output.showFrame(frame)

@@ -30,7 +30,9 @@ class VideoOutput:
         )
         self.data_dict["Collecting balls"] = self.steering_instance.is_collecting_balls
         self.data_dict["State"] = self.steering_instance.state.__class__.__name__
-        self.data_dict["Is ball close to middle cross"] = self.analyser.is_ball_close_to_middle
+        self.data_dict["Is ball close to middle cross"] = (
+            self.analyser.is_ball_close_to_middle
+        )
 
     def showFrame(self, frame):
         self.update_data_dict()
@@ -41,7 +43,7 @@ class VideoOutput:
         text_overview = cv2.cvtColor(
             self.analyser.white_average.astype(np.uint8), cv2.COLOR_GRAY2BGR
         )
-        border_mask = cv2.cvtColor(self.analyser.border_mask, cv2.COLOR_GRAY2BGR)
+        border_mask = cv2.cvtColor(self.analyser.new_border_mask, cv2.COLOR_GRAY2BGR)
 
         y_offset = 20
         for key, value in self.data_dict.items():
@@ -74,11 +76,11 @@ class VideoOutput:
             center = (int(keypoint.pt[0]), int(keypoint.pt[1]))
             radius = int(keypoint.size / 2)
             cv2.circle(result_3channel, center, radius, (0, 255, 0), 4)
-        
+
         for location in self.analyser.egg_location:
             center = (int(location.pt[0]), int(location.pt[1]))
             radius = int(location.size / 2)
-            cv2.circle(result_3channel, center, radius, (255, 0, 255), 4) 
+            cv2.circle(result_3channel, center, radius, (255, 0, 255), 4)
 
         if self.analyser.robot_pos is not None:
             center = (int(self.analyser.robot_pos[0]), int(self.analyser.robot_pos[1]))
